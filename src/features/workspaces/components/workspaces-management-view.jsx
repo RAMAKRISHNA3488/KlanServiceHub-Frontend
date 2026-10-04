@@ -156,7 +156,7 @@ export const WorkspacesManagementView = () => {
                 Workspaces & Organizations
               </h1>
               <p className="text-[11px] text-neutral-500 mt-0.5">
-                Manage, switch, edit, or delete all your Jira workspace environments.
+                Manage, switch, edit, or delete all your KlanserviceHub workspace environments.
               </p>
             </div>
           </div>
@@ -293,7 +293,7 @@ export const WorkspacesManagementView = () => {
                           )}
                         </div>
                         <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                          {ws.domainSlug ? `${ws.domainSlug}.jira.io` : `ID: ${wsId.slice(0, 8)}...`}
+                          {ws.domainSlug ? `${ws.domainSlug}.klanservicehub.io` : `ID: ${wsId.slice(0, 8)}...`}
                         </p>
                       </div>
                     </div>

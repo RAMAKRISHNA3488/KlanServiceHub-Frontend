@@ -140,7 +140,7 @@ export const WorkTypeBreakdownCard = ({ workTypeData, loading = false, onDrillDo
 
       {/* Footer */}
       <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-400">
-        <span>Standard Jira issue hierarchy</span>
+        <span>Standard KlanserviceHub issue hierarchy</span>
         {!isEmpty && (
           <span className="text-neutral-500 font-medium">Dynamic DB calculation</span>
         )}

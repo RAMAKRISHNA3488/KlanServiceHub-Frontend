@@ -721,7 +721,7 @@ export const EmployeeWiseReport = ({
           <div class="header">
             <div class="title-section">
               <h1>Individual Employee Performance & Telemetry</h1>
-              <p>Jira Clone Organization Analytics • Date Range: ${selectedDateRange.toUpperCase()} • Generated: ${new Date().toLocaleDateString()}</p>
+              <p>KlanserviceHub Clone Organization Analytics • Date Range: ${selectedDateRange.toUpperCase()} • Generated: ${new Date().toLocaleDateString()}</p>
             </div>
             <div>
               <span class="badge ${badgeClass}">
@@ -875,7 +875,7 @@ export const EmployeeWiseReport = ({
           </table>
 
           <div class="footer">
-            <span>Jira Clone • Employee Telemetry & Capacity Report</span>
+            <span>KlanserviceHub Clone • Employee Telemetry & Capacity Report</span>
             <span>Confidential Internal Document</span>
           </div>
         </body>
@@ -1110,7 +1110,7 @@ export const EmployeeWiseReport = ({
           <div class="header">
             <div class="title-section">
               <h1>Visual Analytics & Workload Distribution Summary</h1>
-              <p>Jira Clone Organization Analytics • Date Range: ${selectedDateRange.toUpperCase()} • Generated: ${new Date().toLocaleDateString()}</p>
+              <p>KlanserviceHub Clone Organization Analytics • Date Range: ${selectedDateRange.toUpperCase()} • Generated: ${new Date().toLocaleDateString()}</p>
             </div>
             <div>
               <span class="badge">
@@ -1238,7 +1238,7 @@ export const EmployeeWiseReport = ({
           </table>
 
           <div class="footer">
-            <span>Jira Clone • Visual Analytics & Performance Report</span>
+            <span>KlanserviceHub Clone • Visual Analytics & Performance Report</span>
             <span>Confidential Internal Document</span>
           </div>
         </body>

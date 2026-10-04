@@ -5,7 +5,7 @@ import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
 import { tasksApi } from '@/lib/api-client';
 import { NotificationCenter } from './notification-center';
 import { UserButton } from '@/features/auth/components/user-button';
-import { JiraCreateIssueModal } from '@/features/tasks/components/jira-create-issue-modal';
+import { KlanserviceHubCreateIssueModal } from '@/features/tasks/components/klanservicehub-create-issue-modal';
 import { WorkspaceSwitcherModal } from './workspace-switcher-modal';
 import Link from 'next/link';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +28,7 @@ import {
   Command,
 } from 'lucide-react';
 
-export const JiraTopNavbar = () => {
+export const KlanserviceHubTopNavbar = () => {
   const workspaceId = useWorkspaceId();
   const navigate = useNavigate();
   const { data: projectsData } = useGetProjects({ workspaceId });
@@ -185,7 +185,7 @@ export const JiraTopNavbar = () => {
 
         {/* Right Section: Search Bar + Notification + Settings + User */}
         <div className="flex items-center gap-2">
-          {/* Global Jira Search */}
+          {/* Global KlanserviceHub Search */}
           <div className="relative">
             <div className="relative flex items-center">
               <Search className="absolute left-2.5 size-3.5 text-neutral-400" />
@@ -252,13 +252,13 @@ export const JiraTopNavbar = () => {
         </div>
       </header>
 
-      {/* Global Jira Issue Creation Modal */}
-      <JiraCreateIssueModal
+      {/* Global KlanserviceHub Issue Creation Modal */}
+      <KlanserviceHubCreateIssueModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onCreated={(issue) => {
           // If in tasks/board view, reload or trigger event
-          window.dispatchEvent(new CustomEvent('jira-issue-created', { detail: issue }));
+          window.dispatchEvent(new CustomEvent('klanservicehub-issue-created', { detail: issue }));
         }}
       />
 

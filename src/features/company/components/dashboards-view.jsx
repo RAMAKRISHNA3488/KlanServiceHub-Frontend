@@ -4,7 +4,7 @@ import { useConfirm } from '@/hooks/use-confirm';
 import { useCurrent } from '@/features/auth/api/use-current';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
 import { dashboardsApi } from '@/lib/api-client';
-import { JiraIssueDetailModal } from '@/features/tasks/components/jira-issue-detail-modal';
+import { KlanserviceHubIssueDetailModal } from '@/features/tasks/components/klanservicehub-issue-detail-modal';
 import { toast } from 'sonner';
 import {
   LayoutDashboard,
@@ -1296,7 +1296,7 @@ export const DashboardsView = () => {
 
       {/* Task Issue Detail Modal */}
       {selectedTaskId && (
-        <JiraIssueDetailModal
+        <KlanserviceHubIssueDetailModal
           taskId={selectedTaskId}
           open={!!selectedTaskId}
           onClose={() => setSelectedTaskId(null)}

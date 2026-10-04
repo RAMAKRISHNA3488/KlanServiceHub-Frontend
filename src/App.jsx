@@ -34,7 +34,7 @@ import { AcceptableUsePage } from '@/features/legal/components/acceptable-use-pa
 // Product Solutions Deep-Dive Pages
 import { SolutionDetailPage } from '@/features/solutions/components/solution-detail-page';
 
-// Enterprise Jira Modules
+// Enterprise KlanserviceHub Modules
 import { CompanyProfileView } from '@/features/company/components/company-profile-view';
 import { UsersAdminView } from '@/features/company/components/users-admin-view';
 import { GroupsAdminView } from '@/features/company/components/groups-admin-view';

@@ -43,7 +43,7 @@ const STATUS_COLORS = {
   DONE: 'bg-emerald-50 text-emerald-800 border-emerald-200',
 };
 
-export const JiraIssueDetailModal = ({ taskId, open, onClose, onUpdated }) => {
+export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdated }) => {
   const workspaceId = useWorkspaceId();
   const { data: membersData } = useGetMembers({ workspaceId });
   const members = membersData?.documents || [];
@@ -359,7 +359,7 @@ export const JiraIssueDetailModal = ({ taskId, open, onClose, onUpdated }) => {
             </div>
           </div>
 
-          {/* Right Properties Column (Jira Style Box) */}
+          {/* Right Properties Column (KlanserviceHub Style Box) */}
           <div className="lg:col-span-4 p-6 bg-neutral-50/50 space-y-5 text-xs">
             <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">Details</h3>
 

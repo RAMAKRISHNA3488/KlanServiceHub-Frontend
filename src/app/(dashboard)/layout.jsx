@@ -1,5 +1,5 @@
 import { ModalProvider } from '@/components/modal-provider';
-import { JiraTopNavbar } from '@/components/jira-top-navbar';
+import { KlanserviceHubTopNavbar } from '@/components/klanservicehub-top-navbar';
 import { Sidebar } from '@/components/sidebar';
 
 const DashboardLayout = ({ children }) => {
@@ -7,11 +7,11 @@ const DashboardLayout = ({ children }) => {
     <div className="min-h-screen flex flex-col bg-[#F4F5F7]">
       <ModalProvider />
 
-      {/* Jira Global Top Navbar */}
-      <JiraTopNavbar />
+      {/* KlanserviceHub Global Top Navbar */}
+      <KlanserviceHubTopNavbar />
 
       <div className="flex flex-1 size-full">
-        {/* Jira Left Project & Workspace Sidebar */}
+        {/* KlanserviceHub Left Project & Workspace Sidebar */}
         <div className="hidden lg:block w-[260px] shrink-0 border-r border-neutral-200/90 bg-white sticky top-12 h-[calc(100vh-48px)] overflow-y-auto">
           <Sidebar />
         </div>

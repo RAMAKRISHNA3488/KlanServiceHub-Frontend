@@ -264,13 +264,6 @@ export const LandingPageView = () => {
             <a href="#solutions" className="hover:text-blue-600 transition">Solutions</a>
             <a href="#pricing" className="hover:text-blue-600 transition">Pricing</a>
             <a href="#faq" className="hover:text-blue-600 transition">FAQ</a>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('open-dev-modal'))}
-              className="text-neutral-600 hover:text-blue-600 transition font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <User className="size-3.5 text-emerald-600" />
-              <span>Developer Details</span>
-            </button>
           </nav>
         </div>
 
@@ -374,7 +367,7 @@ export const LandingPageView = () => {
         </div>
       </section>
 
-      {/* Interactive Jira Board Preview Graphic */}
+      {/* Interactive KlanserviceHub Board Preview Graphic */}
       <section className="px-6 max-w-6xl mx-auto pb-20">
         <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4 sm:p-6 shadow-2xl text-white overflow-hidden">
           <div className="flex items-center justify-between pb-4 border-b border-neutral-800 text-xs">

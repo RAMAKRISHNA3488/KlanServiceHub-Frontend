@@ -176,7 +176,7 @@ export const TaskIdClient = () => {
         </select>
       </div>
 
-      {/* Main Grid: Details + Jira Properties Panel */}
+      {/* Main Grid: Details + KlanserviceHub Properties Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side: Summary, Description, Comments, Subtasks */}
         <div className="lg:col-span-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-6">

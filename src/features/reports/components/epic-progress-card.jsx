@@ -415,7 +415,7 @@ export const EpicProgressCard = ({
 
       {/* 4. Epics List / Real-Time Progress Rows */}
       {isEmpty ? (
-        /* Empty State with Jira Epic illustration */
+        /* Empty State with KlanserviceHub Epic illustration */
         <div className="my-auto flex flex-col items-center justify-center py-10 text-center select-none space-y-3">
           <div className="relative size-14 flex items-center justify-center">
             <div className="grid grid-cols-2 gap-1.5 size-12">
@@ -675,7 +675,7 @@ export const EpicProgressCard = ({
           onClick={onOpenHelp}
           className="text-purple-600 hover:underline font-semibold text-left sm:text-right"
         >
-          What is an Epic in Jira?
+          What is an Epic in KlanserviceHub?
         </button>
       </div>
     </div>

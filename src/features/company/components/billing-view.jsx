@@ -823,7 +823,7 @@ export const BillingView = () => {
             <div className="rounded-xl border border-neutral-200 p-4 bg-neutral-50/50 space-y-3 text-xs">
               <div className="flex justify-between border-b border-neutral-200/60 pb-2">
                 <div>
-                  <span className="font-bold text-neutral-900">Jira Clone Technologies India Pvt Ltd</span>
+                  <span className="font-bold text-neutral-900">KlanserviceHub Clone Technologies India Pvt Ltd</span>
                   <p className="text-[10px] text-neutral-400">GSTIN: 29AABCU9603R1ZM • SAC: 998315</p>
                 </div>
                 <div className="text-right">

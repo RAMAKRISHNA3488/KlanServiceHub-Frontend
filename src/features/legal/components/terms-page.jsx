@@ -20,7 +20,7 @@ export const TermsPage = () => {
             These Customer Terms of Service ("Agreement") are entered into by and between <strong>klanservicehub</strong> ("we", "us", or "our") and the entity or individual agreeing to these terms ("Customer", "you", or "your").
           </p>
           <p>
-            By accessing or using klanservicehub, creating an organization workspace, configuring Jira-grade boards, sprints, or service desks, or clicking "I agree", you agree to be legally bound by this Agreement.
+            By accessing or using klanservicehub, creating an organization workspace, configuring KlanserviceHub-grade boards, sprints, or service desks, or clicking "I agree", you agree to be legally bound by this Agreement.
           </p>
         </section>
 

@@ -145,7 +145,7 @@ export const OnboardingWizard = () => {
 
         const newProjectId = projectRes?.data?.$id || projectRes?.data?.id;
 
-        // Auto-create 3 starter Jira issues
+        // Auto-create 3 starter KlanserviceHub issues
         if (newProjectId) {
           await tasksApi.createTask({
             workspaceId: createdWorkspaceId,

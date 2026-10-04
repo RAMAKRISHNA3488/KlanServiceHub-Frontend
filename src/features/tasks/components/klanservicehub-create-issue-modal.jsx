@@ -40,7 +40,7 @@ const PRIORITIES = [
   { id: 'LOWEST', name: 'P4 - Lowest', color: '#00B8D9', icon: '⬇️⬇️' },
 ];
 
-export const JiraCreateIssueModal = ({ open, onClose, onCreated, defaultProjectId = null, defaultSprintId = null }) => {
+export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defaultProjectId = null, defaultSprintId = null }) => {
   const workspaceId = useWorkspaceId();
   const { data: projectsData } = useGetProjects({ workspaceId });
   const { data: membersData } = useGetMembers({ workspaceId });
@@ -124,7 +124,7 @@ export const JiraCreateIssueModal = ({ open, onClose, onCreated, defaultProjectI
 
       toast.success(`Issue created: ${res.data?.key || 'Issue'}`);
       if (onCreated) onCreated(res.data);
-      window.dispatchEvent(new CustomEvent('jira-issue-created', { detail: res.data }));
+      window.dispatchEvent(new CustomEvent('klanservicehub-issue-created', { detail: res.data }));
 
       if (createAnother) {
         setForm((prev) => ({
