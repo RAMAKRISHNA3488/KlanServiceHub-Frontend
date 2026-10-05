@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vite build && wrangler deploy"
+    "deploy": "vite build && wrangler pages deploy dist --project-name=klanservicehub-frontend"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
