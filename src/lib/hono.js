@@ -15,5 +15,17 @@ export const baseUrl =
   defaultBackendUrl;
 
 export const client = hc(baseUrl, {
-  fetch: (input, init) => fetch(input, { ...init, credentials: 'include' }),
+  fetch: (input, init) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('klan_auth_token') : null;
+    const headers = new Headers(init?.headers || {});
+    if (token && !headers.has('Authorization') && !headers.has('authorization')) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    return fetch(input, {
+      ...init,
+      headers,
+      credentials: 'include',
+    });
+  },
 });
+
