@@ -1,17 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { client } from '@/lib/hono';
+import { authApi } from '@/lib/api-client';
+
 export const useLogout = () => {
-    const router = useRouter();
     const queryClient = useQueryClient();
     const mutation = useMutation({
         mutationFn: async () => {
-            const response = await client.api.auth.logout['$post']();
-            return await response.json();
+            await authApi.logout();
         },
         onSuccess: () => {
-            router.refresh();
-            queryClient.invalidateQueries();
+            queryClient.clear();
+            window.location.href = '/sign-in';
         },
     });
     return mutation;

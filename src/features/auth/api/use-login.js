@@ -1,24 +1,24 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { client } from '@/lib/hono';
+import { authApi } from '@/lib/api-client';
+
 export const useLogin = () => {
-    const router = useRouter();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const mutation = useMutation({
         mutationFn: async ({ json }) => {
-            const response = await client.api.auth.login['$post']({ json });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Email or Password is incorrect!');
-            }
-            return await response.json();
+            const data = await authApi.login(json);
+            return data;
         },
-        onSuccess: () => {
-            router.refresh();
-            queryClient.invalidateQueries({
-                queryKey: ['current'],
-            });
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['current'] });
+            queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+            if (data?.workspaceId) {
+                window.location.href = `/workspaces/${data.workspaceId}`;
+            } else {
+                window.location.href = '/';
+            }
         },
         onError: (error) => {
             toast.error(error.message || 'Email or Password is incorrect!');

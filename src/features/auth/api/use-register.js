@@ -1,24 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { client } from '@/lib/hono';
+import { authApi } from '@/lib/api-client';
+
 export const useRegister = () => {
-    const router = useRouter();
     const queryClient = useQueryClient();
     const mutation = useMutation({
         mutationFn: async ({ json }) => {
-            const response = await client.api.auth.register['$post']({ json });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Failed to register!');
-            }
-            return await response.json();
+            const data = await authApi.register(json);
+            return data;
         },
-        onSuccess: () => {
-            router.refresh();
-            queryClient.invalidateQueries({
-                queryKey: ['current'],
-            });
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['current'] });
+            queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+            if (data?.workspaceId) {
+                window.location.href = `/workspaces/${data.workspaceId}`;
+            } else {
+                window.location.href = '/';
+            }
         },
         onError: (error) => {
             console.error('[REGISTER]: ', error);
