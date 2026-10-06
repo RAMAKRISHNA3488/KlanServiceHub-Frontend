@@ -1,22 +1,33 @@
-const isLocal = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
-const defaultBackendUrl = isLocal ? 'http://localhost:5000' : 'https://klanservicehub-backend.klanservicehub.workers.dev';
+const isLocal = typeof window !== 'undefined' && (window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1'));
+const defaultBackendUrl = isLocal
+  ? 'http://localhost:5000'
+  : (typeof window !== 'undefined' && window.location.origin ? '' : 'https://klanservicehub-backend.klanservicehub.workers.dev');
 
 export const API_BASE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_APP_BASE_URL)) ||
   (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_APP_BASE_URL) ||
   defaultBackendUrl;
 
+export const AUTH_TOKEN_KEY = 'klan_auth_token';
+
 export async function apiFetch(endpoint, options = {}) {
   const url = endpoint.startsWith('http')
     ? endpoint
     : `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
+  const token = typeof window !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
+
+  if (token && !headers['Authorization'] && !headers['authorization']) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
+    headers,
     credentials: 'include',
   });
 
@@ -27,6 +38,9 @@ export async function apiFetch(endpoint, options = {}) {
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      // Don't auto-redirect, let auth guard handle it gracefully
+    }
     throw new Error(data.error || `Request failed with status ${res.status}`);
   }
   return data;
@@ -36,16 +50,55 @@ export const authApi = {
   checkEmail: (email) => apiFetch('/api/auth/check-email', { method: 'POST', body: JSON.stringify({ email }) }),
   sendOtp: (email, purpose = 'LOGIN') => apiFetch('/api/auth/send-otp', { method: 'POST', body: JSON.stringify({ email, purpose }) }),
   verifyOtp: (email, otp) => apiFetch('/api/auth/verify-otp', { method: 'POST', body: JSON.stringify({ email, otp }) }),
-  loginWithOtp: (email, otp) => apiFetch('/api/auth/login-with-otp', { method: 'POST', body: JSON.stringify({ email, otp }) }),
-  register: (data) => apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(data) }),
-  login: (data) => apiFetch('/api/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+  loginWithOtp: async (email, otp) => {
+    const data = await apiFetch('/api/auth/login-with-otp', { method: 'POST', body: JSON.stringify({ email, otp }) });
+    if (data?.token && typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+    }
+    return data;
+  },
+  register: async (payload) => {
+    const data = await apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(payload) });
+    if (data?.token && typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+    }
+    return data;
+  },
+  login: async (payload) => {
+    const data = await apiFetch('/api/auth/login', { method: 'POST', body: JSON.stringify(payload) });
+    if (data?.token && typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+    }
+    return data;
+  },
   forgotPassword: (data) => apiFetch('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) }),
   verifyResetOtp: (data) => apiFetch('/api/auth/verify-reset-otp', { method: 'POST', body: JSON.stringify(data) }),
-  resetPassword: (data) => apiFetch('/api/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
-  socialLogin: (data) => apiFetch('/api/auth/social-login', { method: 'POST', body: JSON.stringify(data) }),
-  logout: () => apiFetch('/api/auth/logout', { method: 'POST' }),
+  resetPassword: async (payload) => {
+    const data = await apiFetch('/api/auth/reset-password', { method: 'POST', body: JSON.stringify(payload) });
+    if (data?.token && typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+    }
+    return data;
+  },
+  socialLogin: async (payload) => {
+    const data = await apiFetch('/api/auth/social-login', { method: 'POST', body: JSON.stringify(payload) });
+    if (data?.token && typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+    }
+    return data;
+  },
+  logout: async () => {
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' });
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+      }
+    }
+  },
   getCurrentUser: () => apiFetch('/api/auth/current'),
 };
+
 
 export const companyApi = {
   createCompany: (data) => apiFetch('/api/company', { method: 'POST', body: JSON.stringify(data) }),
