@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { companyApi, tasksApi, invitationsApi, usersAdminApi } from '@/lib/api-client';
+import { companyApi, tasksApi, invitationsApi, usersAdminApi, apiFetch } from '@/lib/api-client';
 import { toast } from 'sonner';
 import {
   Building2,
@@ -131,17 +131,15 @@ export const OnboardingWizard = () => {
       try {
         setLoading(true);
         // Create initial project via tasks / projects API
-        const projectRes = await fetch('/api/projects', {
+        const projectRes = await apiFetch('/api/projects', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({
             name: project.name.trim(),
             key: project.key.trim().toUpperCase(),
             workspaceId: createdWorkspaceId,
             category: workType,
           }),
-        }).then((r) => r.json());
+        });
 
         const newProjectId = projectRes?.data?.$id || projectRes?.data?.id;
 
