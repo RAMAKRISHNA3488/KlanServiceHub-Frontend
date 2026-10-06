@@ -1,7 +1,5 @@
 const isLocal = typeof window !== 'undefined' && (window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1'));
-const defaultBackendUrl = isLocal
-  ? 'http://localhost:5000'
-  : (typeof window !== 'undefined' && window.location.origin ? '' : 'https://klanservicehub-backend.klanservicehub.workers.dev');
+const defaultBackendUrl = isLocal ? 'http://localhost:5000' : 'https://klanservicehub-backend.klanservicehub.workers.dev';
 
 export const API_BASE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_APP_BASE_URL)) ||
