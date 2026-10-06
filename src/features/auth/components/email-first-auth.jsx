@@ -442,6 +442,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
                 type="email"
                 required
                 autoFocus
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
@@ -469,6 +470,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
               <input
                 type="password"
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -512,6 +514,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
                 type="text"
                 required
                 autoFocus
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
@@ -527,6 +530,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
@@ -542,6 +546,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
               <input
                 type="password"
                 required
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -693,6 +698,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
               <input
                 type="password"
                 required
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -709,6 +715,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
               <input
                 type="password"
                 required
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"

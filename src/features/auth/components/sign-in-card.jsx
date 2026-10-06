@@ -61,7 +61,7 @@ export const SignInCard = () => {
           <form onSubmit={signInForm.handleSubmit(onSubmit)} className="space-y-4">
             <FormField disabled={isPending} name="email" control={signInForm.control} render={({ field }) => (<FormItem>
                   <FormControl>
-                    <Input {...field} type="email" placeholder="Email address"/>
+                    <Input {...field} type="email" autoComplete="email" placeholder="Email address"/>
                   </FormControl>
 
                   <FormMessage />
@@ -69,7 +69,7 @@ export const SignInCard = () => {
 
             <FormField disabled={isPending} name="password" control={signInForm.control} render={({ field }) => (<FormItem>
                   <FormControl>
-                    <Input {...field} type="password" placeholder="Password"/>
+                    <Input {...field} type="password" autoComplete="current-password" placeholder="Password"/>
                   </FormControl>
 
                   <FormMessage />

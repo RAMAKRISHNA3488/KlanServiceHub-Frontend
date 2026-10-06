@@ -72,7 +72,7 @@ export const SignUpCard = () => {
           <form onSubmit={signUpForm.handleSubmit(onSubmit)} className="space-y-4">
             <FormField disabled={isPending} name="name" control={signUpForm.control} render={({ field }) => (<FormItem>
                   <FormControl>
-                    <Input {...field} type="text" placeholder="Full name"/>
+                    <Input {...field} type="text" autoComplete="name" placeholder="Full name"/>
                   </FormControl>
 
                   <FormMessage />
@@ -80,7 +80,7 @@ export const SignUpCard = () => {
 
             <FormField disabled={isPending} name="email" control={signUpForm.control} render={({ field }) => (<FormItem>
                   <FormControl>
-                    <Input {...field} type="email" placeholder="Email address"/>
+                    <Input {...field} type="email" autoComplete="email" placeholder="Email address"/>
                   </FormControl>
 
                   <FormMessage />
@@ -88,7 +88,7 @@ export const SignUpCard = () => {
 
             <FormField disabled={isPending} name="password" control={signUpForm.control} render={({ field }) => (<FormItem>
                   <FormControl>
-                    <Input {...field} type="password" placeholder="Password"/>
+                    <Input {...field} type="password" autoComplete="new-password" placeholder="Password"/>
                   </FormControl>
 
                   <FormMessage />
