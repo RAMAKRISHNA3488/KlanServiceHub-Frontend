@@ -101,7 +101,9 @@ export const authApi = {
 export const companyApi = {
   createCompany: (data) => apiFetch('/api/company', { method: 'POST', body: JSON.stringify(data) }),
   getProfile: (workspaceId) => apiFetch(`/api/company/${workspaceId}`),
+  getCompany: (workspaceId) => apiFetch(`/api/company/${workspaceId}`),
   updateProfile: (workspaceId, data) => apiFetch(`/api/company/${workspaceId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  updateCompany: (workspaceId, data) => apiFetch(`/api/company/${workspaceId}`, { method: 'PATCH', body: JSON.stringify(data) }),
   transferOwnership: (workspaceId, data) => apiFetch(`/api/company/${workspaceId}/transfer-ownership`, { method: 'POST', body: JSON.stringify(data) }),
   updateStatus: (workspaceId, status) => apiFetch(`/api/company/${workspaceId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteCompany: (workspaceId) => apiFetch(`/api/company/${workspaceId}`, { method: 'DELETE' }),
@@ -322,10 +324,10 @@ export const automationsApi = {
 };
 
 export const notificationsApi = {
-  getNotifications: (workspaceId) => apiFetch(`/api/notifications${workspaceId ? `?workspaceId=${workspaceId}` : ''}`),
+  getNotifications: (workspaceId) => apiFetch(`/api/notifications${workspaceId && workspaceId !== 'undefined' ? `?workspaceId=${workspaceId}` : ''}`),
   markRead: (id) => apiFetch(`/api/notifications/${id}/read`, { method: 'PATCH' }),
-  markAllRead: (workspaceId) => apiFetch(`/api/notifications/read-all${workspaceId ? `?workspaceId=${workspaceId}` : ''}`, { method: 'POST' }),
-  getPreferences: (workspaceId) => apiFetch(`/api/notifications/preferences${workspaceId ? `?workspaceId=${workspaceId}` : ''}`),
+  markAllRead: (workspaceId) => apiFetch(`/api/notifications/read-all${workspaceId && workspaceId !== 'undefined' ? `?workspaceId=${workspaceId}` : ''}`, { method: 'POST' }),
+  getPreferences: (workspaceId) => apiFetch(`/api/notifications/preferences${workspaceId && workspaceId !== 'undefined' ? `?workspaceId=${workspaceId}` : ''}`),
   updatePreferences: (data) => apiFetch('/api/notifications/preferences', { method: 'PUT', body: JSON.stringify(data) }),
 };
 
@@ -432,6 +434,6 @@ export const portfolioApi = {
   getGoals: (workspaceId) => apiFetch(`/api/portfolio/${workspaceId}/goals`),
   createGoal: (workspaceId, data) => apiFetch(`/api/portfolio/${workspaceId}/goals`, { method: 'POST', body: JSON.stringify(data) }),
   globalSearch: (workspaceId, q) => apiFetch(`/api/search/global?workspaceId=${workspaceId}&q=${encodeURIComponent(q)}`),
-  getEnterpriseHome: (workspaceId) => apiFetch(`/api/enterprise/home${workspaceId ? `?workspaceId=${workspaceId}` : ''}`),
+  getEnterpriseHome: (workspaceId) => apiFetch(`/api/enterprise/home${workspaceId && workspaceId !== 'undefined' ? `?workspaceId=${workspaceId}` : ''}`),
 };
 

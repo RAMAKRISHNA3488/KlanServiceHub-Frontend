@@ -10,7 +10,7 @@ export const useGetMembers = ({ workspaceId }) => {
             const { data } = await response.json();
             return data;
         },
-        enabled: !!workspaceId,
+        enabled: Boolean(workspaceId && workspaceId !== 'undefined'),
     });
     return query;
 };

@@ -50,7 +50,7 @@ export const CompanyProfileView = () => {
   });
 
   useEffect(() => {
-    if (workspaceId) {
+    if (workspaceId && workspaceId !== 'undefined') {
       setLoading(true);
       companyApi
         .getCompany(workspaceId)
