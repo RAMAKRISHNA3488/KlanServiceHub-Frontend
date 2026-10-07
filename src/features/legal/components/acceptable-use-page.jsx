@@ -59,7 +59,7 @@ export const AcceptableUsePage = () => {
         {/* 4. Contact */}
         <section className="space-y-2 pt-4 border-t border-neutral-100 text-xs text-neutral-500">
           <p>
-            To report policy violations, contact: <strong>abuse@klanservicehub.dev</strong> | Architect: <strong>Ramakrishna (RK)</strong>
+            To report policy violations, contact: <strong>abuse@klanservicehub.dev</strong>
           </p>
         </section>
       </div>

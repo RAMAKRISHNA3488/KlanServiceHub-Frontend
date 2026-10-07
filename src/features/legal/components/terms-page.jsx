@@ -88,7 +88,7 @@ export const TermsPage = () => {
         {/* 7. Contact */}
         <section className="space-y-2 pt-4 border-t border-neutral-100 text-xs text-neutral-500">
           <p>
-            For legal inquiries, contact: <strong>legal@klanservicehub.dev</strong> | Architecture Lead: <strong>Ramakrishna (RK)</strong>
+            For legal inquiries, contact: <strong>legal@klanservicehub.dev</strong>
           </p>
         </section>
       </div>

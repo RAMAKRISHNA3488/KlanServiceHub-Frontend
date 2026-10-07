@@ -84,7 +84,7 @@ export const PrivacyPage = () => {
         {/* 6. Contact */}
         <section className="space-y-2 pt-4 border-t border-neutral-100 text-xs text-neutral-500">
           <p>
-            Data Protection Officer: <strong>privacy@klanservicehub.dev</strong> | Developed & Maintained by: <strong>Ramakrishna (RK)</strong>
+            Data Protection Officer: <strong>privacy@klanservicehub.dev</strong> | Maintained by: <strong>Klanvision IT Solutions</strong>
           </p>
         </section>
       </div>

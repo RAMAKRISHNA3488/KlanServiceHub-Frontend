@@ -116,7 +116,7 @@ export const LandingPageView = () => {
       category: 'architecture',
       badge: 'Platform Engineering',
       q: 'Who developed klanservicehub and what is the underlying architecture?',
-      a: 'klanservicehub was engineered and developed by Ramakrishna (RK) under Klanvision IT Solutions. Built on React 19, TailwindCSS, Hono, Node.js, and Cloudflare D1 / SQLite distributed edge databases for ultra-fast query execution and real-time state synchronization.',
+      a: 'klanservicehub was engineered and developed under Klanvision IT Solutions. Built on React 19, TailwindCSS, Hono, Node.js, and Cloudflare D1 / SQLite distributed edge databases for ultra-fast query execution and real-time state synchronization.',
       advanced: 'Query execution runs through compiled prepared statements with connection reuse (<10ms p99 latency). State mutations are broadcast over optimistic WebSocket channels with automatic conflict resolution.',
       specs: ['React 19 & Next-style routing', 'Hono micro-framework', 'Cloudflare D1 / SQLite', '<10ms query execution'],
     },
@@ -214,10 +214,6 @@ export const LandingPageView = () => {
 
           <div className="space-y-1.5">
             <h2 className="text-xl font-black text-neutral-950 tracking-tight">klanservicehub</h2>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-0.5 text-xs font-bold text-emerald-800">
-              <Code2 className="size-3.5 text-emerald-600" />
-              <span>Developed by RK</span>
-            </div>
           </div>
 
           {/* Progress Bar */}
@@ -254,9 +250,6 @@ export const LandingPageView = () => {
               K
             </div>
             <span className="font-black text-lg tracking-tight text-neutral-950">klanservicehub</span>
-            <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
-              <Code2 className="size-3" /> Developed by RK
-            </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-neutral-600">
@@ -291,13 +284,6 @@ export const LandingPageView = () => {
             <Sparkles className="size-3.5" />
             <span>New: Klanvision Enterprise Organization & Roles Architecture</span>
           </div>
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent('open-dev-modal'))}
-            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 hover:bg-emerald-100/80 px-3.5 py-1 text-xs font-bold text-emerald-800 shadow-xs transition cursor-pointer"
-          >
-            <Code2 className="size-3.5 text-emerald-600" />
-            <span>Application Developed by RK</span>
-          </button>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-neutral-950 max-w-4xl mx-auto leading-tight">
@@ -602,7 +588,7 @@ export const LandingPageView = () => {
         <div className="text-center space-y-3">
           <h2 className="text-2xl sm:text-4xl font-bold text-neutral-950">Why Engineering Teams Choose This Platform</h2>
           <p className="text-sm text-neutral-600 max-w-xl mx-auto">
-            Engineered by RK for developer delight, maximum responsiveness, and enterprise-grade reliability.
+            Engineered for team productivity, maximum responsiveness, and enterprise-grade reliability.
           </p>
         </div>
 

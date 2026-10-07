@@ -75,14 +75,14 @@ export const SecurityPage = () => {
           <div className="p-4 rounded-2xl bg-neutral-900 text-neutral-300 text-xs font-mono space-y-1">
             <p className="text-emerald-400 font-bold">Security Reporting Channel:</p>
             <p>Email: security@klanservicehub.dev</p>
-            <p>PGP Key Fingerprint: 4A89 F012 3349 98BC RK_KLAN_SEC</p>
+            <p>PGP Key Fingerprint: 4A89 F012 3349 98BC KLAN_SEC_PROD</p>
           </div>
         </section>
 
         {/* 4. Contact */}
         <section className="space-y-2 pt-4 border-t border-neutral-100 text-xs text-neutral-500">
           <p>
-            Security Operations & Platform Architect: <strong>Ramakrishna (RK)</strong>
+            Security Operations: <strong>security@klanservicehub.dev</strong>
           </p>
         </section>
       </div>
