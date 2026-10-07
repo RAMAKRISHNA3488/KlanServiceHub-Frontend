@@ -97,6 +97,8 @@ export const CompanyProfileView = () => {
     }
   };
 
+  const handleSave = handleSubmit;
+
   const handleDeleteCompany = async () => {
     const ok = await confirmAction({
       title: 'Delete Organization Permanently',

@@ -84,6 +84,8 @@ export const RolesAdminView = () => {
     }
   };
 
+  const handleSavePermissions = handleSaveRolePermissions;
+
   const handleCreateRole = async (e) => {
     e.preventDefault();
     try {

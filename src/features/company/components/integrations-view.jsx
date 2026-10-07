@@ -82,6 +82,8 @@ export const IntegrationsView = () => {
     }
   };
 
+  const handleSaveConnect = handleSaveConfig;
+
   const handleTestPing = async (id, name) => {
     try {
       await integrationsApi.testDelivery(workspaceId, id);
