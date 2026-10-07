@@ -334,31 +334,29 @@ export const WorkspacesManagementView = () => {
                 {/* Card Actions Footer */}
                 <div className="mt-5 pt-4 border-t border-neutral-100 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEdit(ws)}
+                      title="Edit Workspace"
+                      className="size-8 rounded-lg border border-neutral-200 hover:bg-neutral-100 text-neutral-600 flex items-center justify-center transition"
+                    >
+                      <Edit3 className="size-3.5" />
+                    </button>
                     {canManage && (
-                      <>
-                        <button
-                          onClick={() => handleOpenEdit(ws)}
-                          title="Edit Workspace"
-                          className="size-8 rounded-lg border border-neutral-200 hover:bg-neutral-100 text-neutral-600 flex items-center justify-center transition"
-                        >
-                          <Edit3 className="size-3.5" />
-                        </button>
-                        <button
-                          onClick={() => navigate(`/workspaces/${wsId}/settings`)}
-                          title="Workspace Settings"
-                          className="size-8 rounded-lg border border-neutral-200 hover:bg-neutral-100 text-neutral-600 flex items-center justify-center transition"
-                        >
-                          <Settings className="size-3.5" />
-                        </button>
-                        <button
-                          onClick={() => setDeletingWorkspace(ws)}
-                          title="Delete Workspace"
-                          className="size-8 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 flex items-center justify-center transition"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
-                      </>
+                      <button
+                        onClick={() => navigate(`/workspaces/${wsId}/settings`)}
+                        title="Workspace Settings"
+                        className="size-8 rounded-lg border border-neutral-200 hover:bg-neutral-100 text-neutral-600 flex items-center justify-center transition"
+                      >
+                        <Settings className="size-3.5" />
+                      </button>
                     )}
+                    <button
+                      onClick={() => setDeletingWorkspace(ws)}
+                      title={canManage ? 'Delete Workspace' : 'Remove / Leave Workspace'}
+                      className="size-8 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 flex items-center justify-center transition"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
                   </div>
 
                   <button
@@ -452,15 +450,29 @@ export const WorkspacesManagementView = () => {
                 <AlertTriangle className="size-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-red-950">Delete Workspace?</h3>
+                <h3 className="text-base font-bold text-red-950">
+                  {deletingWorkspace.isOwner || deletingWorkspace.isAdmin || deletingWorkspace.userRole === 'ADMIN'
+                    ? 'Delete Workspace?'
+                    : 'Remove / Leave Workspace?'}
+                </h3>
                 <p className="text-xs text-red-600 font-medium">This action cannot be undone.</p>
               </div>
             </div>
 
             <p className="text-xs text-neutral-600 mt-4 leading-relaxed">
-              Are you sure you want to permanently delete{' '}
-              <span className="font-bold text-neutral-900 font-mono">"{deletingWorkspace.name}"</span>?
-              All associated projects, tasks, sprints, backlog items, and members will be permanently erased.
+              {deletingWorkspace.isOwner || deletingWorkspace.isAdmin || deletingWorkspace.userRole === 'ADMIN' ? (
+                <>
+                  Are you sure you want to permanently delete{' '}
+                  <span className="font-bold text-neutral-900 font-mono">"{deletingWorkspace.name}"</span>?
+                  All associated projects, tasks, sprints, backlog items, and members will be permanently erased.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to remove and leave{' '}
+                  <span className="font-bold text-neutral-900 font-mono">"{deletingWorkspace.name}"</span>?
+                  This workspace will be removed from your active workspaces list.
+                </>
+              )}
             </p>
 
             <div className="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-neutral-100">
@@ -478,7 +490,11 @@ export const WorkspacesManagementView = () => {
                 onClick={handleConfirmDelete}
                 className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/30 transition disabled:opacity-50"
               >
-                {isDeleting ? 'Deleting...' : 'Yes, Delete Workspace'}
+                {isDeleting
+                  ? 'Processing...'
+                  : deletingWorkspace.isOwner || deletingWorkspace.isAdmin || deletingWorkspace.userRole === 'ADMIN'
+                  ? 'Yes, Delete Workspace'
+                  : 'Yes, Remove Workspace'}
               </button>
             </div>
           </div>
