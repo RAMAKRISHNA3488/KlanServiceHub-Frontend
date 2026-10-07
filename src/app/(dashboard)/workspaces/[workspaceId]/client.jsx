@@ -80,6 +80,7 @@ export const WorkspaceIdClient = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
+  const [invitePassword, setInvitePassword] = useState('');
   const [inviteRole, setInviteRole] = useState('Developer');
   const [sendingInvite, setSendingInvite] = useState(false);
   const [sentInviteData, setSentInviteData] = useState(null);
@@ -97,17 +98,22 @@ export const WorkspaceIdClient = () => {
         email: inviteEmail.trim(),
         name: inviteName.trim() || inviteEmail.split('@')[0],
         roleName: inviteRole,
+        password: invitePassword.trim() || undefined,
         jobTitle: 'Team Member',
         department: 'General',
       });
 
       if (res?.emailSent) {
-        toast.success(`✉️ Invitation email sent successfully to ${inviteEmail}!`);
+        toast.success(`✉️ Invitation email with login credentials sent successfully to ${inviteEmail}!`);
       } else {
         toast.success(`Invitation created for ${inviteEmail}`);
       }
 
-      setSentInviteData({ email: inviteEmail, inviteUrl: res.inviteUrl });
+      setSentInviteData({
+        email: inviteEmail,
+        inviteUrl: res.inviteUrl,
+        tempPassword: res.tempPassword,
+      });
       refetchMembers();
     } catch (err) {
       toast.error(err.message || 'Failed to send invitation');
@@ -214,12 +220,36 @@ export const WorkspaceIdClient = () => {
                   <CheckCircle2 className="size-10 text-emerald-600 mx-auto" />
                   <h4 className="text-sm font-bold text-emerald-950">Invitation Email Dispatched!</h4>
                   <p className="text-xs text-emerald-800">
-                    An email was sent to <strong>{sentInviteData.email}</strong> via Gmail.
+                    An email with login details was sent to <strong>{sentInviteData.email}</strong> via Gmail.
                   </p>
                   <p className="text-[11px] text-emerald-700 bg-emerald-100/60 rounded p-2 text-left">
-                    💡 <strong>Note:</strong> Automated invitation emails may sometimes land in the recipient's <strong>Spam / Junk</strong> folder or <strong>Updates</strong> tab. Please advise them to check there if not in primary inbox.
+                    💡 <strong>Note:</strong> Automated emails may sometimes land in the recipient's <strong>Spam / Junk</strong> folder or <strong>Updates</strong> tab. Please advise them to check there if not in primary inbox.
                   </p>
                 </div>
+
+                {sentInviteData.tempPassword && (
+                  <div className="rounded-xl bg-blue-50/70 border border-blue-200 p-3 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-blue-900">🔑 Generated Login Credentials:</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-[11px] px-2 bg-white"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`Email: ${sentInviteData.email}\nPassword: ${sentInviteData.tempPassword}\nLogin: ${window.location.origin}/sign-in`);
+                          toast.success('Credentials copied to clipboard!');
+                        }}
+                      >
+                        Copy Credentials
+                      </Button>
+                    </div>
+                    <div className="font-mono text-xs text-neutral-800 space-y-1 bg-white p-2.5 rounded-lg border border-blue-100">
+                      <div><strong className="text-neutral-500 font-sans">Email:</strong> {sentInviteData.email}</div>
+                      <div><strong className="text-neutral-500 font-sans">Temporary Password:</strong> <span className="font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">{sentInviteData.tempPassword}</span></div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-neutral-700">Direct Invitation Link:</label>
@@ -251,6 +281,7 @@ export const WorkspaceIdClient = () => {
                     setSentInviteData(null);
                     setInviteEmail('');
                     setInviteName('');
+                    setInvitePassword('');
                   }}
                 >
                   Done
@@ -278,6 +309,19 @@ export const WorkspaceIdClient = () => {
                     value={inviteName}
                     onChange={(e) => setInviteName(e.target.value)}
                     placeholder="Jane Doe"
+                    className="w-full rounded-xl border border-neutral-300 px-3.5 py-2.5 text-sm focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">
+                    Temporary Password <span className="text-neutral-400 font-normal">(Optional - auto-generated if left blank)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={invitePassword}
+                    onChange={(e) => setInvitePassword(e.target.value)}
+                    placeholder="e.g. Klan#Secure123"
                     className="w-full rounded-xl border border-neutral-300 px-3.5 py-2.5 text-sm focus:border-blue-600 focus:outline-none"
                   />
                 </div>
