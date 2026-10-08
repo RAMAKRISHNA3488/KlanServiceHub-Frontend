@@ -273,7 +273,7 @@ export const WorkflowsAdminView = () => {
             Workflows & Issue Types
           </h1>
           <p className="text-[11px] text-neutral-500 mt-0.5">
-            Configure custom enterprise lifecycle transition pipelines, issue categories, and status states that drive your Kanban Boards.
+            Manage lifecycle pipelines, statuses, and issue categories.
           </p>
         </div>
 
@@ -283,7 +283,7 @@ export const WorkflowsAdminView = () => {
             className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition"
           >
             <Columns3 className="size-3.5 text-blue-600" />
-            <span>View Kanban Board</span>
+            <span>Kanban Board</span>
           </button>
 
           {activeTab === 'WORKFLOWS' ? (
@@ -316,7 +316,7 @@ export const WorkflowsAdminView = () => {
               : 'border-transparent text-neutral-500 hover:text-neutral-900'
           }`}
         >
-          Workflow Status Pipeline
+          Workflow Pipeline
         </button>
         <button
           onClick={() => setActiveTab('ISSUE_TYPES')}
@@ -326,7 +326,7 @@ export const WorkflowsAdminView = () => {
               : 'border-transparent text-neutral-500 hover:text-neutral-900'
           }`}
         >
-          Issue Types & Schemas
+          Issue Types
         </button>
       </div>
 
@@ -337,9 +337,9 @@ export const WorkflowsAdminView = () => {
             <GitBranch className="size-7" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-neutral-900">No Workflow Configured</h3>
+            <h3 className="text-base font-bold text-neutral-900">No Workflow Found</h3>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">
-              Initialize the standard software development lifecycle workflow with Backlog, Todo, In Progress, Code Review, Testing, and Done stages.
+              Set up standard stages from Backlog to Done for this workspace.
             </p>
           </div>
           <button
@@ -369,7 +369,7 @@ export const WorkflowsAdminView = () => {
             className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 transition"
           >
             <Sparkles className="size-4" />
-            Initialize Default Enterprise Workflow
+            Initialize Workflow
           </button>
         </div>
       )}
@@ -402,7 +402,7 @@ export const WorkflowsAdminView = () => {
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition shadow-2xs self-start sm:self-auto"
             >
               <Columns3 className="size-3.5" />
-              <span>Live Synced with Engineering Kanban Board ➔</span>
+              <span>Synced with Kanban ➔</span>
             </button>
           </div>
 
@@ -411,9 +411,9 @@ export const WorkflowsAdminView = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">
-                  Active Lifecycle Progression Path ({defaultWorkflow.statuses?.length || 0} Stages)
+                  Lifecycle Stages ({defaultWorkflow.statuses?.length || 0})
                 </p>
-                <span className="text-[10px] text-neutral-400">Scroll horizontally to view all stages • Use arrows on cards to reorder</span>
+                <span className="text-[10px] text-neutral-400">Scroll to view stages • Use arrows to reorder</span>
               </div>
 
               {/* Scroll buttons toolbar */}
@@ -554,9 +554,9 @@ export const WorkflowsAdminView = () => {
                 <Bookmark className="size-7" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-neutral-900">No Issue Types Defined</h3>
+                <h3 className="text-base font-bold text-neutral-900">No Issue Types Found</h3>
                 <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">
-                  Create custom issue categories (Epics, Stories, Tasks, Bugs) to categorize and manage work items in this workspace.
+                  Set up standard issue types (Epic, Story, Task, Bug, Sub-task).
                 </p>
               </div>
               <button
@@ -584,7 +584,7 @@ export const WorkflowsAdminView = () => {
                 className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-indigo-700 transition"
               >
                 <Sparkles className="size-4" />
-                Initialize Standard Issue Types
+                Initialize Issue Types
               </button>
             </div>
           ) : (
