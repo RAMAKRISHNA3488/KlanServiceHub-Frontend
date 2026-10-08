@@ -19,7 +19,7 @@ export const Analytics = ({ data }) => {
   return (
     <ScrollArea className="w-full shrink-0 whitespace-nowrap rounded-2xl border border-neutral-200/80 bg-white shadow-xs">
       <div className="flex w-full flex-row">
-        <div className="flex flex-1 items-center">
+        <div className="flex flex-1 min-w-[150px] items-center">
           <AnalyticsCard
             title="Total tasks"
             value={taskCount}
@@ -29,7 +29,7 @@ export const Analytics = ({ data }) => {
           <DottedSeparator direction="vertical" />
         </div>
 
-        <div className="flex flex-1 items-center">
+        <div className="flex flex-1 min-w-[150px] items-center">
           <AnalyticsCard
             title="Assigned tasks"
             value={assignedCount}
@@ -39,7 +39,7 @@ export const Analytics = ({ data }) => {
           <DottedSeparator direction="vertical" />
         </div>
 
-        <div className="flex flex-1 items-center">
+        <div className="flex flex-1 min-w-[150px] items-center">
           <AnalyticsCard
             title="Completed tasks"
             value={completedCount}
@@ -49,7 +49,7 @@ export const Analytics = ({ data }) => {
           <DottedSeparator direction="vertical" />
         </div>
 
-        <div className="flex flex-1 items-center">
+        <div className="flex flex-1 min-w-[150px] items-center">
           <AnalyticsCard
             title="Overdue tasks"
             value={overdueCount}
@@ -59,7 +59,7 @@ export const Analytics = ({ data }) => {
           <DottedSeparator direction="vertical" />
         </div>
 
-        <div className="flex flex-1 items-center">
+        <div className="flex flex-1 min-w-[150px] items-center">
           <AnalyticsCard
             title="Incomplete tasks"
             value={incompleteCount}

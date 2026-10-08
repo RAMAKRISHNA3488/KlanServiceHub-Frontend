@@ -26,6 +26,8 @@ import {
   Kanban,
   Sparkles,
   Command,
+  Menu,
+  X,
 } from 'lucide-react';
 
 export const KlanserviceHubTopNavbar = () => {
@@ -42,6 +44,7 @@ export const KlanserviceHubTopNavbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   // Keyboard shortcut: Press 'c' to create issue
@@ -57,6 +60,13 @@ export const KlanserviceHubTopNavbar = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Listen to open create issue event from mobile bottom nav or other triggers
+  useEffect(() => {
+    const handleOpenCreate = () => setCreateModalOpen(true);
+    window.addEventListener('klanservicehub-open-create-issue', handleOpenCreate);
+    return () => window.removeEventListener('klanservicehub-open-create-issue', handleOpenCreate);
   }, []);
 
   const handleSearch = async (val) => {
@@ -83,9 +93,20 @@ export const KlanserviceHubTopNavbar = () => {
 
   return (
     <>
-      <header className="h-12 w-full bg-white border-b border-neutral-200/90 px-4 flex items-center justify-between text-neutral-700 text-xs font-semibold select-none sticky top-0 z-40 shadow-xs">
-        {/* Left Section: App Switcher + Logo + Menus */}
+      <header className="h-12 w-full bg-white border-b border-neutral-200/90 px-2.5 sm:px-4 flex items-center justify-between text-neutral-700 text-xs font-semibold select-none sticky top-0 z-40 shadow-xs">
+        {/* Left Section: Mobile Menu + App Switcher + Logo + Menus */}
         <div className="flex items-center gap-1 sm:gap-2">
+          {/* Mobile Sidebar Trigger (Hamburger) */}
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('klanservicehub-open-mobile-sidebar'))}
+            className="lg:hidden p-1.5 rounded-md hover:bg-neutral-100 text-neutral-700 transition"
+            title="Open Menu"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu className="size-5 text-neutral-800" />
+          </button>
+
           {/* Klanvision 9-dots */}
           <button
             onClick={() => setWorkspaceSwitcherOpen(true)}
@@ -98,18 +119,18 @@ export const KlanserviceHubTopNavbar = () => {
           {/* klanservicehub Logo & Switcher Trigger */}
           <button
             onClick={() => setWorkspaceSwitcherOpen(true)}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-neutral-100 transition mr-2"
+            className="flex items-center gap-1.5 px-1.5 sm:px-2 py-1 rounded-md hover:bg-neutral-100 transition mr-1 sm:mr-2"
           >
             <div className="size-5 rounded-md bg-blue-600 flex items-center justify-center text-white font-black text-[11px] shadow-xs">
               K
             </div>
-            <span className="font-extrabold text-neutral-900 text-sm tracking-tight hidden md:inline">
+            <span className="font-extrabold text-neutral-900 text-sm tracking-tight hidden sm:inline">
               klanservicehub
             </span>
             <ChevronDown className="size-3 text-neutral-400" />
           </button>
 
-          {/* Top Menus */}
+          {/* Desktop Top Menus */}
           <div className="hidden lg:flex items-center gap-0.5">
             {/* Projects Menu */}
             <div className="relative">
@@ -173,10 +194,10 @@ export const KlanserviceHubTopNavbar = () => {
           {/* Primary Quick Create Button */}
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="flex items-center gap-1 rounded-md bg-blue-600 hover:bg-blue-700 px-3 py-1 text-xs font-bold text-white shadow-xs transition ml-1"
+            className="flex items-center gap-1 rounded-md bg-blue-600 hover:bg-blue-700 px-2 sm:px-3 py-1 text-xs font-bold text-white shadow-xs transition ml-0.5 sm:ml-1"
           >
             <Plus className="size-3.5 stroke-[3]" />
-            <span>Create</span>
+            <span className="hidden xs:inline">Create</span>
             <span className="hidden sm:inline-block font-mono text-[9px] bg-blue-700/80 px-1 rounded text-blue-100 ml-1">
               C
             </span>
@@ -184,9 +205,19 @@ export const KlanserviceHubTopNavbar = () => {
         </div>
 
         {/* Right Section: Search Bar + Notification + Settings + User */}
-        <div className="flex items-center gap-2">
-          {/* Global KlanserviceHub Search */}
-          <div className="relative">
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Mobile Search Icon Toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className="sm:hidden p-1.5 rounded-md hover:bg-neutral-100 text-neutral-600 transition"
+            title="Search issues, boards"
+          >
+            <Search className="size-4" />
+          </button>
+
+          {/* Global KlanserviceHub Search (Desktop) */}
+          <div className="relative hidden sm:block">
             <div className="relative flex items-center">
               <Search className="absolute left-2.5 size-3.5 text-neutral-400" />
               <input
@@ -197,7 +228,7 @@ export const KlanserviceHubTopNavbar = () => {
                   if (searchResults.length > 0) setSearchOpen(true);
                 }}
                 placeholder="Search issues, boards... (/)"
-                className="w-36 sm:w-56 rounded-md border border-neutral-200 bg-neutral-100/70 pl-8 pr-2.5 py-1 text-xs font-medium focus:w-72 focus:bg-white focus:border-blue-600 focus:outline-none transition-all shadow-inner"
+                className="w-32 md:w-48 lg:w-60 rounded-md border border-neutral-200 bg-neutral-100/70 pl-8 pr-2.5 py-1 text-xs font-medium focus:bg-white focus:border-blue-600 focus:outline-none transition-all shadow-inner"
               />
             </div>
 
@@ -240,17 +271,70 @@ export const KlanserviceHubTopNavbar = () => {
           {/* Settings Quick Link */}
           <Link
             href={`/workspaces/${workspaceId}/company-profile`}
-            className="p-1.5 rounded-md hover:bg-neutral-100 text-neutral-600 transition"
+            className="p-1.5 rounded-md hover:bg-neutral-100 text-neutral-600 transition hidden xs:inline-flex"
             title="klanservicehub Settings"
           >
             <Settings className="size-4" />
           </Link>
 
-          <div className="h-5 w-px bg-neutral-200 mx-1" />
+          <div className="h-5 w-px bg-neutral-200 mx-0.5 sm:mx-1" />
 
           <UserButton />
         </div>
       </header>
+
+      {/* Expandable Mobile Search Dropdown Bar */}
+      {mobileSearchOpen && (
+        <div className="sm:hidden bg-white border-b border-neutral-200 px-3 py-2 shadow-sm sticky top-12 z-35 animate-in slide-in-from-top-2 duration-150">
+          <div className="relative flex items-center">
+            <Search className="absolute left-3 size-4 text-neutral-400" />
+            <input
+              type="text"
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Search issues, projects, boards..."
+              className="w-full rounded-lg border border-neutral-300 bg-neutral-50 pl-9 pr-8 py-1.5 text-xs font-medium focus:bg-white focus:border-blue-600 focus:outline-none"
+            />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSearchResults([]);
+                }}
+                className="absolute right-2 text-neutral-400 hover:text-neutral-600 p-1"
+              >
+                <X className="size-3.5" />
+              </button>
+            ) : null}
+          </div>
+
+          {searchResults.length > 0 && (
+            <div className="mt-2 divide-y divide-neutral-100 max-h-60 overflow-y-auto rounded-lg border border-neutral-200 bg-white">
+              {searchResults.map((t) => (
+                <Link
+                  key={t.$id || t.id}
+                  href={`/workspaces/${workspaceId}/tasks/${t.$id || t.id}`}
+                  onClick={() => {
+                    setMobileSearchOpen(false);
+                    setSearchQuery('');
+                  }}
+                  className="flex items-center justify-between p-2.5 hover:bg-blue-50 transition text-xs"
+                >
+                  <div className="truncate mr-2">
+                    <p className="font-bold text-neutral-900 truncate">{t.name}</p>
+                    <span className="font-mono text-[10px] text-neutral-400">{t.key || 'TASK'}</span>
+                  </div>
+                  <span className="rounded bg-neutral-100 px-2 py-0.5 text-[9px] font-bold text-neutral-700 shrink-0">
+                    {t.status}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Global KlanserviceHub Issue Creation Modal */}
       <KlanserviceHubCreateIssueModal

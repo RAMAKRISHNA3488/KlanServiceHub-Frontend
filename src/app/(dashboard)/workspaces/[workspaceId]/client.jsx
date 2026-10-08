@@ -169,15 +169,15 @@ export const WorkspaceIdClient = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setInviteModalOpen(true)} className="text-[11px] h-7 px-2.5 font-semibold">
-            <UserPlus className="mr-1 size-3 text-blue-600" /> Invite Member
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+          <Button size="sm" variant="outline" onClick={() => setInviteModalOpen(true)} className="text-[11px] h-7 px-2 sm:px-2.5 font-semibold flex-1 sm:flex-none">
+            <UserPlus className="mr-1 size-3 text-blue-600" /> Invite
           </Button>
-          <Button size="sm" variant="secondary" onClick={() => createProject()} className="text-[11px] h-7 px-2.5 font-semibold">
-            <PlusIcon className="mr-1 size-3" /> New Project
+          <Button size="sm" variant="secondary" onClick={() => createProject()} className="text-[11px] h-7 px-2 sm:px-2.5 font-semibold flex-1 sm:flex-none">
+            <PlusIcon className="mr-1 size-3" /> Project
           </Button>
-          <Button size="sm" onClick={() => createTask()} className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] h-7 px-2.5 font-semibold">
-            <PlusIcon className="mr-1 size-3" /> Create Task
+          <Button size="sm" onClick={() => createTask()} className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] h-7 px-2 sm:px-2.5 font-semibold flex-1 sm:flex-none">
+            <PlusIcon className="mr-1 size-3" /> Issue
           </Button>
         </div>
       </div>
