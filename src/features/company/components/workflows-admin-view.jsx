@@ -331,6 +331,49 @@ export const WorkflowsAdminView = () => {
       </div>
 
       {/* Workflow Designer Tab */}
+      {activeTab === 'WORKFLOWS' && !defaultWorkflow && (
+        <div className="rounded-2xl border border-neutral-200 bg-white p-12 text-center shadow-sm space-y-4">
+          <div className="size-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+            <GitBranch className="size-7" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-neutral-900">No Workflow Configured</h3>
+            <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">
+              Initialize the standard software development lifecycle workflow with Backlog, Todo, In Progress, Code Review, Testing, and Done stages.
+            </p>
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                setLoading(true);
+                await workflowsAdminApi.createWorkflow(workspaceId, {
+                  name: 'Standard Software Development Workflow',
+                  description: 'Default enterprise workflow for software development lifecycle',
+                  statuses: [
+                    { name: 'BACKLOG', category: 'TODO', color: '#94A3B8' },
+                    { name: 'TODO', category: 'TODO', color: '#3B82F6' },
+                    { name: 'IN_PROGRESS', category: 'IN_PROGRESS', color: '#F59E0B' },
+                    { name: 'CODE_REVIEW', category: 'IN_PROGRESS', color: '#8B5CF6' },
+                    { name: 'TESTING', category: 'IN_PROGRESS', color: '#06B6D4' },
+                    { name: 'DONE', category: 'DONE', color: '#10B981' },
+                  ],
+                });
+                toast.success('Default workflow initialized!');
+                fetchData();
+              } catch (err) {
+                toast.error(err.message || 'Failed to initialize workflow');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 transition"
+          >
+            <Sparkles className="size-4" />
+            Initialize Default Enterprise Workflow
+          </button>
+        </div>
+      )}
+
       {activeTab === 'WORKFLOWS' && defaultWorkflow && (
         <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-6">
           {/* Workflow Header with Edit & Sync Info */}
@@ -504,40 +547,83 @@ export const WorkflowsAdminView = () => {
 
       {/* Issue Types Tab */}
       {activeTab === 'ISSUE_TYPES' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {issueTypes.map((it) => {
-            const Icon = ICON_MAP[it.icon] || Bookmark;
-            return (
-              <div
-                key={it.id}
-                className="group relative rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:shadow-md"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="size-10 rounded-xl flex items-center justify-center text-white shadow-sm"
-                      style={{ backgroundColor: it.color }}
-                    >
-                      <Icon className="size-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-neutral-900">{it.name}</h4>
-                      <span className="font-mono text-[10px] text-neutral-400">{it.color}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleDeleteIssueType(it.id, it.name)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-600 rounded transition"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-
-                <p className="text-xs text-neutral-600 mt-3 line-clamp-2">{it.description || 'Standard issue type'}</p>
+        <div className="space-y-4">
+          {issueTypes.length === 0 ? (
+            <div className="rounded-2xl border border-neutral-200 bg-white p-12 text-center shadow-sm space-y-4">
+              <div className="size-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+                <Bookmark className="size-7" />
               </div>
-            );
-          })}
+              <div>
+                <h3 className="text-base font-bold text-neutral-900">No Issue Types Defined</h3>
+                <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">
+                  Create custom issue categories (Epics, Stories, Tasks, Bugs) to categorize and manage work items in this workspace.
+                </p>
+              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    const standardTypes = [
+                      { name: 'Epic', icon: 'zap', color: '#8B5CF6', description: 'A big body of work that can be broken down into stories and tasks' },
+                      { name: 'Story', icon: 'bookmark', color: '#10B981', description: 'A user requirement or functional enhancement' },
+                      { name: 'Task', icon: 'check-square', color: '#3B82F6', description: 'A general task that needs to be performed' },
+                      { name: 'Bug', icon: 'alert-circle', color: '#EF4444', description: 'A problem which impairs or prevents system functions' },
+                      { name: 'Sub-task', icon: 'list', color: '#6B7280', description: 'A piece of work required to complete another task' },
+                    ];
+                    for (const t of standardTypes) {
+                      await workflowsAdminApi.createIssueType(workspaceId, t);
+                    }
+                    toast.success('Standard issue types initialized!');
+                    fetchData();
+                  } catch (err) {
+                    toast.error(err.message || 'Failed to initialize issue types');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-indigo-700 transition"
+              >
+                <Sparkles className="size-4" />
+                Initialize Standard Issue Types
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {issueTypes.map((it) => {
+                const Icon = ICON_MAP[it.icon] || Bookmark;
+                return (
+                  <div
+                    key={it.id}
+                    className="group relative rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="size-10 rounded-xl flex items-center justify-center text-white shadow-sm"
+                          style={{ backgroundColor: it.color }}
+                        >
+                          <Icon className="size-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-neutral-900">{it.name}</h4>
+                          <span className="font-mono text-[10px] text-neutral-400">{it.color}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleDeleteIssueType(it.id, it.name)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-600 rounded transition"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-neutral-600 mt-3 line-clamp-2">{it.description || 'Standard issue type'}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
