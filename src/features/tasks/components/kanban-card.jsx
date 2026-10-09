@@ -15,11 +15,18 @@ export const KanbanCard = ({ task }) => {
     return (<div className="mb-2.5 space-y-2.5 rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between gap-x-2">
         <div className="space-y-1">
-          {task.key && (
-            <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
-              {task.key}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {(task.issueType || task.issue_type) && (
+              <span className="text-[10px] font-bold text-neutral-600 bg-neutral-100 px-1.5 py-0.5 rounded">
+                {task.issueType || task.issue_type}
+              </span>
+            )}
+            {task.key && (
+              <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+                {task.key}
+              </span>
+            )}
+          </div>
           <p className="line-clamp-2 text-xs font-semibold text-neutral-900 break-words">{task.name}</p>
         </div>
 

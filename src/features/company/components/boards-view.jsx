@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useCurrent } from '@/features/auth/api/use-current';
@@ -46,9 +46,28 @@ export const BoardsView = () => {
   const [tasks, setTasks] = useState([]);
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProject, setSelectedProject] = useState('ALL');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryProjectId = searchParams.get('projectId');
+  const [selectedProject, setSelectedProject] = useState(queryProjectId || 'ALL');
+  const [issueTypes, setIssueTypes] = useState([]);
   const [selectedPriority, setSelectedPriority] = useState('ALL');
+
+  useEffect(() => {
+    if (queryProjectId && queryProjectId !== selectedProject) {
+      setSelectedProject(queryProjectId);
+    }
+  }, [queryProjectId]);
+
+  const handleProjectChange = (newProjId) => {
+    setSelectedProject(newProjId);
+    const nextParams = new URLSearchParams(searchParams);
+    if (newProjId === 'ALL') {
+      nextParams.delete('projectId');
+    } else {
+      nextParams.set('projectId', newProjId);
+    }
+    setSearchParams(nextParams);
+  };
 
   const { data: projectsData } = useGetProjects({ workspaceId });
   const { data: membersData } = useGetMembers({ workspaceId });
@@ -80,14 +99,19 @@ export const BoardsView = () => {
   const fetchBoardsAndTasks = async () => {
     try {
       setLoading(true);
-      const [boardsRes, tasksRes, wfRes] = await Promise.all([
+      const [boardsRes, tasksRes, wfRes, typesRes] = await Promise.all([
         boardsApi.getBoards(workspaceId),
         tasksApi.getTasks({ workspaceId }),
         workflowsAdminApi.getWorkflows(workspaceId).catch(() => ({ data: [] })),
+        workflowsAdminApi.getIssueTypes(workspaceId).catch(() => ({ data: [] })),
       ]);
 
       const loadedBoards = boardsRes?.data || [];
       setBoards(loadedBoards);
+
+      if (typesRes?.data) {
+        setIssueTypes(typesRes.data);
+      }
 
       if (loadedBoards.length > 0 && !selectedBoardId) {
         setSelectedBoardId(loadedBoards[0].id);
@@ -278,7 +302,7 @@ export const BoardsView = () => {
 
   const handleQuickCreateTask = async (status) => {
     if (!newTaskName.trim()) return;
-    const targetProject = newTaskProject || projects[0]?.$id || projects[0]?.id;
+    const targetProject = newTaskProject || (selectedProject !== 'ALL' ? selectedProject : (projects[0]?.$id || projects[0]?.id));
     if (!targetProject) {
       toast.error('Please create a project first before adding tasks.');
       return;
@@ -346,23 +370,27 @@ export const BoardsView = () => {
   }
 
   const activeBoard = boards.find((b) => b.id === selectedBoardId) || boards[0];
+  const activeProjectObj = projects.find((p) => (p.$id || p.id) === selectedProject);
+  const boardDisplayName = activeProjectObj
+    ? `${activeProjectObj.name} • Engineering Kanban Board`
+    : (activeBoard?.name || 'Engineering Kanban Board');
 
   return (
     <div className="flex flex-col gap-y-5 max-w-7xl mx-auto pb-16">
-      {/* Top Header & Board Selector */}
+      {/* Top Header & Project Engineering Kanban Board Info */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-200 pb-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-lg font-bold tracking-tight text-neutral-900 flex items-center gap-2">
               <Kanban className="size-4 text-blue-600" />
-              {activeBoard ? activeBoard.name : 'Engineering Kanban Board'}
+              {boardDisplayName}
             </h1>
-            <span className="rounded bg-blue-50 px-2 py-0.2 text-[10px] font-bold text-blue-700">
-              {activeBoard?.type || 'KANBAN'}
+            <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+              {activeProjectObj ? 'PROJECT BOARD' : (activeBoard?.type || 'KANBAN')}
             </span>
           </div>
           <p className="text-[11px] text-neutral-500 mt-0.5">
-            Dynamic workflow board syncing {columns.length} stages: {columns.map((c) => c.label).join(' ➔ ')}.
+            Dynamic engineering workflow syncing {columns.length} stages: {columns.map((c) => c.label).join(' ➔ ')}.
           </p>
         </div>
 
@@ -406,11 +434,11 @@ export const BoardsView = () => {
 
           <button
             onClick={() => navigate(`/workspaces/${workspaceId}/workflows-admin`)}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition"
-            title="Configure workflow statuses and lifecycle rules"
+            className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 hover:text-blue-600 transition"
+            title="Edit Workflows & Issue Types to reflect across all boards"
           >
-            <Settings className="size-3.5 text-neutral-500" />
-            <span>Workflow Settings</span>
+            <Settings className="size-3.5 text-blue-600" />
+            <span>Edit Workflows & Issue Types</span>
           </button>
 
           <button
@@ -431,6 +459,44 @@ export const BoardsView = () => {
         </div>
       </div>
 
+      {/* Project Selector Navigation Pills */}
+      {projects.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-1 shrink-0">
+            <Layers className="size-3.5 text-neutral-500" />
+            <span>Project Boards:</span>
+          </span>
+          <button
+            onClick={() => handleProjectChange('ALL')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer ${
+              selectedProject === 'ALL'
+                ? 'bg-neutral-900 text-white shadow-xs'
+                : 'bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200'
+            }`}
+          >
+            All Projects
+          </button>
+          {projects.map((p) => {
+            const pId = p.$id || p.id;
+            const isSelected = selectedProject === pId;
+            return (
+              <button
+                key={pId}
+                onClick={() => handleProjectChange(pId)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-200'
+                }`}
+              >
+                <span className="size-2 rounded-full" style={{ backgroundColor: isSelected ? '#ffffff' : '#3B82F6' }} />
+                <span>{p.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Board Filters Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-xl border border-neutral-200 shadow-xs">
         <div className="flex items-center gap-2 flex-1 max-w-sm">
@@ -450,7 +516,7 @@ export const BoardsView = () => {
           {/* Project Filter */}
           <select
             value={selectedProject}
-            onChange={(e) => setSelectedProject(e.target.value)}
+            onChange={(e) => handleProjectChange(e.target.value)}
             className="rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs font-medium text-neutral-700"
           >
             <option value="ALL">All Projects</option>
@@ -565,16 +631,32 @@ export const BoardsView = () => {
                 ) : (
                   columnTasks.map((task) => {
                     const taskId = task.$id || task.id;
+                    const taskTypeName = task.issueType || task.issue_type || task.type;
+                    const matchedType = issueTypes.find(
+                      (it) => it.name?.toLowerCase() === String(taskTypeName || '').toLowerCase() || it.id === taskTypeName
+                    );
+
                     return (
                       <div
                         key={taskId}
                         className="shrink-0 w-full rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-md hover:border-blue-300 transition-all space-y-2"
                       >
-                        {/* Task Key & Priority */}
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
-                            {task.key || 'TASK'}
-                          </span>
+                        {/* Task Key, Issue Type Badge & Priority */}
+                        <div className="flex items-center justify-between gap-1 flex-wrap">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {matchedType && (
+                              <span
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold text-white shadow-2xs"
+                                style={{ backgroundColor: matchedType.color || '#4F46E5' }}
+                                title={`Issue Type: ${matchedType.name}`}
+                              >
+                                <span>{matchedType.name}</span>
+                              </span>
+                            )}
+                            <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+                              {task.key || 'TASK'}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-1.5">
                             <span
                               className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${

@@ -82,6 +82,37 @@ export const WorkflowsAdminView = () => {
   const [addTypeModal, setAddTypeModal] = useState(false);
   const [newType, setNewType] = useState({ name: '', icon: 'bookmark', color: '#4F46E5', description: '' });
 
+  // Edit Issue Type Modal
+  const [editingType, setEditingType] = useState(null); // { id, name, icon, color, description }
+
+  const handleOpenEditIssueType = (it) => {
+    setEditingType({
+      id: it.id,
+      name: it.name || '',
+      icon: it.icon || 'bookmark',
+      color: it.color || '#4F46E5',
+      description: it.description || '',
+    });
+  };
+
+  const handleSaveEditIssueType = async (e) => {
+    e.preventDefault();
+    if (!editingType) return;
+    try {
+      await workflowsAdminApi.updateIssueType(workspaceId, editingType.id, {
+        name: editingType.name,
+        icon: editingType.icon,
+        color: editingType.color,
+        description: editingType.description,
+      });
+      toast.success(`Issue type "${editingType.name}" updated successfully!`);
+      setEditingType(null);
+      fetchData();
+    } catch (err) {
+      toast.error(err.message || 'Failed to update issue type');
+    }
+  };
+
   const scrollPipeline = (direction) => {
     if (pipelineScrollRef.current) {
       const scrollOffset = direction === 'left' ? -280 : 280;
@@ -283,10 +314,11 @@ export const WorkflowsAdminView = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(`/workspaces/${workspaceId}/boards`)}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition"
+            className="flex items-center gap-1.5 rounded-lg bg-neutral-900 text-white px-3.5 py-1.5 text-xs font-bold shadow-xs hover:bg-neutral-800 transition"
+            title="Open Engineering Kanban Board to view active workflow columns and task cards"
           >
-            <Columns3 className="size-3.5 text-blue-600" />
-            <span>Kanban Board</span>
+            <Columns3 className="size-3.5 text-blue-400" />
+            <span>Engineering Kanban Board ➔</span>
           </button>
 
           {activeTab === 'WORKFLOWS' ? (
@@ -330,6 +362,23 @@ export const WorkflowsAdminView = () => {
           }`}
         >
           Issue Types
+        </button>
+      </div>
+
+      {/* Global Sync Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200/80 text-xs text-blue-950">
+        <div className="flex items-center gap-2.5">
+          <Sparkles className="size-4 text-blue-600 shrink-0" />
+          <span>
+            <strong>Global Reflection Active:</strong> Status stages and issue types configured here immediately reflect across all project Engineering Kanban Boards, task cards, and issue creation dialogs.
+          </span>
+        </div>
+        <button
+          onClick={() => navigate(`/workspaces/${workspaceId}/boards`)}
+          className="shrink-0 font-bold text-blue-700 hover:text-blue-950 underline underline-offset-2 flex items-center gap-1 cursor-pointer"
+        >
+          <span>Open Kanban Board</span>
+          <ArrowRight className="size-3" />
         </button>
       </div>
 
@@ -613,12 +662,22 @@ export const WorkflowsAdminView = () => {
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => handleDeleteIssueType(it.id, it.name)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-600 rounded transition"
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                        <button
+                          onClick={() => handleOpenEditIssueType(it)}
+                          className="p-1 text-neutral-400 hover:text-blue-600 rounded hover:bg-neutral-100 transition cursor-pointer"
+                          title="Edit Issue Type"
+                        >
+                          <Pencil className="size-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteIssueType(it.id, it.name)}
+                          className="p-1 text-neutral-400 hover:text-red-600 rounded hover:bg-red-50 transition cursor-pointer"
+                          title="Delete Issue Type"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
                     </div>
 
                     <p className="text-xs text-neutral-600 mt-3 line-clamp-2">{it.description || 'Standard issue type'}</p>
@@ -922,6 +981,106 @@ export const WorkflowsAdminView = () => {
                   className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700"
                 >
                   Create Type
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Issue Type Modal */}
+      {editingType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-neutral-200">
+            <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+              <h3 className="text-base font-bold text-neutral-900">Edit Issue Type</h3>
+              <button onClick={() => setEditingType(null)} className="text-neutral-400 hover:text-neutral-700">
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditIssueType} className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1">Issue Type Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingType.name}
+                  onChange={(e) => setEditingType({ ...editingType, name: e.target.value })}
+                  placeholder="e.g. Bug, Feature, Spike"
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1">Description</label>
+                <input
+                  type="text"
+                  value={editingType.description}
+                  onChange={(e) => setEditingType({ ...editingType, description: e.target.value })}
+                  placeholder="Describe when this issue type is used..."
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Color Badge</label>
+                <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                  {COLOR_PRESETS.map((p) => (
+                    <button
+                      key={p.color}
+                      type="button"
+                      onClick={() => setEditingType({ ...editingType, color: p.color })}
+                      className={`size-6 rounded-full border transition-all ${
+                        editingType.color === p.color ? 'ring-2 ring-blue-600 ring-offset-2 scale-110' : 'hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: p.color }}
+                      title={p.label}
+                    />
+                  ))}
+                </div>
+                <input
+                  type="color"
+                  value={editingType.color}
+                  onChange={(e) => setEditingType({ ...editingType, color: e.target.value })}
+                  className="h-9 w-full rounded-lg border border-neutral-300 p-1 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Icon</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {Object.entries(ICON_MAP).map(([key, IconComp]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setEditingType({ ...editingType, icon: key })}
+                      className={`flex flex-col items-center gap-1 p-2 rounded-xl border text-xs transition ${
+                        editingType.icon === key
+                          ? 'border-blue-600 bg-blue-50 text-blue-700 font-bold'
+                          : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                      }`}
+                    >
+                      <IconComp className="size-4" />
+                      <span className="text-[10px] capitalize">{key}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingType(null)}
+                  className="rounded-lg px-4 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700"
+                >
+                  Save Changes
                 </button>
               </div>
             </form>

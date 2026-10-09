@@ -48,9 +48,24 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
   const projects = projectsData?.documents || [];
   const members = membersData?.documents || [];
 
+  const [workspaceIssueTypes, setWorkspaceIssueTypes] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [creating, setCreating] = useState(false);
   const [createAnother, setCreateAnother] = useState(false);
+
+  useEffect(() => {
+    if (workspaceId) {
+      workflowsAdminApi.getIssueTypes(workspaceId)
+        .then((res) => {
+          if (res?.data && res.data.length > 0) {
+            setWorkspaceIssueTypes(res.data);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [workspaceId]);
+
+  const availableIssueTypes = workspaceIssueTypes.length > 0 ? workspaceIssueTypes : ISSUE_TYPES;
 
   const [form, setForm] = useState({
     projectId: defaultProjectId || '',
@@ -195,22 +210,31 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                   onChange={(e) => setForm({ ...form, issueType: e.target.value })}
                   className="w-full rounded-lg border border-neutral-300 bg-white pl-8 pr-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none shadow-xs"
                 >
-                  {ISSUE_TYPES.map((t) => (
-                    <option key={t.id} value={t.id}>
+                  {availableIssueTypes.map((t) => (
+                    <option key={t.id || t.name} value={t.name || t.id}>
                       {t.name}
                     </option>
                   ))}
                 </select>
                 <div className="absolute left-2.5 top-2.5 pointer-events-none">
-                  {React.createElement(
-                    ISSUE_TYPES.find((t) => t.id === form.issueType)?.icon || CheckSquare,
-                    {
-                      className: 'size-3.5',
-                      style: {
-                        color: ISSUE_TYPES.find((t) => t.id === form.issueType)?.color || '#0052CC',
-                      },
-                    }
-                  )}
+                  {(() => {
+                    const activeTypeObj = availableIssueTypes.find((t) => t.id === form.issueType || t.name === form.issueType);
+                    const iconVal = activeTypeObj?.icon;
+                    const IconComp = typeof iconVal === 'function' ? iconVal : (
+                      iconVal === 'bookmark' ? Bookmark :
+                      iconVal === 'zap' ? Zap :
+                      iconVal === 'alert-circle' ? AlertCircle :
+                      iconVal === 'list' ? List :
+                      iconVal === 'trending-up' ? TrendingUp :
+                      CheckSquare
+                    );
+                    return (
+                      <IconComp
+                        className="size-3.5"
+                        style={{ color: activeTypeObj?.color || '#0052CC' }}
+                      />
+                    );
+                  })()}
                 </div>
               </div>
             </div>

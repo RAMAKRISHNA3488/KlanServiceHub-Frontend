@@ -168,6 +168,7 @@ export const workflowsAdminApi = {
   deleteStatus: (workspaceId, workflowId, statusId) => apiFetch(`/api/workflows/${workspaceId}/${workflowId}/statuses/${statusId}`, { method: 'DELETE' }),
   getIssueTypes: (workspaceId) => apiFetch(`/api/issue-types/${workspaceId}`),
   createIssueType: (workspaceId, data) => apiFetch(`/api/issue-types/${workspaceId}`, { method: 'POST', body: JSON.stringify(data) }),
+  updateIssueType: (workspaceId, id, data) => apiFetch(`/api/issue-types/${workspaceId}/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteIssueType: (workspaceId, id) => apiFetch(`/api/issue-types/${workspaceId}/${id}`, { method: 'DELETE' }),
 };
 

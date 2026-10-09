@@ -50,6 +50,8 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
   const [task, setTask] = useState(null);
   const [sprints, setSprints] = useState([]);
+  const [workspaceIssueTypes, setWorkspaceIssueTypes] = useState([]);
+  const [workflowStatuses, setWorkflowStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -82,6 +84,14 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         sprintsApi.getSprints(workspaceId).then((res) => {
           if (res?.data?.sprints) setSprints(res.data.sprints);
         }).catch(() => {});
+
+        Promise.all([
+          workflowsAdminApi.getIssueTypes(workspaceId).catch(() => ({ data: [] })),
+          workflowsAdminApi.getWorkflows(workspaceId).catch(() => ({ data: [] })),
+        ]).then(([typesRes, wfRes]) => {
+          if (typesRes?.data) setWorkspaceIssueTypes(typesRes.data);
+          if (wfRes?.data?.[0]?.statuses) setWorkflowStatuses(wfRes.data[0].statuses);
+        });
       }
     }
   }, [open, taskId, workspaceId]);
@@ -146,8 +156,21 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     }
   };
 
-  const typeConfig = TYPE_ICONS[task?.issueType] || TYPE_ICONS.Task;
-  const TypeIcon = typeConfig.icon;
+  const currentTypeName = task?.issueType || task?.issue_type || task?.type;
+  const matchedType = workspaceIssueTypes.find(
+    (it) => it.name?.toLowerCase() === String(currentTypeName || '').toLowerCase() || it.id === currentTypeName
+  );
+
+  const matchedColor = matchedType?.color || TYPE_ICONS[currentTypeName]?.color || '#0052CC';
+  const rawIcon = matchedType?.icon || TYPE_ICONS[currentTypeName]?.icon;
+  const TypeIcon = typeof rawIcon === 'function' ? rawIcon : (
+    rawIcon === 'bookmark' ? Bookmark :
+    rawIcon === 'zap' ? Zap :
+    rawIcon === 'alert-circle' ? AlertCircle :
+    rawIcon === 'list' ? List :
+    rawIcon === 'trending-up' ? TrendingUp :
+    CheckSquare
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
@@ -155,12 +178,20 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         {/* Top Header & Breadcrumbs */}
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-neutral-200 bg-neutral-50/70 select-none">
           <div className="flex items-center gap-2">
-            <TypeIcon className="size-4 shrink-0" style={{ color: typeConfig.color }} />
+            <TypeIcon className="size-4 shrink-0" style={{ color: matchedColor }} />
             <span className="font-mono text-xs font-bold text-neutral-500 hover:underline cursor-pointer">
               {task?.key || (task?.project?.key ? `${task.project.key}-1` : 'TASK-1')}
             </span>
             <span className="text-neutral-300">/</span>
             <span className="text-xs font-bold text-neutral-700">{task?.project?.name || 'Project'}</span>
+            {matchedType && (
+              <span
+                className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold text-white shadow-2xs ml-1"
+                style={{ backgroundColor: matchedColor }}
+              >
+                {matchedType.name}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -168,16 +199,24 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
             <select
               value={task?.status || 'TODO'}
               onChange={(e) => handleUpdateProperty({ status: e.target.value })}
-              className={`rounded-lg px-3 py-1 text-xs font-bold border cursor-pointer focus:outline-none ${
-                STATUS_COLORS[task?.status] || STATUS_COLORS.TODO
-              }`}
+              className="rounded-lg px-3 py-1 text-xs font-bold border border-neutral-300 bg-white text-neutral-800 cursor-pointer focus:outline-none"
             >
-              <option value="BACKLOG">BACKLOG</option>
-              <option value="TODO">TO DO</option>
-              <option value="IN_PROGRESS">IN PROGRESS</option>
-              <option value="IN_REVIEW">IN REVIEW</option>
-              <option value="TESTING">TESTING</option>
-              <option value="DONE">DONE</option>
+              {workflowStatuses.length > 0 ? (
+                workflowStatuses.map((st) => (
+                  <option key={st.id || st.name} value={st.name}>
+                    {st.name.replace(/_/g, ' ')}
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="BACKLOG">BACKLOG</option>
+                  <option value="TODO">TO DO</option>
+                  <option value="IN_PROGRESS">IN PROGRESS</option>
+                  <option value="IN_REVIEW">IN REVIEW</option>
+                  <option value="TESTING">TESTING</option>
+                  <option value="DONE">DONE</option>
+                </>
+              )}
             </select>
 
             <button
@@ -438,6 +477,33 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 </div>
                 <span>{task?.reporter?.name || 'System User'}</span>
               </div>
+            </div>
+
+            {/* Issue Type */}
+            <div>
+              <label className="block text-[11px] font-bold text-neutral-500 mb-1">Issue Type</label>
+              <select
+                value={task?.issueType || 'Task'}
+                onChange={(e) => handleUpdateProperty({ issueType: e.target.value })}
+                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+              >
+                {workspaceIssueTypes.length > 0 ? (
+                  workspaceIssueTypes.map((t) => (
+                    <option key={t.id || t.name} value={t.name || t.id}>
+                      {t.name}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="Story">Story</option>
+                    <option value="Task">Task</option>
+                    <option value="Bug">Bug</option>
+                    <option value="Epic">Epic</option>
+                    <option value="Sub-task">Sub-task</option>
+                    <option value="Improvement">Improvement</option>
+                  </>
+                )}
+              </select>
             </div>
 
             {/* Priority */}
