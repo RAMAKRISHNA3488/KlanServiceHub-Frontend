@@ -102,10 +102,13 @@ export const CompanyProfileView = () => {
   const handleDeleteCompany = async () => {
     const ok = await confirmAction({
       title: 'Delete Organization Permanently',
+      subtitle: 'Root workspace destruction',
+      targetName: formData.name || 'this organization',
       message: `Are you sure you want to permanently delete company "${formData.name || 'this organization'}"?`,
       variant: 'destructive',
       confirmText: 'Delete Organization',
-      warningNotice: 'This action cannot be undone and will permanently cascade to all associated teams, projects, sprints, workflows, and issues.'
+      impactTitle: 'Permanent Deletion & Data Wipe',
+      impactNotice: 'This action cannot be undone and will permanently cascade to all associated teams, projects, sprints, workflows, and issues.'
     });
     if (!ok) return;
 
@@ -119,6 +122,19 @@ export const CompanyProfileView = () => {
   };
 
   const handleStatusToggle = async (newStatus) => {
+    if (newStatus === 'SUSPENDED' || newStatus === 'INACTIVE') {
+      const ok = await confirmAction({
+        title: `${newStatus === 'SUSPENDED' ? 'Suspend' : 'Deactivate'} Organization`,
+        subtitle: 'Organization status change',
+        targetName: formData.name || 'this organization',
+        message: `Are you sure you want to mark this organization as ${newStatus}?`,
+        variant: 'warning',
+        confirmText: `${newStatus === 'SUSPENDED' ? 'Suspend' : 'Deactivate'}`,
+        impactTitle: 'Access Restriction Impact',
+        impactNotice: 'Organization members will be restricted from modifying active projects until the workspace is reactivated.',
+      });
+      if (!ok) return;
+    }
     try {
       await companyApi.updateStatus(workspaceId, newStatus);
       toast.success(`Company status updated to ${newStatus}`);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import AuthLayout from '@/app/(auth)/layout';
 import DashboardLayout from '@/app/(dashboard)/layout';
@@ -18,6 +18,8 @@ import { ProjectIdSettingsClient } from '@/app/(standalone)/workspaces/[workspac
 import { WorkspacesManagementView } from '@/features/workspaces/components/workspaces-management-view';
 import { PageLoader } from '@/components/page-loader';
 import { ScrollToTop } from '@/components/scroll-to-top';
+import { CookieConsentBanner } from '@/components/cookie-consent-banner';
+import { initPerformanceOptimizer } from '@/lib/performance-optimizer';
 
 // SaaS Landing Page & Onboarding
 import { LandingPageView } from '@/features/landing/components/landing-page';
@@ -100,9 +102,14 @@ const HomePage = () => {
 };
 
 export const App = () => {
+  useEffect(() => {
+    initPerformanceOptimizer();
+  }, []);
+
   return (
     <>
       <ScrollToTop />
+      <CookieConsentBanner />
       <Routes>
       {/* Public Landing & Invitation Routes */}
       <Route path="/" element={<HomePage />} />

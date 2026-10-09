@@ -72,10 +72,13 @@ export const ApiTokensView = () => {
   const handleRevoke = async (id, name) => {
     const ok = await confirmAction({
       title: 'Revoke API Token',
+      subtitle: 'Authentication credential revocation',
+      targetName: name,
       message: `Are you sure you want to revoke the API token "${name}"?`,
       variant: 'destructive',
       confirmText: 'Revoke Token',
-      warningNotice: 'Any active integrations or CI/CD pipelines using this key will immediately fail authentication.'
+      impactTitle: 'Integration Failure Impact',
+      impactNotice: 'Any active scripts, webhooks, or API requests using this token will immediately fail authentication.'
     });
     if (!ok) return;
     try {

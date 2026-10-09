@@ -98,10 +98,13 @@ export const AutomationsView = () => {
   const handleDelete = async (id, ruleName = 'this automation rule') => {
     const ok = await confirmAction({
       title: 'Delete Automation Rule',
+      subtitle: 'Workflow rule deletion',
+      targetName: ruleName,
       message: `Are you sure you want to delete automation rule "${ruleName}"?`,
       variant: 'destructive',
       confirmText: 'Delete Rule',
-      warningNotice: 'Automatic triggers connected to this rule will cease executing immediately.'
+      impactTitle: 'Execution Halt Impact',
+      impactNotice: 'Automatic triggers connected to this rule will cease executing immediately.'
     });
     if (!ok) return;
     try {

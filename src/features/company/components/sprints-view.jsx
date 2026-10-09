@@ -140,10 +140,13 @@ export const SprintsView = () => {
   const handleCompleteSprint = async (sprintId, sprintName = 'this sprint') => {
     const ok = await confirmAction({
       title: 'Complete Active Sprint',
+      subtitle: 'Sprint lifecycle progression',
+      targetName: sprintName,
       message: `Are you sure you want to complete sprint "${sprintName}"?`,
       variant: 'warning',
       confirmText: 'Complete Sprint',
-      warningNotice: 'Incomplete tasks will automatically be moved back to the backlog for prioritization into future sprints.'
+      impactTitle: 'Backlog Roll-Over Impact',
+      impactNotice: 'Incomplete tasks will automatically be moved back to the backlog for prioritization into future sprints.'
     });
     if (!ok) return;
 

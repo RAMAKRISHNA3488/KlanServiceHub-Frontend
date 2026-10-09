@@ -79,10 +79,13 @@ export const TeamsAdminView = () => {
   const handleDeleteTeam = async (teamId, teamName = 'this team') => {
     const ok = await confirmAction({
       title: 'Delete Team',
+      subtitle: 'Team alignment removal',
+      targetName: teamName,
       message: `Are you sure you want to delete team "${teamName}"?`,
       variant: 'destructive',
       confirmText: 'Delete Team',
-      warningNotice: 'Assigned projects and issues will remain intact, but squad alignment associations will be removed.'
+      impactTitle: 'Squad Alignment Impact',
+      impactNotice: 'Assigned projects and issues will remain intact, but squad alignment associations will be removed.'
     });
     if (!ok) return;
 

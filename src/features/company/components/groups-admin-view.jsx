@@ -326,10 +326,13 @@ export const GroupsAdminView = () => {
     }
     const ok = await confirmAction({
       title: 'Delete Access Group',
+      subtitle: 'Organization access group removal',
+      targetName: group.name,
       message: `Are you sure you want to delete access group "${group.name}"?`,
       variant: 'destructive',
       confirmText: 'Delete Group',
-      warningNotice: 'Group members will lose all permission grants and access rights associated with this group.'
+      impactTitle: 'Access Rights Impact',
+      impactNotice: 'Group members will lose all permission grants and access rights associated with this group.'
     });
     if (!ok) return;
 

@@ -33,14 +33,24 @@ export const MembersList = () => {
   const [sendingInvite, setSendingInvite] = useState(false);
   const [sentInviteData, setSentInviteData] = useState(null);
 
-  const handleDeleteMember = async (memberId) => {
-    const ok = await confirm();
+  const handleDeleteMember = async (memberId, memberName = 'this member') => {
+    const ok = await confirm({
+      title: 'Remove Workspace Member',
+      subtitle: 'Workspace membership revocation',
+      targetName: memberName,
+      message: 'This user will be removed from this workspace.',
+      impactTitle: 'Access & Assignment Impact',
+      impactNotice: 'This member will immediately lose access to all projects, boards, and tasks in this workspace. Tasks currently assigned to them will need to be reassigned.',
+      confirmText: 'Remove Member',
+      variant: 'destructive',
+    });
     if (!ok) return;
     deleteMember(
       { param: { memberId } },
       {
         onSuccess: () => {
-          window.location.reload();
+          refetchMembers();
+          toast.success('Member removed successfully.');
         },
       },
     );
@@ -150,7 +160,7 @@ export const MembersList = () => {
                     Set as Member
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="font-medium text-amber-700" onClick={() => handleDeleteMember(member.$id)} disabled={isPending}>
+                  <DropdownMenuItem className="font-medium text-amber-700" onClick={() => handleDeleteMember(member.$id, member.name || member.email)} disabled={isPending}>
                     Remove {member.name}
                   </DropdownMenuItem>
                 </DropdownMenuContent>

@@ -74,10 +74,13 @@ export const ReleasesView = () => {
   const handleDelete = async (id, versionName = 'this release version') => {
     const ok = await confirmAction({
       title: 'Delete Release Version',
+      subtitle: 'Milestone release removal',
+      targetName: versionName,
       message: `Are you sure you want to delete release version "${versionName}"?`,
       variant: 'destructive',
       confirmText: 'Delete Version',
-      warningNotice: 'Issues tagged with this fix version will retain their status but will be unlinked from this release milestone.'
+      impactTitle: 'Version Unlinking Impact',
+      impactNotice: 'Issues tagged with this fix version will retain their status but will be unlinked from this release milestone.'
     });
     if (!ok) return;
 

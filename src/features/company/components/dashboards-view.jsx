@@ -296,10 +296,13 @@ export const DashboardsView = () => {
     const dashId = activeDashboard.id || activeDashboard.$id;
     const ok = await confirmAction({
       title: 'Delete Custom Dashboard',
+      subtitle: 'Dashboard configuration deletion',
+      targetName: activeDashboard.name,
       message: `Are you sure you want to delete dashboard "${activeDashboard.name}"?`,
       variant: 'destructive',
       confirmText: 'Delete Dashboard',
-      warningNotice: 'Custom gadget configurations and layout arrangements on this dashboard will be removed.'
+      impactTitle: 'Gadget Configuration Impact',
+      impactNotice: 'Custom gadget configurations and layout arrangements on this dashboard will be permanently removed.'
     });
     if (!ok) return;
 
@@ -349,6 +352,19 @@ export const DashboardsView = () => {
   const handleDeleteGadget = async (gadgetId, title) => {
     let dashId = activeDashboard ? (activeDashboard.id || activeDashboard.$id) : selectedDashboardId;
     if (!dashId) return;
+
+    const ok = await confirmAction({
+      title: 'Remove Dashboard Gadget',
+      subtitle: 'Widget removal',
+      targetName: title,
+      message: `Are you sure you want to remove the "${title}" gadget from this dashboard?`,
+      variant: 'destructive',
+      confirmText: 'Remove Gadget',
+      impactTitle: 'Layout Adjustment',
+      impactNotice: 'This visual widget and its real-time metrics feed will be removed from this dashboard view.'
+    });
+    if (!ok) return;
+
     try {
       await dashboardsApi.deleteGadget(workspaceId, dashId, gadgetId);
       toast.success(`Removed "${title}"`);

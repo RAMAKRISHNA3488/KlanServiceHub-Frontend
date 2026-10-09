@@ -102,10 +102,13 @@ export const RolesAdminView = () => {
   const handleDeleteRole = async (roleId, roleName = 'this custom role') => {
     const ok = await confirmAction({
       title: 'Delete Custom Role',
+      subtitle: 'Security role deletion',
+      targetName: roleName,
       message: `Are you sure you want to delete custom role "${roleName}"?`,
       variant: 'destructive',
       confirmText: 'Delete Role',
-      warningNotice: 'Users assigned to this role will be downgraded to default workspace membership permissions.'
+      impactTitle: 'Permission Revocation Impact',
+      impactNotice: 'Users assigned to this role will be downgraded to default workspace membership permissions.'
     });
     if (!ok) return;
 

@@ -239,11 +239,14 @@ export const WorkflowsAdminView = () => {
 
   const handleDeleteIssueType = async (id, typeName = 'this issue type') => {
     const ok = await confirmAction({
-      title: 'Delete Issue Type',
-      message: `Are you sure you want to delete issue type "${typeName}"? Issues currently assigned to this type will retain their history but may require reassignment.`,
+      title: 'Remove Issue Type',
+      subtitle: 'Issue category removal',
+      targetName: typeName,
+      message: `Are you sure you want to remove issue type "${typeName}"?`,
       variant: 'destructive',
-      confirmText: 'Delete Type',
-      warningNotice: 'This action cannot be undone.'
+      confirmText: 'Remove Type',
+      impactTitle: 'Issue Category Impact',
+      impactNotice: 'Existing issues assigned to this category will retain their history but may require reassignment to another valid issue type.',
     });
     if (!ok) return;
     try {

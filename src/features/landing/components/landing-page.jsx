@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { LandingFooter } from '@/components/landing-footer';
 import {
@@ -80,25 +80,48 @@ export const LandingPageView = () => {
   const [faqCategory, setFaqCategory] = useState('all');
   const [faqSearch, setFaqSearch] = useState('');
   const [advancedFaqMode, setAdvancedFaqMode] = useState(false);
+  const searchInputRef = useRef(null);
 
-  const toggleFaq = (id) => {
-    setOpenFaqs((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (
+        e.key === '/' &&
+        document.activeElement?.tagName !== 'INPUT' &&
+        document.activeElement?.tagName !== 'TEXTAREA'
+      ) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const highlightMatch = (text, query) => {
+    if (!text || !query || !query.trim()) return text;
+    const trimmed = query.trim();
+    const regex = new RegExp(`(${trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      part.toLowerCase() === trimmed.toLowerCase() ? (
+        <mark key={i} className="bg-amber-100 text-amber-950 font-semibold px-1 rounded-xs">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
   };
 
-  const handleToggleExpandAll = () => {
-    const allExpanded = Object.keys(openFaqs).length === faqs.length && Object.values(openFaqs).every(Boolean);
-    if (allExpanded) {
-      setOpenFaqs({});
-    } else {
-      const next = {};
-      faqs.forEach((f) => {
-        next[f.id] = true;
-      });
-      setOpenFaqs(next);
-    }
+  const toggleFaq = (id) => {
+    const isSearching = faqSearch.trim().length > 0;
+    setOpenFaqs((prev) => {
+      const current = isSearching ? (prev[id] !== false) : !!prev[id];
+      return {
+        ...prev,
+        [id]: !current,
+      };
+    });
   };
 
   const faqCategories = [
@@ -196,9 +219,27 @@ export const LandingPageView = () => {
     return matchesCategory && matchesSearch;
   });
 
+  const isSearching = faqSearch.trim().length > 0;
+
   const isAllExpanded =
     filteredFaqs.length > 0 &&
-    filteredFaqs.every((f) => openFaqs[f.id]);
+    filteredFaqs.every((f) => (isSearching ? openFaqs[f.id] !== false : !!openFaqs[f.id]));
+
+  const handleToggleExpandAll = () => {
+    if (isAllExpanded) {
+      const next = {};
+      filteredFaqs.forEach((f) => {
+        next[f.id] = false;
+      });
+      setOpenFaqs(next);
+    } else {
+      const next = {};
+      filteredFaqs.forEach((f) => {
+        next[f.id] = true;
+      });
+      setOpenFaqs(next);
+    }
+  };
 
   if (loading) {
     return (
@@ -920,71 +961,84 @@ export const LandingPageView = () => {
           </p>
         </div>
 
-        {/* 🛠️ ADVANCE OPTIONS CONTROL BAR 🛠️ */}
-        <div className="space-y-4 bg-neutral-50 border border-neutral-200/90 rounded-2xl p-4 sm:p-6 shadow-xs">
-          {/* Top Controls: Search Bar & Toggle Controls */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            {/* Search Input */}
-            <div className="relative w-full sm:max-w-md">
-              <Search className="size-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        {/* 🔍 FAQ SEARCH BAR & QUICK FILTERS 🔍 */}
+        <div className="space-y-3.5 max-w-3xl mx-auto">
+          {/* Main Search Input */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 blur-sm transition-all duration-300 pointer-events-none" />
+            <div className="relative flex items-center bg-white border border-neutral-300/90 rounded-2xl shadow-xs transition-all duration-200 group-hover:border-neutral-400 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
+              <div className="pl-4 pr-1 text-neutral-400 group-focus-within:text-blue-600 transition-colors pointer-events-none flex items-center justify-center">
+                <Search className="size-5" />
+              </div>
               <input
+                ref={searchInputRef}
                 type="text"
                 value={faqSearch}
                 onChange={(e) => setFaqSearch(e.target.value)}
-                placeholder="Search topics, keywords, RBAC rules, or tech stack..."
-                className="w-full pl-9.5 pr-8 py-2.5 rounded-xl border border-neutral-300 bg-white text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+                placeholder="Search topics, architecture specs, RBAC rules, or tech stack..."
+                className="w-full pl-3 pr-24 py-3.5 bg-transparent text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
               />
-              {faqSearch && (
-                <button
-                  onClick={() => setFaqSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-700 rounded-full hover:bg-neutral-100 transition cursor-pointer"
-                >
-                  <X className="size-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Advance Option Action Buttons */}
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-              {/* Advance Technical View Toggle */}
-              <button
-                onClick={() => setAdvancedFaqMode(!advancedFaqMode)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                  advancedFaqMode
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                    : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100'
-                }`}
-                title="Toggle Deep Technical Architecture View"
-              >
-                <Terminal className="size-3.5" />
-                <span>{advancedFaqMode ? 'Deep Tech View: Active' : 'Enable Advance View'}</span>
-              </button>
-
-              {/* Expand / Collapse All */}
-              <button
-                onClick={handleToggleExpandAll}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-300 transition cursor-pointer"
-              >
-                {isAllExpanded ? (
-                  <>
-                    <Minimize2 className="size-3.5 text-neutral-500" />
-                    <span>Collapse All</span>
-                  </>
+              <div className="absolute right-3 flex items-center gap-1.5">
+                {faqSearch ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFaqSearch('');
+                      searchInputRef.current?.focus();
+                    }}
+                    className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="size-4" />
+                  </button>
                 ) : (
-                  <>
-                    <Maximize2 className="size-3.5 text-neutral-500" />
-                    <span>Expand All</span>
-                  </>
+                  <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-medium text-neutral-400 bg-neutral-100 border border-neutral-200 rounded-md pointer-events-none">
+                    /
+                  </kbd>
                 )}
-              </button>
+              </div>
             </div>
           </div>
 
+          {/* Quick Keyword Suggestion Pills */}
+          <div className="flex items-center gap-1.5 flex-wrap justify-center sm:justify-start pt-0.5 text-xs">
+            <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+              <Sparkles className="size-3 text-purple-600" />
+              <span>Popular:</span>
+            </span>
+            {['Architecture', 'RBAC', 'Cloudflare D1', 'OTP & SSO', 'Audit Trail', 'ITSM & SLA'].map((tag) => {
+              const isSelected = faqSearch.toLowerCase() === tag.toLowerCase();
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => {
+                    if (isSelected) {
+                      setFaqSearch('');
+                    } else {
+                      setFaqSearch(tag);
+                    }
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer border ${
+                    isSelected
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                      : 'bg-white hover:bg-neutral-100 text-neutral-600 border-neutral-200/90'
+                  }`}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 🛠️ CATEGORY FILTERS & ADVANCE VIEW ACTIONS 🛠️ */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-neutral-50/80 border border-neutral-200/80 rounded-2xl p-3 sm:p-4 shadow-xs">
           {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-neutral-200/70">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mr-1 flex items-center gap-1">
               <SlidersHorizontal className="size-3" />
-              <span>Filters:</span>
+              <span>Category:</span>
             </span>
             {faqCategories.map((cat) => {
               const isActive = faqCategory === cat.id;
@@ -1002,6 +1056,41 @@ export const LandingPageView = () => {
                 </button>
               );
             })}
+          </div>
+
+          {/* Advance Action Buttons */}
+          <div className="flex items-center gap-2 justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/70">
+            {/* Advance Technical View Toggle */}
+            <button
+              onClick={() => setAdvancedFaqMode(!advancedFaqMode)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                advancedFaqMode
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                  : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100'
+              }`}
+              title="Toggle Deep Technical Architecture View"
+            >
+              <Terminal className="size-3.5" />
+              <span>{advancedFaqMode ? 'Tech View: Active' : 'Advance View'}</span>
+            </button>
+
+            {/* Expand / Collapse All */}
+            <button
+              onClick={handleToggleExpandAll}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-300 transition cursor-pointer"
+            >
+              {isAllExpanded ? (
+                <>
+                  <Minimize2 className="size-3.5 text-neutral-500" />
+                  <span>Collapse All</span>
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="size-3.5 text-neutral-500" />
+                  <span>Expand All</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -1039,7 +1128,7 @@ export const LandingPageView = () => {
             </div>
           ) : (
             filteredFaqs.map((faq) => {
-              const isOpen = !!openFaqs[faq.id];
+              const isOpen = isSearching ? openFaqs[faq.id] !== false : !!openFaqs[faq.id];
 
               return (
                 <div
@@ -1067,7 +1156,7 @@ export const LandingPageView = () => {
                         )}
                       </div>
                       <h3 className="text-xs sm:text-sm font-bold text-neutral-900 leading-snug">
-                        {faq.q}
+                        {highlightMatch(faq.q, faqSearch)}
                       </h3>
                     </div>
 
@@ -1084,7 +1173,7 @@ export const LandingPageView = () => {
                   {isOpen && (
                     <div className="px-4 pb-5 sm:px-5 sm:pb-6 pt-0 space-y-4 text-xs sm:text-sm text-neutral-700 leading-relaxed border-t border-neutral-100 bg-neutral-50/30">
                       <p className="pt-3 text-xs sm:text-sm text-neutral-700">
-                        {faq.a}
+                        {highlightMatch(faq.a, faqSearch)}
                       </p>
 
                       {/* 🚀 DEEP TECHNICAL ADVANCE VIEW CONTAINER 🚀 */}
@@ -1099,7 +1188,7 @@ export const LandingPageView = () => {
                           </div>
 
                           <p className="text-xs text-neutral-300 font-mono leading-relaxed">
-                            {faq.advanced}
+                            {highlightMatch(faq.advanced, faqSearch)}
                           </p>
 
                           {/* Technical Spec Tags */}

@@ -53,7 +53,16 @@ export const EditWorkspaceForm = ({ onCancel, initialValues }) => {
         }
     };
     const handleDelete = async () => {
-        const ok = await confirmDelete();
+        const ok = await confirmDelete({
+            title: 'Delete Workspace',
+            subtitle: 'Permanent workspace destruction',
+            targetName: initialValues.name,
+            message: 'Are you sure you want to delete this workspace and all associated data?',
+            impactTitle: 'Permanent Data Loss',
+            impactNotice: 'All projects, Kanban boards, sprint backlogs, tasks, attachments, and memberships under this workspace will be permanently erased. This action cannot be reversed.',
+            confirmText: 'Delete Workspace',
+            variant: 'destructive',
+        });
         if (!ok)
             return;
         deleteWorkspace({
@@ -65,7 +74,15 @@ export const EditWorkspaceForm = ({ onCancel, initialValues }) => {
         });
     };
     const handleResetInviteCode = async () => {
-        const ok = await confirmReset();
+        const ok = await confirmReset({
+            title: 'Reset Invite Link',
+            subtitle: 'Security link invalidation',
+            message: 'Are you sure you want to reset the invite link for this workspace?',
+            impactTitle: 'Link Invalidation',
+            impactNotice: 'Any existing invite links previously sent to team members will immediately stop working. A new invite code will be generated.',
+            confirmText: 'Reset Link',
+            variant: 'warning',
+        });
         if (!ok)
             return;
         resetInviteCode({

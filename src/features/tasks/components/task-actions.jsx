@@ -12,7 +12,15 @@ export const TaskActions = ({ id, projectId, children }) => {
     const [ConfirmDialog, confirm] = useConfirm('Delete task', 'This action cannot be undone.', 'destructive');
     const { mutate: deleteTask, isPending } = useDeleteTask();
     const onDelete = async () => {
-        const ok = await confirm();
+        const ok = await confirm({
+            title: 'Delete Task',
+            subtitle: 'Issue permanent deletion',
+            message: 'Are you sure you want to permanently delete this task?',
+            impactTitle: 'Permanent Deletion',
+            impactNotice: 'This task, its subtasks, attachments, and worklogs will be permanently removed. This action cannot be undone.',
+            confirmText: 'Delete Task',
+            variant: 'destructive',
+        });
         if (!ok)
             return;
         deleteTask({ param: { taskId: id } });

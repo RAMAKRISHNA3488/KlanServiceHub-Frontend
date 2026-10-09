@@ -115,6 +115,19 @@ export const LandingFooter = ({ className = '' }) => {
                     Acceptable Use
                   </Link>
                 </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('open-cookie-preferences'));
+                      }
+                    }}
+                    className="hover:text-blue-600 transition cursor-pointer text-left inline-flex items-center gap-1"
+                  >
+                    <span>Cookie & Speed Settings</span>
+                  </button>
+                </li>
               </ul>
             </div>
 

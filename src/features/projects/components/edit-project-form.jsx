@@ -52,7 +52,16 @@ export const EditProjectForm = ({ onCancel, initialValues }) => {
         }
     };
     const handleDelete = async () => {
-        const ok = await confirmDelete();
+        const ok = await confirmDelete({
+            title: 'Delete Project',
+            subtitle: 'Permanent project removal',
+            targetName: initialValues.name,
+            message: 'Are you sure you want to delete this project and all its issues?',
+            impactTitle: 'Permanent Project Impact',
+            impactNotice: 'All tasks, sprints, Kanban boards, attachments, releases, and activity history belonging to this project will be permanently erased. This action cannot be reversed.',
+            confirmText: 'Delete Project',
+            variant: 'destructive',
+        });
         if (!ok)
             return;
         deleteProject({
