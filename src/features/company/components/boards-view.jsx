@@ -180,6 +180,7 @@ export const BoardsView = () => {
 
     // Default fallback columns if no custom workflow configured
     return [
+      { id: 'BACKLOG', label: 'BACKLOG', color: '#94A3B8', category: 'TODO', icon: CircleDot, bg: 'bg-slate-50/70', border: 'border-slate-200' },
       { id: 'TODO', label: 'TO DO', color: '#3B82F6', category: 'TODO', icon: CircleDot, bg: 'bg-blue-50/70', border: 'border-blue-200' },
       { id: 'IN_PROGRESS', label: 'IN PROGRESS', color: '#F59E0B', category: 'IN_PROGRESS', icon: Clock, bg: 'bg-amber-50/70', border: 'border-amber-200' },
       { id: 'CODE_REVIEW', label: 'CODE REVIEW', color: '#8B5CF6', category: 'IN_PROGRESS', icon: Code2, bg: 'bg-purple-50/70', border: 'border-purple-200' },
@@ -351,10 +352,12 @@ export const BoardsView = () => {
 
   const getTasksForColumn = (columnId) => {
     const normCol = String(columnId || '').toUpperCase().replace(/\s+/g, '_');
+    const hasBacklogColumn = columns.some((c) => String(c.id || '').toUpperCase().replace(/\s+/g, '_') === 'BACKLOG');
     return filteredTasks.filter((t) => {
       const st = String(t.status || '').toUpperCase().replace(/\s+/g, '_');
       if (st === normCol) return true;
-      if (normCol === 'TODO' && (st === 'TO_DO' || st === 'BACKLOG')) return true;
+      if (normCol === 'TODO' && st === 'TO_DO') return true;
+      if (normCol === 'TODO' && st === 'BACKLOG' && !hasBacklogColumn) return true;
       if (normCol === 'IN_PROGRESS' && (st === 'INPROGRESS' || st === 'IN_PROGRESS')) return true;
       if ((normCol === 'IN_REVIEW' || normCol === 'CODE_REVIEW') && (st === 'IN_REVIEW' || st === 'CODE_REVIEW' || st === 'REVIEW')) return true;
       return false;

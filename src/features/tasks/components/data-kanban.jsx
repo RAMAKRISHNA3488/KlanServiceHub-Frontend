@@ -53,8 +53,16 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
         });
         (data || []).forEach((task) => {
             const taskStatus = String(task.status || '').toUpperCase().replace(/\s+/g, '_');
-            const matchedBoard = boardIds.find((b) => b === taskStatus) || 
-                                (taskStatus === 'TODO' || taskStatus === 'BACKLOG' ? boardIds[0] : boardIds[0]);
+            let matchedBoard = boardIds.find((b) => b === taskStatus);
+            if (!matchedBoard) {
+                if (taskStatus === 'BACKLOG' && boardIds.includes('BACKLOG')) matchedBoard = 'BACKLOG';
+                else if ((taskStatus === 'TODO' || taskStatus === 'TO_DO') && boardIds.includes('TODO')) matchedBoard = 'TODO';
+                else if (taskStatus === 'IN_PROGRESS' && boardIds.includes('IN_PROGRESS')) matchedBoard = 'IN_PROGRESS';
+                else if ((taskStatus === 'CODE_REVIEW' || taskStatus === 'IN_REVIEW') && (boardIds.includes('CODE_REVIEW') || boardIds.includes('IN_REVIEW'))) {
+                    matchedBoard = boardIds.includes('CODE_REVIEW') ? 'CODE_REVIEW' : 'IN_REVIEW';
+                } else if (taskStatus === 'DONE' && boardIds.includes('DONE')) matchedBoard = 'DONE';
+                else matchedBoard = boardIds[0];
+            }
             if (matchedBoard && initialTasks[matchedBoard]) {
                 initialTasks[matchedBoard].push(task);
             }
@@ -74,7 +82,8 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             const taskStatus = String(task.status || '').toUpperCase().replace(/\s+/g, '_');
             let matchedBoard = boardIds.find((b) => b === taskStatus);
             if (!matchedBoard) {
-                if (taskStatus === 'TODO' && boardIds.includes('TODO')) matchedBoard = 'TODO';
+                if (taskStatus === 'BACKLOG' && boardIds.includes('BACKLOG')) matchedBoard = 'BACKLOG';
+                else if ((taskStatus === 'TODO' || taskStatus === 'TO_DO') && boardIds.includes('TODO')) matchedBoard = 'TODO';
                 else if (taskStatus === 'IN_PROGRESS' && boardIds.includes('IN_PROGRESS')) matchedBoard = 'IN_PROGRESS';
                 else if ((taskStatus === 'CODE_REVIEW' || taskStatus === 'IN_REVIEW') && (boardIds.includes('CODE_REVIEW') || boardIds.includes('IN_REVIEW'))) {
                     matchedBoard = boardIds.includes('CODE_REVIEW') ? 'CODE_REVIEW' : 'IN_REVIEW';
