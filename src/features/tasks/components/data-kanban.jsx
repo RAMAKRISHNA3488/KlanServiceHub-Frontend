@@ -93,13 +93,18 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             result[b] = [];
         });
 
-        // Deduplicate incoming tasks by ID
+        // Deduplicate incoming tasks by ID and issue key
         const seen = new Set();
         const uniqueItems = (items || []).filter((task) => {
-            const id = task?.$id || task?.id;
-            if (!id) return true;
-            if (seen.has(id)) return false;
-            seen.add(id);
+            const id1 = task?.$id;
+            const id2 = task?.id;
+            const key = task?.key;
+            if (id1 && seen.has(id1)) return false;
+            if (id2 && seen.has(id2)) return false;
+            if (key && seen.has(`key_${key}`)) return false;
+            if (id1) seen.add(id1);
+            if (id2) seen.add(id2);
+            if (key) seen.add(`key_${key}`);
             return true;
         });
 
@@ -150,6 +155,7 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             // Locate moved task
             let movedTask = newTasks[sourceStatus]?.[source.index];
             let cleanId = movedTask?.$id || movedTask?.id;
+            const taskKey = movedTask?.key;
 
             // Fallback search across all columns if index mismatch
             if (!cleanId) {
@@ -168,9 +174,14 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             }
 
             // ENFORCE: One ticket must be in ONE state only!
-            // Strictly scrub this ticket ID from ALL columns on the board
+            // Strictly scrub this ticket from ALL columns on the board by ID and issue key
             boardIds.forEach((b) => {
-                newTasks[b] = newTasks[b].filter((t) => (t.$id || t.id) !== cleanId);
+                newTasks[b] = newTasks[b].filter((t) => {
+                    const tId = t?.$id || t?.id;
+                    if (tId === cleanId) return false;
+                    if (taskKey && t?.key === taskKey) return false;
+                    return true;
+                });
             });
 
             // Update task status to target column
@@ -192,7 +203,7 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             // Update affected tasks positions in destination column
             newTasks[destStatus].forEach((task, index) => {
                 const tId = task?.$id || task?.id;
-                if (task && tId !== cleanId) {
+                if (task && tId !== cleanId && (!taskKey || task.key !== taskKey)) {
                     const newPosition = Math.min((index + 1) * 1000, 1_00_000);
                     if (task.position !== newPosition) {
                         updatesPayload.push({
@@ -208,13 +219,15 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             if (sourceStatus !== destStatus && newTasks[sourceStatus]) {
                 newTasks[sourceStatus].forEach((task, index) => {
                     const tId = task?.$id || task?.id;
-                    const newPosition = Math.min((index + 1) * 1000, 1_00_000);
-                    if (task.position !== newPosition) {
-                        updatesPayload.push({
-                            $id: tId,
-                            status: sourceStatus,
-                            position: newPosition,
-                        });
+                    if (task && tId !== cleanId && (!taskKey || task.key !== taskKey)) {
+                        const newPosition = Math.min((index + 1) * 1000, 1_00_000);
+                        if (task.position !== newPosition) {
+                            updatesPayload.push({
+                                $id: tId,
+                                status: sourceStatus,
+                                position: newPosition,
+                            });
+                        }
                     }
                 });
             }
@@ -222,7 +235,14 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             return newTasks;
         });
 
-        onChange(updatesPayload);
+        // Deduplicate updatesPayload by task ID to guarantee single update per task
+        const uniquePayloadMap = new Map();
+        updatesPayload.forEach((u) => {
+            if (u?.$id) uniquePayloadMap.set(u.$id, u);
+        });
+        const finalPayload = Array.from(uniquePayloadMap.values());
+
+        onChange(finalPayload);
     }, [onChange, columns, isAdmin, boardIds]);
 
     return (

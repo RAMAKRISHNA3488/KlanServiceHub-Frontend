@@ -261,14 +261,21 @@ export const BoardsView = () => {
       return;
     }
 
+    const currentTask = tasks.find((t) => t.$id === taskId || t.id === taskId);
+    const taskKey = currentTask?.key;
+
     try {
-      // Optimistic update
+      // Optimistic update: strictly update all references in-place without duplicate entries
       setTasks((prev) =>
-        prev.map((t) => (t.$id === taskId || t.id === taskId ? { ...t, status: newStatus } : t))
+        prev.map((t) =>
+          (t.$id === taskId || t.id === taskId || (taskKey && t.key === taskKey))
+            ? { ...t, status: newStatus }
+            : t
+        )
       );
 
       await tasksApi.bulkUpdate([{ $id: taskId, status: newStatus }]);
-      toast.success(`Moved to ${newStatus.replace('_', ' ')}`);
+      toast.success(`Moved to ${newStatus.replace(/_/g, ' ')}`);
     } catch (err) {
       toast.error(err.message || 'Failed to update task status');
       fetchBoardsAndTasks();
@@ -336,10 +343,15 @@ export const BoardsView = () => {
   const uniqueTasks = useMemo(() => {
     const seen = new Set();
     return tasks.filter((t) => {
-      const id = t.$id || t.id;
-      if (!id) return true;
-      if (seen.has(id)) return false;
-      seen.add(id);
+      const id1 = t?.$id;
+      const id2 = t?.id;
+      const key = t?.key;
+      if (id1 && seen.has(id1)) return false;
+      if (id2 && seen.has(id2)) return false;
+      if (key && seen.has(`key_${key}`)) return false;
+      if (id1) seen.add(id1);
+      if (id2) seen.add(id2);
+      if (key) seen.add(`key_${key}`);
       return true;
     });
   }, [tasks]);
