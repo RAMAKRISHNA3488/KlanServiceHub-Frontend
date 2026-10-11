@@ -136,6 +136,11 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
         const sourceStatus = source.droppableId;
         const destStatus = destination.droppableId;
 
+        // If dropped in the same position in the same column, do nothing
+        if (sourceStatus === destStatus && source.index === destination.index) {
+            return;
+        }
+
         const targetColumn = columns.find((c) => c.id === destStatus);
         const isDone = targetColumn?.category === 'DONE' || destStatus === TaskStatus.DONE || destStatus === 'DONE';
 
@@ -145,95 +150,103 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             return;
         }
 
-        let updatesPayload = [];
-        setTasks((prevTasks) => {
-            const newTasks = {};
-            boardIds.forEach((b) => {
-                newTasks[b] = [...(prevTasks[b] || [])];
-            });
+        // Clone current columns map synchronously
+        const newTasks = {};
+        boardIds.forEach((b) => {
+            newTasks[b] = [...(tasks[b] || [])];
+        });
 
-            // Locate moved task
-            let movedTask = newTasks[sourceStatus]?.[source.index];
-            let cleanId = movedTask?.$id || movedTask?.id;
-            const taskKey = movedTask?.key;
+        // Locate moved task
+        const draggedId = result.draggableId;
+        let movedTask = newTasks[sourceStatus]?.[source.index];
+        let cleanId = draggedId || movedTask?.$id || movedTask?.id;
 
-            // Fallback search across all columns if index mismatch
-            if (!cleanId) {
-                for (const b of boardIds) {
-                    if (newTasks[b]?.[source.index]) {
-                        movedTask = newTasks[b][source.index];
-                        cleanId = movedTask.$id || movedTask.id;
-                        break;
-                    }
+        // Fallback search across all columns if index mismatch
+        if (!movedTask || (cleanId && (movedTask.$id || movedTask.id) !== cleanId)) {
+            for (const b of boardIds) {
+                const found = (newTasks[b] || []).find((t) => {
+                    const id = t?.$id || t?.id;
+                    return id === cleanId || String(id) === String(cleanId);
+                });
+                if (found) {
+                    movedTask = found;
+                    break;
                 }
             }
+        }
+        if (!cleanId && movedTask) {
+            cleanId = movedTask.$id || movedTask.id;
+        }
 
-            if (!movedTask || !cleanId) {
-                console.error('No task found at the source index.');
-                return prevTasks;
+        if (!movedTask || !cleanId) {
+            console.error('No task found at the source index.');
+            return;
+        }
+
+        const taskKey = movedTask.key;
+
+        // ENFORCE: One ticket must be in ONE state only!
+        // Strictly scrub this ticket from ALL columns on the board by ID and issue key
+        boardIds.forEach((b) => {
+            newTasks[b] = (newTasks[b] || []).filter((t) => {
+                const tId = t?.$id || t?.id;
+                if (tId === cleanId || String(tId) === String(cleanId)) return false;
+                if (taskKey && t?.key === taskKey) return false;
+                return true;
+            });
+        });
+
+        // Update task status to target column
+        const updatedMovedTask = { ...movedTask, status: destStatus };
+
+        // Insert strictly into the destination column at destination index
+        const destColumn = [...(newTasks[destStatus] || [])];
+        destColumn.splice(destination.index, 0, updatedMovedTask);
+        newTasks[destStatus] = destColumn;
+
+        // Prepare minimal update payloads synchronously
+        const updatesPayload = [];
+        const movedNewPosition = Math.min((destination.index + 1) * 1000, 1_00_000);
+        updatesPayload.push({
+            $id: cleanId,
+            status: destStatus,
+            position: movedNewPosition,
+        });
+
+        // Update affected tasks positions in destination column
+        newTasks[destStatus].forEach((task, index) => {
+            const tId = task?.$id || task?.id;
+            if (task && tId !== cleanId && String(tId) !== String(cleanId) && (!taskKey || task.key !== taskKey)) {
+                const newPosition = Math.min((index + 1) * 1000, 1_00_000);
+                if (task.position !== newPosition) {
+                    updatesPayload.push({
+                        $id: tId,
+                        status: destStatus,
+                        position: newPosition,
+                    });
+                }
             }
+        });
 
-            // ENFORCE: One ticket must be in ONE state only!
-            // Strictly scrub this ticket from ALL columns on the board by ID and issue key
-            boardIds.forEach((b) => {
-                newTasks[b] = newTasks[b].filter((t) => {
-                    const tId = t?.$id || t?.id;
-                    if (tId === cleanId) return false;
-                    if (taskKey && t?.key === taskKey) return false;
-                    return true;
-                });
-            });
-
-            // Update task status to target column
-            const updatedMovedTask = { ...movedTask, status: destStatus };
-
-            // Insert strictly into the destination column at destination index
-            const destColumn = [...(newTasks[destStatus] || [])];
-            destColumn.splice(destination.index, 0, updatedMovedTask);
-            newTasks[destStatus] = destColumn;
-
-            // Prepare minimal update payloads
-            updatesPayload = [];
-            updatesPayload.push({
-                $id: cleanId,
-                status: destStatus,
-                position: Math.min((destination.index + 1) * 1000, 1_00_000),
-            });
-
-            // Update affected tasks positions in destination column
-            newTasks[destStatus].forEach((task, index) => {
+        // If task moved between columns, update positions in source column
+        if (sourceStatus !== destStatus && newTasks[sourceStatus]) {
+            newTasks[sourceStatus].forEach((task, index) => {
                 const tId = task?.$id || task?.id;
-                if (task && tId !== cleanId && (!taskKey || task.key !== taskKey)) {
+                if (task && tId !== cleanId && String(tId) !== String(cleanId) && (!taskKey || task.key !== taskKey)) {
                     const newPosition = Math.min((index + 1) * 1000, 1_00_000);
                     if (task.position !== newPosition) {
                         updatesPayload.push({
                             $id: tId,
-                            status: destStatus,
+                            status: sourceStatus,
                             position: newPosition,
                         });
                     }
                 }
             });
+        }
 
-            // If task moved between columns, update positions in source column
-            if (sourceStatus !== destStatus && newTasks[sourceStatus]) {
-                newTasks[sourceStatus].forEach((task, index) => {
-                    const tId = task?.$id || task?.id;
-                    if (task && tId !== cleanId && (!taskKey || task.key !== taskKey)) {
-                        const newPosition = Math.min((index + 1) * 1000, 1_00_000);
-                        if (task.position !== newPosition) {
-                            updatesPayload.push({
-                                $id: tId,
-                                status: sourceStatus,
-                                position: newPosition,
-                            });
-                        }
-                    }
-                });
-            }
-
-            return newTasks;
-        });
+        // Synchronously update local UI state
+        setTasks(newTasks);
 
         // Deduplicate updatesPayload by task ID to guarantee single update per task
         const uniquePayloadMap = new Map();
@@ -242,8 +255,10 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
         });
         const finalPayload = Array.from(uniquePayloadMap.values());
 
-        onChange(finalPayload);
-    }, [onChange, columns, isAdmin, boardIds]);
+        if (finalPayload.length > 0) {
+            onChange(finalPayload);
+        }
+    }, [tasks, onChange, columns, isAdmin, boardIds]);
 
     return (
       <DragDropContext onDragEnd={onDragEnd}>
@@ -268,19 +283,22 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
                     ref={provided.innerRef}
                     className="min-h-[350px] py-1.5 space-y-2"
                   >
-                    {(tasks[col.id] || []).map((task, index) => (
-                      <Draggable key={task.$id} draggableId={task.$id} index={index}>
-                        {(provided) => (
-                          <div
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            ref={provided.innerRef}
-                          >
-                            <KanbanCard task={task} />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
+                    {(tasks[col.id] || []).map((task, index) => {
+                      const taskId = String(task?.$id || task?.id || `task-${col.id}-${index}`);
+                      return (
+                        <Draggable key={taskId} draggableId={taskId} index={index}>
+                          {(provided) => (
+                            <div
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              ref={provided.innerRef}
+                            >
+                              <KanbanCard task={task} />
+                            </div>
+                          )}
+                        </Draggable>
+                      );
+                    })}
 
                     {provided.placeholder}
                   </div>

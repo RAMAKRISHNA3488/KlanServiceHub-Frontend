@@ -424,13 +424,32 @@ export const BoardsView = () => {
       if (col) return col.id;
     }
 
-    // 4. Category fallback (if status matches category e.g. 'TODO', 'DONE')
-    const catMatch = cols.find(
-      (c) => c.category && String(c.category).toUpperCase().trim() === cleanStatus
-    );
-    if (catMatch) return catMatch.id;
+    // 4. Category fallback (for generic workflow categories like IN_PROGRESS or DONE)
+    // Strictly exclude BACKLOG and TODO so they are never conflated with each other
+    if (cleanStatus !== 'BACKLOG' && cleanStatus !== 'TODO' && cleanStatus !== 'BACK_LOG' && cleanStatus !== 'TO_DO') {
+      const catMatch = cols.find(
+        (c) => c.category && String(c.category).toUpperCase().trim() === cleanStatus
+      );
+      if (catMatch) return catMatch.id;
+    }
 
-    // 5. Default fallback to first column
+    // 5. Explicit fallback for BACKLOG and TODO columns
+    if (cleanStatus === 'BACKLOG' || cleanStatus === 'BACK_LOG') {
+      const backlogCol = cols.find((c) => {
+        const str = String(c.id || c.name || c.label || '').toUpperCase();
+        return str.includes('BACKLOG') || str.includes('BACK_LOG');
+      });
+      if (backlogCol) return backlogCol.id;
+    }
+    if (cleanStatus === 'TODO' || cleanStatus === 'TO_DO') {
+      const todoCol = cols.find((c) => {
+        const str = String(c.id || c.name || c.label || '').toUpperCase();
+        return str.includes('TODO') || str.includes('TO_DO') || str.includes('TO DO');
+      });
+      if (todoCol) return todoCol.id;
+    }
+
+    // 6. Default fallback to first column
     return cols[0]?.id;
   };
 
@@ -440,7 +459,19 @@ export const BoardsView = () => {
       map[col.id] = [];
     });
 
-    filteredTasks.forEach((task) => {
+    // Deduplicate tasks by id and issue key to strictly ensure one task per column
+    const seen = new Set();
+    const uniqueTasks = (filteredTasks || []).filter((task) => {
+      const tId = task?.$id || task?.id;
+      const key = task?.key;
+      if (tId && seen.has(tId)) return false;
+      if (key && seen.has(`key_${key}`)) return false;
+      if (tId) seen.add(tId);
+      if (key) seen.add(`key_${key}`);
+      return true;
+    });
+
+    uniqueTasks.forEach((task) => {
       const targetColumnId = resolveTaskColumnId(task, columns);
       if (targetColumnId && map[targetColumnId]) {
         map[targetColumnId].push(task);
