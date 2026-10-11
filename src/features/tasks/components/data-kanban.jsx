@@ -142,60 +142,88 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
 
         let updatesPayload = [];
         setTasks((prevTasks) => {
-            const newTasks = { ...prevTasks };
-            // Safely remove the task from the source column
-            const sourceColumn = [...(newTasks[sourceStatus] || [])];
-            const [movedTask] = sourceColumn.splice(source.index, 1);
-            // If there is no moved task, return the previous state
-            if (!movedTask) {
+            const newTasks = {};
+            boardIds.forEach((b) => {
+                newTasks[b] = [...(prevTasks[b] || [])];
+            });
+
+            // Locate moved task
+            let movedTask = newTasks[sourceStatus]?.[source.index];
+            let cleanId = movedTask?.$id || movedTask?.id;
+
+            // Fallback search across all columns if index mismatch
+            if (!cleanId) {
+                for (const b of boardIds) {
+                    if (newTasks[b]?.[source.index]) {
+                        movedTask = newTasks[b][source.index];
+                        cleanId = movedTask.$id || movedTask.id;
+                        break;
+                    }
+                }
+            }
+
+            if (!movedTask || !cleanId) {
                 console.error('No task found at the source index.');
                 return prevTasks;
             }
-            // Create a new task object with updated status
-            const updatedMovedTask = sourceStatus !== destStatus ? { ...movedTask, status: destStatus } : movedTask;
-            // Update the source column
-            newTasks[sourceStatus] = sourceColumn;
-            // Add the task to the destination column
+
+            // ENFORCE: One ticket must be in ONE state only!
+            // Strictly scrub this ticket ID from ALL columns on the board
+            boardIds.forEach((b) => {
+                newTasks[b] = newTasks[b].filter((t) => (t.$id || t.id) !== cleanId);
+            });
+
+            // Update task status to target column
+            const updatedMovedTask = { ...movedTask, status: destStatus };
+
+            // Insert strictly into the destination column at destination index
             const destColumn = [...(newTasks[destStatus] || [])];
             destColumn.splice(destination.index, 0, updatedMovedTask);
             newTasks[destStatus] = destColumn;
+
             // Prepare minimal update payloads
             updatesPayload = [];
             updatesPayload.push({
-                $id: updatedMovedTask.$id,
+                $id: cleanId,
                 status: destStatus,
                 position: Math.min((destination.index + 1) * 1000, 1_00_000),
             });
-            // Update affected tasks positions in the destination column
+
+            // Update affected tasks positions in destination column
             newTasks[destStatus].forEach((task, index) => {
-                if (task && task.$id !== updatedMovedTask.$id) {
+                const tId = task?.$id || task?.id;
+                if (task && tId !== cleanId) {
                     const newPosition = Math.min((index + 1) * 1000, 1_00_000);
                     if (task.position !== newPosition) {
                         updatesPayload.push({
-                            $id: task.$id,
+                            $id: tId,
                             status: destStatus,
                             position: newPosition,
                         });
                     }
                 }
             });
-            // If the task moved between columns, update positions in the source column
-            if (sourceStatus !== destStatus) {
+
+            // If task moved between columns, update positions in source column
+            if (sourceStatus !== destStatus && newTasks[sourceStatus]) {
                 newTasks[sourceStatus].forEach((task, index) => {
+                    const tId = task?.$id || task?.id;
                     const newPosition = Math.min((index + 1) * 1000, 1_00_000);
                     if (task.position !== newPosition) {
                         updatesPayload.push({
-                            $id: task.$id,
+                            $id: tId,
                             status: sourceStatus,
                             position: newPosition,
                         });
                     }
                 });
             }
+
             return newTasks;
         });
+
         onChange(updatesPayload);
-    }, [onChange, columns, isAdmin]);
+    }, [onChange, columns, isAdmin, boardIds]);
 
     return (
       <DragDropContext onDragEnd={onDragEnd}>
