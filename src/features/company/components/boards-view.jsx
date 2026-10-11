@@ -319,7 +319,9 @@ export const BoardsView = () => {
       });
 
       if (res?.data) {
-        setTasks((prev) => [res.data, ...prev]);
+        const newTask = res.data;
+        const newId = newTask.$id || newTask.id;
+        setTasks((prev) => [newTask, ...prev.filter((t) => (t.$id || t.id) !== newId)]);
         toast.success(`Created issue in ${status.replace(/_/g, ' ')}`);
         setNewTaskName('');
         setQuickCreateOpen(null);
@@ -361,19 +363,85 @@ export const BoardsView = () => {
     return matchesSearch && matchesProject && matchesPriority;
   });
 
-  const getTasksForColumn = (columnId) => {
-    const normCol = String(columnId || '').toUpperCase().replace(/\s+/g, '_');
-    return filteredTasks.filter((t) => {
-      const st = String(t.status || '').toUpperCase().replace(/\s+/g, '_');
-      if (st === normCol) return true;
-      if (normCol === 'TODO') return st === 'TO_DO' || st === 'OPEN';
-      if (normCol === 'BACKLOG') return st === 'BACK_LOG';
-      if (normCol === 'IN_PROGRESS') return st === 'INPROGRESS' || st === 'IN_PROGRESS';
-      if (normCol === 'IN_REVIEW' || normCol === 'CODE_REVIEW') return st === 'IN_REVIEW' || st === 'CODE_REVIEW' || st === 'REVIEW';
-      if (normCol === 'TESTING' || normCol === 'TEST') return st === 'TESTING' || st === 'TEST' || st === 'QA';
-      if (normCol === 'DONE') return st === 'DONE' || st === 'RESOLVED' || st === 'CLOSED';
-      return false;
+  const resolveTaskColumnId = (task, cols) => {
+    if (!task || !cols || cols.length === 0) return null;
+    const rawStatus = task.status;
+    if (!rawStatus) return cols[0]?.id;
+
+    // 1. Direct match with column id or rawName
+    const directMatch = cols.find(
+      (c) => c.id === rawStatus || (c.rawName && c.rawName === rawStatus)
+    );
+    if (directMatch) return directMatch.id;
+
+    // 2. Normalized uppercase string comparison
+    const cleanStatus = String(rawStatus).toUpperCase().trim().replace(/[\s-]+/g, '_');
+    const normalizedMatch = cols.find((c) => {
+      const cId = String(c.id || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+      const cRaw = String(c.rawName || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+      return cId === cleanStatus || cRaw === cleanStatus;
     });
+    if (normalizedMatch) return normalizedMatch.id;
+
+    // Helper to find column matching any alias in order of precedence
+    const findColumnByAliases = (...aliases) =>
+      cols.find((c) => {
+        const cId = String(c.id || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+        const cRaw = String(c.rawName || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+        return aliases.includes(cId) || aliases.includes(cRaw);
+      });
+
+    // 3. Known workflow status standard synonyms
+    if (cleanStatus === 'BACKLOG' || cleanStatus === 'BACK_LOG') {
+      const col = findColumnByAliases('BACKLOG', 'BACK_LOG');
+      if (col) return col.id;
+    } else if (cleanStatus === 'TODO' || cleanStatus === 'TO_DO' || cleanStatus === 'OPEN') {
+      const col = findColumnByAliases('TODO', 'TO_DO');
+      if (col) return col.id;
+    } else if (cleanStatus === 'IN_PROGRESS' || cleanStatus === 'INPROGRESS') {
+      const col = findColumnByAliases('IN_PROGRESS', 'INPROGRESS');
+      if (col) return col.id;
+    } else if (cleanStatus === 'CODE_REVIEW' || cleanStatus === 'IN_REVIEW' || cleanStatus === 'REVIEW') {
+      const col = findColumnByAliases('CODE_REVIEW', 'IN_REVIEW', 'REVIEW');
+      if (col) return col.id;
+    } else if (cleanStatus === 'TESTING' || cleanStatus === 'TEST' || cleanStatus === 'QA') {
+      const col = findColumnByAliases('TESTING', 'TEST', 'QA');
+      if (col) return col.id;
+    } else if (cleanStatus === 'DONE' || cleanStatus === 'RESOLVED' || cleanStatus === 'CLOSED') {
+      const col = findColumnByAliases('DONE', 'RESOLVED', 'CLOSED');
+      if (col) return col.id;
+    }
+
+    // 4. Category fallback (if status matches category e.g. 'TODO', 'DONE')
+    const catMatch = cols.find(
+      (c) => c.category && String(c.category).toUpperCase().trim() === cleanStatus
+    );
+    if (catMatch) return catMatch.id;
+
+    // 5. Default fallback to first column
+    return cols[0]?.id;
+  };
+
+  const tasksByColumn = useMemo(() => {
+    const map = {};
+    columns.forEach((col) => {
+      map[col.id] = [];
+    });
+
+    filteredTasks.forEach((task) => {
+      const targetColumnId = resolveTaskColumnId(task, columns);
+      if (targetColumnId && map[targetColumnId]) {
+        map[targetColumnId].push(task);
+      } else if (columns.length > 0) {
+        map[columns[0].id].push(task);
+      }
+    });
+
+    return map;
+  }, [filteredTasks, columns]);
+
+  const getTasksForColumn = (columnId) => {
+    return tasksByColumn[columnId] || [];
   };
 
   if (loading && boards.length === 0) {

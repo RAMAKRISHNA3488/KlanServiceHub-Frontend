@@ -46,59 +46,83 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
 
     const boardIds = useMemo(() => columns.map((c) => c.id), [columns]);
 
-    const [tasks, setTasks] = useState(() => {
-        const initialTasks = {};
-        boardIds.forEach((b) => {
-            initialTasks[b] = [];
+    const resolveKanbanColumnId = useCallback((task, bIds) => {
+        if (!task || !bIds || bIds.length === 0) return null;
+        const rawStatus = task.status;
+        if (!rawStatus) return bIds[0];
+
+        // Direct match
+        if (bIds.includes(rawStatus)) return rawStatus;
+
+        const clean = String(rawStatus).toUpperCase().trim().replace(/[\s-]+/g, '_');
+        const exactNorm = bIds.find((b) => String(b).toUpperCase().trim().replace(/[\s-]+/g, '_') === clean);
+        if (exactNorm) return exactNorm;
+
+        const findBoard = (...aliases) =>
+            bIds.find((b) => {
+                const norm = String(b).toUpperCase().trim().replace(/[\s-]+/g, '_');
+                return aliases.includes(norm);
+            });
+
+        if (clean === 'BACKLOG' || clean === 'BACK_LOG') {
+            const b = findBoard('BACKLOG', 'BACK_LOG');
+            if (b) return b;
+        } else if (clean === 'TODO' || clean === 'TO_DO' || clean === 'OPEN') {
+            const b = findBoard('TODO', 'TO_DO');
+            if (b) return b;
+        } else if (clean === 'IN_PROGRESS' || clean === 'INPROGRESS') {
+            const b = findBoard('IN_PROGRESS', 'INPROGRESS');
+            if (b) return b;
+        } else if (clean === 'CODE_REVIEW' || clean === 'IN_REVIEW' || clean === 'REVIEW') {
+            const b = findBoard('CODE_REVIEW', 'IN_REVIEW', 'REVIEW');
+            if (b) return b;
+        } else if (clean === 'TESTING' || clean === 'TEST' || clean === 'QA') {
+            const b = findBoard('TESTING', 'TEST', 'QA');
+            if (b) return b;
+        } else if (clean === 'DONE' || clean === 'RESOLVED' || clean === 'CLOSED') {
+            const b = findBoard('DONE', 'RESOLVED', 'CLOSED');
+            if (b) return b;
+        }
+
+        return bIds[0];
+    }, []);
+
+    const buildTasksMap = useCallback((items, bIds) => {
+        const result = {};
+        bIds.forEach((b) => {
+            result[b] = [];
         });
-        (data || []).forEach((task) => {
-            const taskStatus = String(task.status || '').toUpperCase().replace(/\s+/g, '_');
-            let matchedBoard = boardIds.find((b) => b === taskStatus);
-            if (!matchedBoard) {
-                if (taskStatus === 'BACKLOG' && boardIds.includes('BACKLOG')) matchedBoard = 'BACKLOG';
-                else if ((taskStatus === 'TODO' || taskStatus === 'TO_DO') && boardIds.includes('TODO')) matchedBoard = 'TODO';
-                else if (taskStatus === 'IN_PROGRESS' && boardIds.includes('IN_PROGRESS')) matchedBoard = 'IN_PROGRESS';
-                else if ((taskStatus === 'CODE_REVIEW' || taskStatus === 'IN_REVIEW') && (boardIds.includes('CODE_REVIEW') || boardIds.includes('IN_REVIEW'))) {
-                    matchedBoard = boardIds.includes('CODE_REVIEW') ? 'CODE_REVIEW' : 'IN_REVIEW';
-                } else if (taskStatus === 'DONE' && boardIds.includes('DONE')) matchedBoard = 'DONE';
-                else matchedBoard = boardIds[0];
+
+        // Deduplicate incoming tasks by ID
+        const seen = new Set();
+        const uniqueItems = (items || []).filter((task) => {
+            const id = task?.$id || task?.id;
+            if (!id) return true;
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+        });
+
+        uniqueItems.forEach((task) => {
+            const targetBoard = resolveKanbanColumnId(task, bIds);
+            if (targetBoard && result[targetBoard]) {
+                result[targetBoard].push(task);
+            } else if (bIds.length > 0) {
+                result[bIds[0]].push(task);
             }
-            if (matchedBoard && initialTasks[matchedBoard]) {
-                initialTasks[matchedBoard].push(task);
-            }
         });
-        Object.keys(initialTasks).forEach((status) => {
-            initialTasks[status].sort((a, b) => (a.position || 0) - (b.position || 0));
+
+        Object.keys(result).forEach((status) => {
+            result[status].sort((a, b) => (a.position || 0) - (b.position || 0));
         });
-        return initialTasks;
-    });
+        return result;
+    }, [resolveKanbanColumnId]);
+
+    const [tasks, setTasks] = useState(() => buildTasksMap(data, boardIds));
 
     useEffect(() => {
-        const newTasks = {};
-        boardIds.forEach((b) => {
-            newTasks[b] = [];
-        });
-        (data || []).forEach((task) => {
-            const taskStatus = String(task.status || '').toUpperCase().replace(/\s+/g, '_');
-            let matchedBoard = boardIds.find((b) => b === taskStatus);
-            if (!matchedBoard) {
-                if (taskStatus === 'BACKLOG' && boardIds.includes('BACKLOG')) matchedBoard = 'BACKLOG';
-                else if ((taskStatus === 'TODO' || taskStatus === 'TO_DO') && boardIds.includes('TODO')) matchedBoard = 'TODO';
-                else if (taskStatus === 'IN_PROGRESS' && boardIds.includes('IN_PROGRESS')) matchedBoard = 'IN_PROGRESS';
-                else if ((taskStatus === 'CODE_REVIEW' || taskStatus === 'IN_REVIEW') && (boardIds.includes('CODE_REVIEW') || boardIds.includes('IN_REVIEW'))) {
-                    matchedBoard = boardIds.includes('CODE_REVIEW') ? 'CODE_REVIEW' : 'IN_REVIEW';
-                } else if (taskStatus === 'DONE' && boardIds.includes('DONE')) matchedBoard = 'DONE';
-                else matchedBoard = boardIds[0];
-            }
-            if (matchedBoard && newTasks[matchedBoard]) {
-                newTasks[matchedBoard].push(task);
-            }
-        });
-        Object.keys(newTasks).forEach((status) => {
-            newTasks[status].sort((a, b) => (a.position || 0) - (b.position || 0));
-        });
-        setTasks(newTasks);
-    }, [data, boardIds]);
+        setTasks(buildTasksMap(data, boardIds));
+    }, [data, boardIds, buildTasksMap]);
 
     const onDragEnd = useCallback((result) => {
         if (!result.destination)
