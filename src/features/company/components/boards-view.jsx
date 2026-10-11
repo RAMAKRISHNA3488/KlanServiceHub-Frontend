@@ -331,7 +331,18 @@ export const BoardsView = () => {
     }
   };
 
-  const filteredTasks = tasks.filter((task) => {
+  const uniqueTasks = useMemo(() => {
+    const seen = new Set();
+    return tasks.filter((t) => {
+      const id = t.$id || t.id;
+      if (!id) return true;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  }, [tasks]);
+
+  const filteredTasks = uniqueTasks.filter((task) => {
     const matchesSearch =
       !searchQuery ||
       task.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -352,14 +363,15 @@ export const BoardsView = () => {
 
   const getTasksForColumn = (columnId) => {
     const normCol = String(columnId || '').toUpperCase().replace(/\s+/g, '_');
-    const hasBacklogColumn = columns.some((c) => String(c.id || '').toUpperCase().replace(/\s+/g, '_') === 'BACKLOG');
     return filteredTasks.filter((t) => {
       const st = String(t.status || '').toUpperCase().replace(/\s+/g, '_');
       if (st === normCol) return true;
-      if (normCol === 'TODO' && st === 'TO_DO') return true;
-      if (normCol === 'TODO' && st === 'BACKLOG' && !hasBacklogColumn) return true;
-      if (normCol === 'IN_PROGRESS' && (st === 'INPROGRESS' || st === 'IN_PROGRESS')) return true;
-      if ((normCol === 'IN_REVIEW' || normCol === 'CODE_REVIEW') && (st === 'IN_REVIEW' || st === 'CODE_REVIEW' || st === 'REVIEW')) return true;
+      if (normCol === 'TODO') return st === 'TO_DO' || st === 'OPEN';
+      if (normCol === 'BACKLOG') return st === 'BACK_LOG';
+      if (normCol === 'IN_PROGRESS') return st === 'INPROGRESS' || st === 'IN_PROGRESS';
+      if (normCol === 'IN_REVIEW' || normCol === 'CODE_REVIEW') return st === 'IN_REVIEW' || st === 'CODE_REVIEW' || st === 'REVIEW';
+      if (normCol === 'TESTING' || normCol === 'TEST') return st === 'TESTING' || st === 'TEST' || st === 'QA';
+      if (normCol === 'DONE') return st === 'DONE' || st === 'RESOLVED' || st === 'CLOSED';
       return false;
     });
   };
