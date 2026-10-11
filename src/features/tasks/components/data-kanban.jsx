@@ -213,7 +213,7 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             position: movedNewPosition,
         });
 
-        // Update affected tasks positions in destination column
+        // Update affected tasks positions in destination column if reordered
         newTasks[destStatus].forEach((task, index) => {
             const tId = task?.$id || task?.id;
             if (task && tId !== cleanId && String(tId) !== String(cleanId) && (!taskKey || task.key !== taskKey)) {
@@ -227,23 +227,6 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
                 }
             }
         });
-
-        // If task moved between columns, update positions in source column
-        if (sourceStatus !== destStatus && newTasks[sourceStatus]) {
-            newTasks[sourceStatus].forEach((task, index) => {
-                const tId = task?.$id || task?.id;
-                if (task && tId !== cleanId && String(tId) !== String(cleanId) && (!taskKey || task.key !== taskKey)) {
-                    const newPosition = Math.min((index + 1) * 1000, 1_00_000);
-                    if (task.position !== newPosition) {
-                        updatesPayload.push({
-                            $id: tId,
-                            status: sourceStatus,
-                            position: newPosition,
-                        });
-                    }
-                }
-            });
-        }
 
         // Synchronously update local UI state
         setTasks(newTasks);
