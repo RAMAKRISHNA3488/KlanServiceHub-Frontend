@@ -138,7 +138,7 @@ export const WorkspacesManagementView = () => {
     );
   };
 
-  if (isLoading) {
+  if (isLoading && !workspacesData) {
     return <PageLoader />;
   }
 

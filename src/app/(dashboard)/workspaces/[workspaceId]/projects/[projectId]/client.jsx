@@ -14,10 +14,10 @@ export const ProjectIdClient = () => {
     const projectId = useProjectId();
     const { data: project, isLoading: isLoadingProject } = useGetProject({ projectId });
     const { data: projectAnalytics, isLoading: isLoadingProjectAnalytics } = useGetProjectAnalytics({ projectId });
-    const isLoading = isLoadingProject || isLoadingProjectAnalytics;
+    const isLoading = isLoadingProject && !project;
     if (isLoading)
         return <PageLoader />;
-    if (!project)
+    if (!project && !isLoadingProject)
         return <PageError message="Project not found."/>;
     return (<div className="flex flex-col gap-y-4">
       <div className="flex items-center justify-between">

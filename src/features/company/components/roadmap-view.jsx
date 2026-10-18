@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { tasksApi } from '@/lib/api-client';
 import { useCreateTaskModal } from '@/features/tasks/hooks/use-create-task-modal';
+import { useGetTasks } from '@/features/tasks/api/use-get-tasks';
 import { RoadmapTaskModal } from './roadmap-task-modal';
 import { toast } from 'sonner';
 import {
@@ -46,8 +47,16 @@ export const RoadmapView = () => {
   const workspaceId = useWorkspaceId();
   const { open: openCreateTask } = useCreateTaskModal();
 
+  const { data: tasksData, isLoading: isLoadingTasks, refetch: refetchTasks } = useGetTasks({ workspaceId });
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (tasksData?.documents) {
+      setTasks(tasksData.documents);
+    }
+  }, [tasksData]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [timeScale, setTimeScale] = useState('months'); // 'weeks' | 'months' | 'quarters'
   const [viewDate, setViewDate] = useState(new Date()); // Base anchor date for Previous / Next paging
@@ -72,7 +81,7 @@ export const RoadmapView = () => {
         (t.$id || t.id) === (updatedTask.$id || updatedTask.id) ? { ...t, ...updatedTask } : t
       )
     );
-    fetchTasks();
+    refetchTasks();
   };
 
   const timelineContainerRef = useRef(null);
@@ -81,20 +90,13 @@ export const RoadmapView = () => {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const res = await tasksApi.getTasks({ workspaceId });
-      if (res?.data?.documents) {
-        setTasks(res.data.documents);
-      }
+      await refetchTasks();
     } catch (e) {
       toast.error('Failed to load roadmap tasks');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (workspaceId) fetchTasks();
-  }, [workspaceId]);
 
   // Previous & Next navigation handlers
   const handlePrevious = () => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
@@ -96,47 +97,43 @@ export const BoardsView = () => {
   const [newTaskProject, setNewTaskProject] = useState('');
   const [creatingTask, setCreatingTask] = useState(false);
 
-  const fetchBoardsAndTasks = async () => {
-    try {
-      setLoading(true);
+  const queryClient = useQueryClient();
+
+  const { data: boardsData, isLoading: isQueryLoading } = useQuery({
+    queryKey: ['boards-view-data', workspaceId],
+    queryFn: async () => {
       const [boardsRes, tasksRes, wfRes, typesRes] = await Promise.all([
         boardsApi.getBoards(workspaceId),
         tasksApi.getTasks({ workspaceId }),
         workflowsAdminApi.getWorkflows(workspaceId).catch(() => ({ data: [] })),
         workflowsAdminApi.getIssueTypes(workspaceId).catch(() => ({ data: [] })),
       ]);
-
-      const loadedBoards = boardsRes?.data || [];
-      setBoards(loadedBoards);
-
-      if (typesRes?.data) {
-        setIssueTypes(typesRes.data);
-      }
-
-      if (loadedBoards.length > 0 && !selectedBoardId) {
-        setSelectedBoardId(loadedBoards[0].id);
-      }
-
-      if (tasksRes?.data?.documents) {
-        setTasks(tasksRes.data.documents);
-      }
-
-      if (wfRes?.data) {
-        setWorkflows(wfRes.data);
-      }
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to load board data');
-    } finally {
-      setLoading(false);
-    }
-  };
+      return {
+        boards: boardsRes?.data || [],
+        tasks: tasksRes?.data?.documents || [],
+        workflows: wfRes?.data || [],
+        issueTypes: typesRes?.data || [],
+      };
+    },
+    enabled: !!workspaceId,
+  });
 
   useEffect(() => {
-    if (workspaceId) {
-      fetchBoardsAndTasks();
+    if (boardsData) {
+      setBoards(boardsData.boards);
+      setTasks(boardsData.tasks);
+      setWorkflows(boardsData.workflows);
+      setIssueTypes(boardsData.issueTypes);
+      if (boardsData.boards.length > 0 && !selectedBoardId) {
+        setSelectedBoardId(boardsData.boards[0].id);
+      }
+      setLoading(false);
     }
-  }, [workspaceId]);
+  }, [boardsData]);
+
+  const fetchBoardsAndTasks = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
+  };
 
   // Derive dynamic board columns from active workflow statuses
   const defaultWorkflow = workflows[0];
@@ -487,7 +484,7 @@ export const BoardsView = () => {
     return tasksByColumn[columnId] || [];
   };
 
-  if (loading && boards.length === 0) {
+  if (loading && !boardsData && boards.length === 0) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="size-8 animate-spin text-neutral-400" />

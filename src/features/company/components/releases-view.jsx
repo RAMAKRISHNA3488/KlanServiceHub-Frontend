@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { releasesApi } from '@/lib/api-client';
@@ -19,8 +20,16 @@ import {
 
 export const ReleasesView = () => {
   const workspaceId = useWorkspaceId();
-  const [releases, setReleases] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data: releases = [], isLoading } = useQuery({
+    queryKey: ['releases', workspaceId],
+    queryFn: async () => {
+      const res = await releasesApi.getReleases(workspaceId);
+      return res?.data || [];
+    },
+    enabled: !!workspaceId,
+  });
 
   const [ConfirmDialog, confirmAction] = useConfirm(
     'Delete Release Version',
@@ -31,21 +40,9 @@ export const ReleasesView = () => {
   const [createModal, setCreateModal] = useState(false);
   const [releaseForm, setReleaseForm] = useState({ name: '', description: '', releaseDate: '' });
 
-  const fetchReleases = async () => {
-    try {
-      setLoading(true);
-      const res = await releasesApi.getReleases(workspaceId);
-      if (res?.data) setReleases(res.data);
-    } catch (e) {
-      toast.error('Failed to load releases');
-    } finally {
-      setLoading(false);
-    }
+  const fetchReleases = () => {
+    queryClient.invalidateQueries({ queryKey: ['releases', workspaceId] });
   };
-
-  useEffect(() => {
-    if (workspaceId) fetchReleases();
-  }, [workspaceId]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -93,7 +90,7 @@ export const ReleasesView = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading && releases.length === 0) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="size-8 animate-spin text-neutral-400" />

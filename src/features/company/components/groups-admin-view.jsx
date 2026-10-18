@@ -398,7 +398,7 @@ export const GroupsAdminView = () => {
     (u) => !groupMembers.some((gm) => gm.id === (u.user_id || u.id)),
   );
 
-  if (loading) {
+  if (loading && groups.length === 0) {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-3">
         <RefreshCw className="size-8 animate-spin text-blue-600" />

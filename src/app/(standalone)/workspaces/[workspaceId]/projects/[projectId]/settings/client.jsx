@@ -7,9 +7,9 @@ import { useProjectId } from '@/features/projects/hooks/use-project-id';
 export const ProjectIdSettingsClient = () => {
     const projectId = useProjectId();
     const { data: initialValues, isLoading } = useGetProject({ projectId });
-    if (isLoading)
+    if (isLoading && !initialValues)
         return <PageLoader />;
-    if (!initialValues)
+    if (!initialValues && !isLoading)
         return <PageError message="Project not found."/>;
     return (<div className="w-full lg:max-w-xl">
       <EditProjectForm initialValues={initialValues}/>

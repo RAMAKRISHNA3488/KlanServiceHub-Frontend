@@ -289,7 +289,7 @@ export const WorkflowsAdminView = () => {
     }
   };
 
-  if (loading) {
+  if (loading && workflows.length === 0) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="size-8 animate-spin text-neutral-400" />

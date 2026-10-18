@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useCurrent } from '@/features/auth/api/use-current';
@@ -182,31 +183,41 @@ export const DashboardsView = () => {
   const [targetColumn, setTargetColumn] = useState(0);
   const [addingGadget, setAddingGadget] = useState(false);
 
+  const queryClient = useQueryClient();
+
+  const { data: cachedDashboardData, isLoading: isQueryLoading } = useQuery({
+    queryKey: ['dashboard-data', workspaceId, selectedDashboardId || 'DEFAULT', selectedProject || 'ALL'],
+    queryFn: async () => {
+      const params = {};
+      if (selectedDashboardId) params.dashboardId = selectedDashboardId;
+      if (selectedProject && selectedProject !== 'ALL') params.projectId = selectedProject;
+      const res = await dashboardsApi.getDashboardData(workspaceId, params);
+      return res?.data || null;
+    },
+    enabled: !!workspaceId,
+  });
+
+  useEffect(() => {
+    if (cachedDashboardData) {
+      setData(cachedDashboardData);
+      if (!selectedDashboardId && cachedDashboardData.activeDashboard) {
+        setSelectedDashboardId(cachedDashboardData.activeDashboard.id || cachedDashboardData.activeDashboard.$id);
+      }
+      setLoading(false);
+    }
+  }, [cachedDashboardData]);
+
   const fetchDashboard = async (dashId = selectedDashboardId, projId = selectedProject, isSilent = false) => {
     if (!workspaceId) return;
     try {
-      if (!isSilent) setLoading(true);
-      const params = {};
-      if (dashId) params.dashboardId = dashId;
-      if (projId && projId !== 'ALL') params.projectId = projId;
-
-      const res = await dashboardsApi.getDashboardData(workspaceId, params);
-      if (res?.data) {
-        setData(res.data);
-        if (!selectedDashboardId && res.data.activeDashboard) {
-          setSelectedDashboardId(res.data.activeDashboard.id || res.data.activeDashboard.$id);
-        }
-      }
+      if (!isSilent && !data) setLoading(true);
+      await queryClient.invalidateQueries({ queryKey: ['dashboard-data', workspaceId] });
     } catch (e) {
       if (!isSilent) toast.error('Failed to load dashboard');
     } finally {
       if (!isSilent) setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchDashboard(selectedDashboardId, selectedProject);
-  }, [workspaceId, selectedDashboardId, selectedProject]);
 
   // Auto-refresh timer
   useEffect(() => {

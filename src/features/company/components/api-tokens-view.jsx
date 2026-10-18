@@ -98,7 +98,7 @@ export const ApiTokensView = () => {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  if (loading) {
+  if (loading && tokens.length === 0) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="size-8 animate-spin text-neutral-400" />

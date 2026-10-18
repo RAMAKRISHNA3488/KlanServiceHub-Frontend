@@ -205,7 +205,7 @@ export const BillingView = () => {
     toast.success(`Invoice ${inv.invoice_number} downloaded as JSON`);
   };
 
-  if (loading) {
+  if (loading && !billing) {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-3">
         <RefreshCw className="size-8 animate-spin text-blue-600" />

@@ -69,28 +69,28 @@ import {
 // Protected Route Component
 const ProtectedRoute = () => {
   const { data: user, isLoading } = useCurrent();
-  if (isLoading) return <PageLoader />;
-  if (!user) return <Navigate to="/sign-in" replace />;
+  if (isLoading && !user) return <PageLoader />;
+  if (!user && !isLoading) return <Navigate to="/sign-in" replace />;
   return <Outlet />;
 };
 
 // Public/Guest Route Component
 const PublicRoute = () => {
   const { data: user, isLoading } = useCurrent();
-  if (isLoading) return <PageLoader />;
+  if (isLoading && !user) return <PageLoader />;
   if (user) return <Navigate to="/" replace />;
   return <Outlet />;
 };
 
 // Home Redirect / SaaS Landing Page Component
 const HomePage = () => {
-  const { data: user, isLoading: isLoadingUser } = useCurrent();
+  const { data: user } = useCurrent();
   const { data: workspaces, isLoading: isLoadingWorkspaces } = useGetWorkspaces({
     enabled: !!user,
   });
 
   if (user) {
-    if (isLoadingWorkspaces) return <PageLoader />;
+    if (isLoadingWorkspaces && !workspaces) return <PageLoader />;
     if (!workspaces || workspaces.total === 0) return <Navigate to="/onboarding" replace />;
     const wsId = workspaces.documents[0]?.$id || workspaces.documents[0]?.id;
     if (wsId) return <Navigate to={`/workspaces/${wsId}`} replace />;

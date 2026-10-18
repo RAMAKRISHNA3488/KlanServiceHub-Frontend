@@ -145,7 +145,7 @@ export const CompanyProfileView = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !profile) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="size-8 animate-spin text-neutral-400" />

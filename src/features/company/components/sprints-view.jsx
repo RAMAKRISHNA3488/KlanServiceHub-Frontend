@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { sprintsApi } from '@/lib/api-client';
@@ -25,9 +26,20 @@ import {
 
 export const SprintsView = () => {
   const workspaceId = useWorkspaceId();
-  const [sprints, setSprints] = useState([]);
-  const [backlog, setBacklog] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data: sprintsData, isLoading } = useQuery({
+    queryKey: ['sprints', workspaceId],
+    queryFn: async () => {
+      const res = await sprintsApi.getSprints(workspaceId);
+      return res?.data || { sprints: [], backlog: [] };
+    },
+    enabled: !!workspaceId,
+  });
+
+  const sprints = sprintsData?.sprints || [];
+  const backlog = sprintsData?.backlog || [];
+  const loading = isLoading && !sprintsData;
 
   const [ConfirmDialog, confirmAction] = useConfirm(
     'Complete Active Sprint',
@@ -51,24 +63,9 @@ export const SprintsView = () => {
   // Closed Sprints Accordion toggle
   const [showClosedSprints, setShowClosedSprints] = useState(false);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const res = await sprintsApi.getSprints(workspaceId);
-      if (res?.data) {
-        setSprints(res.data.sprints || []);
-        setBacklog(res.data.backlog || []);
-      }
-    } catch (e) {
-      toast.error('Failed to load sprints and backlog');
-    } finally {
-      setLoading(false);
-    }
+  const fetchData = () => {
+    queryClient.invalidateQueries({ queryKey: ['sprints', workspaceId] });
   };
-
-  useEffect(() => {
-    if (workspaceId) fetchData();
-  }, [workspaceId]);
 
   const handleCreateSprint = async (e) => {
     e.preventDefault();
@@ -213,7 +210,7 @@ export const SprintsView = () => {
     }
   };
 
-  if (loading) {
+  if (loading && sprints.length === 0 && backlog.length === 0) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="size-8 animate-spin text-neutral-400" />

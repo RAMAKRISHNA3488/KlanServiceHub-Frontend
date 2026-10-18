@@ -138,8 +138,8 @@ export const TaskIdClient = () => {
     }
   };
 
-  if (loading) return <PageLoader />;
-  if (!task) return <PageError message="Issue not found." />;
+  if (loading && !task) return <PageLoader />;
+  if (!task && !loading) return <PageError message="Issue not found." />;
 
   const typeConfig = TYPE_ICONS[task.issueType] || TYPE_ICONS.Task;
   const TypeIcon = typeConfig.icon;
