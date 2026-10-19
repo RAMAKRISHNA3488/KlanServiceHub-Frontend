@@ -52,15 +52,15 @@ export const ActivityFeedCard = ({ activities = [], loading = false, onOpenActiv
             Organization Activity
           </h3>
           {!isEmpty && (
-            <span className="text-[11px] font-semibold text-neutral-400">
-              Live Feed
+            <span className="text-[11px] font-semibold text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">
+              Live Feed ({activities.length} of max 50)
             </span>
           )}
         </div>
         <p className="text-xs text-neutral-500 mt-1">
           {isEmpty
-            ? 'Chronological event history across projects, work items, and memberships.'
-            : 'Recent events and updates across your organization.'}
+            ? 'Chronological event history across projects, work items, and memberships (Rolling 50 events max).'
+            : 'Rolling 50 recent events across your organization. Older events expire automatically.'}
         </p>
       </div>
 
@@ -82,7 +82,7 @@ export const ActivityFeedCard = ({ activities = [], loading = false, onOpenActiv
         </div>
       ) : (
         /* Live Activity Stream */
-        <div className="pt-3 divide-y divide-neutral-100 max-h-[200px] overflow-y-auto custom-scrollbar">
+        <div className="pt-3 divide-y divide-neutral-100 max-h-[260px] overflow-y-auto custom-scrollbar">
           {activities.map((act) => {
             let timeAgo = 'recently';
             try {

@@ -169,7 +169,7 @@ export const OrganizationAnalyticsPage = () => {
         reportsApi.getSprints(workspaceId, params),
         reportsApi.getBugs(workspaceId, params),
         reportsApi.getOverdue(workspaceId, params),
-        reportsApi.getActivity(workspaceId, { limit: 20 }),
+        reportsApi.getActivity(workspaceId, { limit: 50 }),
       ]);
 
       if (overviewRes.status === 'fulfilled') setOverview(overviewRes.value?.data || {});
