@@ -208,6 +208,8 @@ export const tasksApi = {
   bulkUpdate: (tasks) => apiFetch('/api/tasks/bulk-update', { method: 'POST', body: JSON.stringify({ tasks }) }),
   getComments: (taskId) => apiFetch(`/api/tasks/${taskId}/comments`),
   addComment: (taskId, content) => apiFetch(`/api/tasks/${taskId}/comments`, { method: 'POST', body: JSON.stringify({ content }) }),
+  updateComment: (taskId, commentId, content) => apiFetch(`/api/tasks/${taskId}/comments/${commentId}`, { method: 'PATCH', body: JSON.stringify({ content }) }),
+  deleteComment: (taskId, commentId) => apiFetch(`/api/tasks/${taskId}/comments/${commentId}`, { method: 'DELETE' }),
 };
 
 export const dashboardsApi = {

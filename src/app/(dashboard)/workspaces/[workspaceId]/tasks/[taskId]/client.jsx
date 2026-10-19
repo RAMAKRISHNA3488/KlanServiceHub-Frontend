@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTaskId } from '@/features/tasks/hooks/use-task-id';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetMembers } from '@/features/members/api/use-get-members';
+import { useCurrent } from '@/features/auth/api/use-current';
 import { tasksApi, sprintsApi } from '@/lib/api-client';
 import { PageLoader } from '@/components/page-loader';
 import { PageError } from '@/components/page-error';
@@ -23,6 +24,10 @@ import {
   User,
   Tag,
   ArrowLeft,
+  Pencil,
+  Trash2,
+  Check,
+  X,
 } from 'lucide-react';
 
 const TYPE_ICONS = {
@@ -46,6 +51,7 @@ const STATUS_COLORS = {
 export const TaskIdClient = () => {
   const taskId = useTaskId();
   const workspaceId = useWorkspaceId();
+  const { data: currentUser } = useCurrent();
   const { data: membersData } = useGetMembers({ workspaceId });
   const members = membersData?.documents || [];
 
@@ -54,9 +60,24 @@ export const TaskIdClient = () => {
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingContent, setEditingContent] = useState('');
   const [subtaskTitle, setSubtaskTitle] = useState('');
   const [logHours, setLogHours] = useState(1);
   const [activeTab, setActiveTab] = useState('COMMENTS');
+  const [storyPointsInput, setStoryPointsInput] = useState('1');
+
+  // Determine current user permissions
+  const currentMember = members.find(
+    (m) =>
+      m.userId === currentUser?.$id ||
+      m.user_id === currentUser?.$id ||
+      m.$id === currentUser?.$id
+  );
+  const isAdmin =
+    currentMember?.role === 'ADMIN' ||
+    currentUser?.role === 'ADMIN' ||
+    task?.workspace?.user_id === currentUser?.$id;
 
   const fetchTask = async () => {
     try {
@@ -65,6 +86,7 @@ export const TaskIdClient = () => {
       if (res?.data) {
         setTask(res.data);
         setComments(res.data.comments || []);
+        setStoryPointsInput(String(res.data.storyPoints ?? res.data.story_points ?? 1));
       }
     } catch (e) {
       toast.error('Failed to load issue');
@@ -77,20 +99,39 @@ export const TaskIdClient = () => {
     if (taskId) {
       fetchTask();
       if (workspaceId) {
-        sprintsApi.getSprints(workspaceId).then((res) => {
-          if (res?.data?.sprints) setSprints(res.data.sprints);
-        }).catch(() => {});
+        sprintsApi
+          .getSprints(workspaceId)
+          .then((res) => {
+            if (res?.data?.sprints) setSprints(res.data.sprints);
+          })
+          .catch(() => {});
       }
     }
   }, [taskId, workspaceId]);
 
   const handleUpdate = async (fields) => {
     try {
-      await tasksApi.updateTask(taskId, fields);
-      setTask((prev) => ({ ...prev, ...fields }));
+      // Optimistic update
+      setTask((prev) => ({
+        ...prev,
+        ...fields,
+        assignee_id: fields.assigneeId !== undefined ? fields.assigneeId : prev?.assignee_id,
+        assigneeId: fields.assigneeId !== undefined ? fields.assigneeId : prev?.assigneeId,
+        sprint_id: fields.sprintId !== undefined ? fields.sprintId : prev?.sprint_id,
+        sprintId: fields.sprintId !== undefined ? fields.sprintId : prev?.sprintId,
+      }));
+
+      const res = await tasksApi.updateTask(taskId, fields);
+      if (res?.data) {
+        setTask(res.data);
+        if (res.data.storyPoints !== undefined) {
+          setStoryPointsInput(String(res.data.storyPoints));
+        }
+      }
       toast.success('Updated successfully');
     } catch (err) {
       toast.error(err.message || 'Failed to update issue');
+      fetchTask();
     }
   };
 
@@ -107,13 +148,49 @@ export const TaskIdClient = () => {
     }
   };
 
+  const handleStartEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditingContent(comment.content || '');
+  };
+
+  const handleSaveEditComment = async (commentId) => {
+    if (!editingContent.trim()) {
+      toast.error('Comment content cannot be empty');
+      return;
+    }
+    try {
+      await tasksApi.updateComment(taskId, commentId, editingContent.trim());
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, content: editingContent.trim(), updated_at: new Date().toISOString() } : c
+        )
+      );
+      setEditingCommentId(null);
+      setEditingContent('');
+      toast.success('Comment updated');
+    } catch (err) {
+      toast.error(err.message || 'Failed to update comment');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Are you sure you want to delete this comment?')) return;
+    try {
+      await tasksApi.deleteComment(taskId, commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      toast.success('Comment deleted');
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete comment');
+    }
+  };
+
   const handleAddSubtask = async (e) => {
     e.preventDefault();
     if (!subtaskTitle.trim()) return;
     try {
       await tasksApi.createTask({
         workspaceId,
-        projectId: task.project.$id,
+        projectId: task.project?.$id || task.project_id,
         name: subtaskTitle.trim(),
         issueType: 'Sub-task',
         parentTaskId: taskId,
@@ -141,15 +218,33 @@ export const TaskIdClient = () => {
   if (loading && !task) return <PageLoader />;
   if (!task && !loading) return <PageError message="Issue not found." />;
 
-  const typeConfig = TYPE_ICONS[task.issueType] || TYPE_ICONS.Task;
+  const typeConfig = TYPE_ICONS[task.issueType || task.issue_type] || TYPE_ICONS.Task;
   const TypeIcon = typeConfig.icon;
+
+  const currentAssigneeId =
+    task.assignee?.$id ||
+    task.assignee?.id ||
+    task.assigneeId ||
+    task.assignee_id ||
+    '';
+
+  const currentSprintId = task.sprintId || task.sprint_id || '';
+
+  const dueDateFormatted = task.dueDate
+    ? task.dueDate.split('T')[0]
+    : task.due_date
+    ? task.due_date.split('T')[0]
+    : '';
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-16">
       {/* Breadcrumbs Navigation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500">
-          <Link href={`/workspaces/${workspaceId}/tasks`} className="flex items-center gap-1 hover:text-blue-600 transition">
+          <Link
+            href={`/workspaces/${workspaceId}/tasks`}
+            className="flex items-center gap-1 hover:text-blue-600 transition"
+          >
             <ArrowLeft className="size-3.5" />
             <span>Issues</span>
           </Link>
@@ -184,7 +279,7 @@ export const TaskIdClient = () => {
             <TypeIcon className="size-5 shrink-0" style={{ color: typeConfig.color }} />
             <input
               type="text"
-              value={task.name}
+              value={task.name || ''}
               onChange={(e) => setTask({ ...task, name: e.target.value })}
               onBlur={(e) => handleUpdate({ name: e.target.value })}
               className="text-xl font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none w-full py-1 transition"
@@ -193,7 +288,9 @@ export const TaskIdClient = () => {
 
           {/* Description */}
           <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Description</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+              Description
+            </span>
             <textarea
               rows={5}
               value={task.description || ''}
@@ -262,20 +359,109 @@ export const TaskIdClient = () => {
                 </form>
 
                 <div className="space-y-3 pt-2">
-                  {comments.map((c) => (
-                    <div key={c.id} className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3.5 border border-neutral-100">
-                      <div className="size-7 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
-                        {c.user_name?.substring(0, 2).toUpperCase() || 'U'}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-neutral-900">{c.user_name}</span>
-                          <span className="text-[10px] text-neutral-400">{new Date(c.created_at).toLocaleTimeString()}</span>
+                  {comments.length === 0 ? (
+                    <p className="text-xs text-neutral-400 italic py-2">No comments yet.</p>
+                  ) : (
+                    comments.map((c) => {
+                      const isAuthor =
+                        c.user_id === currentUser?.$id ||
+                        c.userId === currentUser?.$id;
+                      const canModify = isAdmin || isAuthor;
+
+                      return (
+                        <div
+                          key={c.id}
+                          className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3.5 border border-neutral-100 hover:border-neutral-200 transition"
+                        >
+                          <div className="size-7 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                            {c.user_name?.substring(0, 2).toUpperCase() ||
+                              c.userName?.substring(0, 2).toUpperCase() ||
+                              'U'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-xs text-neutral-900">
+                                  {c.user_name || c.userName || 'Member'}
+                                </span>
+                                <span className="text-[10px] text-neutral-400">
+                                  {c.created_at
+                                    ? new Date(c.created_at).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })
+                                    : ''}
+                                  {c.updated_at && c.updated_at !== c.created_at && (
+                                    <span className="italic ml-1 text-neutral-400">
+                                      (edited)
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+
+                              {/* Edit & Delete Actions for Admin or Author */}
+                              {canModify && editingCommentId !== c.id && (
+                                <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEditComment(c)}
+                                    title="Edit comment"
+                                    className="p-1 rounded-md text-neutral-400 hover:text-blue-600 hover:bg-neutral-200/60 transition"
+                                  >
+                                    <Pencil className="size-3" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteComment(c.id)}
+                                    title="Delete comment"
+                                    className="p-1 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                  >
+                                    <Trash2 className="size-3" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+
+                            {editingCommentId === c.id ? (
+                              <div className="mt-2 space-y-2">
+                                <textarea
+                                  rows={2}
+                                  value={editingContent}
+                                  onChange={(e) => setEditingContent(e.target.value)}
+                                  className="w-full rounded-lg border border-blue-400 bg-white p-2 text-xs text-neutral-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+                                />
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSaveEditComment(c.id)}
+                                    className="flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 transition"
+                                  >
+                                    <Check className="size-3" />
+                                    Save
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingCommentId(null);
+                                      setEditingContent('');
+                                    }}
+                                    className="flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-600 hover:bg-neutral-50 transition"
+                                  >
+                                    <X className="size-3" />
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap">
+                                {c.content}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-xs text-neutral-700 mt-1">{c.content}</p>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })
+                  )}
                 </div>
               </div>
             )}
@@ -300,17 +486,21 @@ export const TaskIdClient = () => {
                 </form>
 
                 <div className="divide-y divide-neutral-100 text-xs">
-                  {(task.subtasks || []).map((sub) => (
-                    <div key={sub.id} className="py-2.5 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CheckSquare className="size-3.5 text-blue-600" />
-                        <span className="font-semibold text-neutral-800">{sub.name}</span>
+                  {(task.subtasks || []).length === 0 ? (
+                    <p className="text-xs text-neutral-400 italic py-2">No sub-tasks yet.</p>
+                  ) : (
+                    (task.subtasks || []).map((sub) => (
+                      <div key={sub.id || sub.$id} className="py-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CheckSquare className="size-3.5 text-blue-600" />
+                          <span className="font-semibold text-neutral-800">{sub.name}</span>
+                        </div>
+                        <span className="rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-600">
+                          {sub.status}
+                        </span>
                       </div>
-                      <span className="rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-600">
-                        {sub.status}
-                      </span>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -342,22 +532,24 @@ export const TaskIdClient = () => {
           </div>
         </div>
 
-        {/* Right Side: Properties Panel */}
+        {/* Right Side: Properties Panel (ISSUE DETAILS) */}
         <div className="lg:col-span-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5 text-xs">
-          <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">Issue Details</h3>
+          <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">
+            Issue Details
+          </h3>
 
           {/* Assignee */}
           <div>
             <label className="block text-[11px] font-bold text-neutral-500 mb-1">Assignee</label>
             <select
-              value={task.assignee_id || ''}
-              onChange={(e) => handleUpdate({ assigneeId: e.target.value })}
+              value={currentAssigneeId}
+              onChange={(e) => handleUpdate({ assigneeId: e.target.value || null })}
               className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
             >
               <option value="">Unassigned</option>
               {members.map((m) => (
-                <option key={m.$id} value={m.$id}>
-                  {m.name} ({m.role})
+                <option key={m.$id || m.id} value={m.$id || m.id}>
+                  {m.name} ({m.role || 'MEMBER'})
                 </option>
               ))}
             </select>
@@ -392,12 +584,28 @@ export const TaskIdClient = () => {
 
           {/* Story Points */}
           <div>
-            <label className="block text-[11px] font-bold text-neutral-500 mb-1">Story Points Estimate</label>
+            <label className="block text-[11px] font-bold text-neutral-500 mb-1">
+              Story Points Estimate
+            </label>
             <input
               type="number"
-              min={1}
-              value={task.storyPoints || 1}
-              onChange={(e) => handleUpdate({ storyPoints: e.target.value })}
+              min={0}
+              value={storyPointsInput}
+              onChange={(e) => setStoryPointsInput(e.target.value)}
+              onBlur={(e) => {
+                const val = Number(e.target.value);
+                if (val !== (task.storyPoints ?? task.story_points ?? 1)) {
+                  handleUpdate({ storyPoints: val });
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const val = Number(e.currentTarget.value);
+                  if (val !== (task.storyPoints ?? task.story_points ?? 1)) {
+                    handleUpdate({ storyPoints: val });
+                  }
+                }
+              }}
               className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
             />
           </div>
@@ -407,8 +615,8 @@ export const TaskIdClient = () => {
             <label className="block text-[11px] font-bold text-neutral-500 mb-1">Due Date</label>
             <input
               type="date"
-              value={task.due_date ? task.due_date.split('T')[0] : ''}
-              onChange={(e) => handleUpdate({ dueDate: e.target.value })}
+              value={dueDateFormatted}
+              onChange={(e) => handleUpdate({ dueDate: e.target.value || null })}
               className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
             />
           </div>
@@ -417,7 +625,7 @@ export const TaskIdClient = () => {
           <div>
             <label className="block text-[11px] font-bold text-neutral-500 mb-1">Sprint</label>
             <select
-              value={task.sprint_id || task.sprintId || ''}
+              value={currentSprintId}
               onChange={(e) => handleUpdate({ sprintId: e.target.value || null })}
               className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
             >

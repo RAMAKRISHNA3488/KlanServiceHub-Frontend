@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetMembers } from '@/features/members/api/use-get-members';
+import { useCurrent } from '@/features/auth/api/use-current';
 import { tasksApi, sprintsApi, workflowsAdminApi } from '@/lib/api-client';
 import { toast } from 'sonner';
 import {
@@ -23,6 +24,8 @@ import {
   Plus,
   ArrowRight,
   Sparkles,
+  Pencil,
+  Check,
 } from 'lucide-react';
 
 const TYPE_ICONS = {
@@ -45,6 +48,7 @@ const STATUS_COLORS = {
 
 export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdated }) => {
   const workspaceId = useWorkspaceId();
+  const { data: currentUser } = useCurrent();
   const { data: membersData } = useGetMembers({ workspaceId });
   const members = membersData?.documents || [];
 
@@ -56,7 +60,20 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [addingComment, setAddingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingContent, setEditingContent] = useState('');
   const [activeTab, setActiveTab] = useState('COMMENTS'); // COMMENTS, SUBTASKS, WORKLOG
+
+  const currentMember = members.find(
+    (m) =>
+      m.userId === currentUser?.$id ||
+      m.user_id === currentUser?.$id ||
+      m.$id === currentUser?.$id
+  );
+  const isAdmin =
+    currentMember?.role === 'ADMIN' ||
+    currentUser?.role === 'ADMIN' ||
+    task?.workspace?.user_id === currentUser?.$id;
 
   const [subtaskTitle, setSubtaskTitle] = useState('');
   const [logHoursInput, setLogHoursInput] = useState(1);
@@ -100,10 +117,15 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
   const handleUpdateProperty = async (fields) => {
     try {
-      await tasksApi.updateTask(taskId, fields);
-      setTask((prev) => ({ ...prev, ...fields }));
+      const res = await tasksApi.updateTask(taskId, fields);
+      if (res?.data) {
+        setTask(res.data);
+        if (onUpdated) onUpdated(res.data);
+      } else {
+        setTask((prev) => ({ ...prev, ...fields }));
+        if (onUpdated) onUpdated({ ...task, ...fields });
+      }
       toast.success('Issue updated');
-      if (onUpdated) onUpdated({ ...task, ...fields });
     } catch (err) {
       toast.error(err.message || 'Failed to update issue');
     }
@@ -122,6 +144,42 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       toast.error(err.message || 'Failed to post comment');
     } finally {
       setAddingComment(false);
+    }
+  };
+
+  const handleStartEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditingContent(comment.content || '');
+  };
+
+  const handleSaveEditComment = async (commentId) => {
+    if (!editingContent.trim()) {
+      toast.error('Comment cannot be empty');
+      return;
+    }
+    try {
+      await tasksApi.updateComment(taskId, commentId, editingContent.trim());
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, content: editingContent.trim(), updated_at: new Date().toISOString() } : c
+        )
+      );
+      setEditingCommentId(null);
+      setEditingContent('');
+      toast.success('Comment updated');
+    } catch (err) {
+      toast.error(err.message || 'Failed to update comment');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Are you sure you want to delete this comment?')) return;
+    try {
+      await tasksApi.deleteComment(taskId, commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      toast.success('Comment deleted');
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete comment');
     }
   };
 
@@ -316,22 +374,108 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   </form>
 
                   <div className="space-y-3 pt-2">
-                    {comments.map((c) => (
-                      <div key={c.id} className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3 border border-neutral-100">
-                        <div className="size-7 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
-                          {c.user_name?.substring(0, 2).toUpperCase() || 'U'}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-neutral-900">{c.user_name}</span>
-                            <span className="text-[10px] text-neutral-400">
-                              {new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                    {comments.length === 0 ? (
+                      <p className="text-xs text-neutral-400 italic py-2">No comments yet.</p>
+                    ) : (
+                      comments.map((c) => {
+                        const isAuthor =
+                          c.user_id === currentUser?.$id ||
+                          c.userId === currentUser?.$id;
+                        const canModify = isAdmin || isAuthor;
+
+                        return (
+                          <div
+                            key={c.id}
+                            className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3 border border-neutral-100 hover:border-neutral-200 transition"
+                          >
+                            <div className="size-7 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                              {c.user_name?.substring(0, 2).toUpperCase() ||
+                                c.userName?.substring(0, 2).toUpperCase() ||
+                                'U'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-xs text-neutral-900">
+                                    {c.user_name || c.userName || 'Member'}
+                                  </span>
+                                  <span className="text-[10px] text-neutral-400">
+                                    {c.created_at
+                                      ? new Date(c.created_at).toLocaleTimeString([], {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                        })
+                                      : ''}
+                                    {c.updated_at && c.updated_at !== c.created_at && (
+                                      <span className="italic ml-1 text-neutral-400">
+                                        (edited)
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+
+                                {canModify && editingCommentId !== c.id && (
+                                  <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStartEditComment(c)}
+                                      title="Edit comment"
+                                      className="p-1 rounded-md text-neutral-400 hover:text-blue-600 hover:bg-neutral-200/60 transition"
+                                    >
+                                      <Pencil className="size-3" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteComment(c.id)}
+                                      title="Delete comment"
+                                      className="p-1 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                    >
+                                      <Trash2 className="size-3" />
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+
+                              {editingCommentId === c.id ? (
+                                <div className="mt-2 space-y-2">
+                                  <textarea
+                                    rows={2}
+                                    value={editingContent}
+                                    onChange={(e) => setEditingContent(e.target.value)}
+                                    className="w-full rounded-lg border border-blue-400 bg-white p-2 text-xs text-neutral-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+                                  />
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSaveEditComment(c.id)}
+                                      className="flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 transition"
+                                    >
+                                      <Check className="size-3" />
+                                      Save
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setEditingCommentId(null);
+                                        setEditingContent('');
+                                      }}
+                                      className="flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-600 hover:bg-neutral-50 transition"
+                                    >
+                                      <X className="size-3" />
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap">
+                                  {c.content}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-xs text-neutral-700 mt-1">{c.content}</p>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               )}
