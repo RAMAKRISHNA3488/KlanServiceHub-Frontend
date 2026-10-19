@@ -122,6 +122,8 @@ export const TaskIdClient = () => {
       setTask((prev) => ({
         ...prev,
         ...fields,
+        storyPoints: fields.storyPoints !== undefined ? fields.storyPoints : (prev?.storyPoints ?? prev?.story_points),
+        story_points: fields.storyPoints !== undefined ? fields.storyPoints : (prev?.story_points ?? prev?.storyPoints),
         assignee_id: fields.assigneeId !== undefined ? fields.assigneeId : prev?.assignee_id,
         assigneeId: fields.assigneeId !== undefined ? fields.assigneeId : prev?.assigneeId,
         sprint_id: fields.sprintId !== undefined ? fields.sprintId : prev?.sprint_id,
@@ -131,8 +133,8 @@ export const TaskIdClient = () => {
       const res = await tasksApi.updateTask(taskId, fields);
       if (res?.data) {
         setTask(res.data);
-        if (res.data.storyPoints !== undefined) {
-          setStoryPointsInput(String(res.data.storyPoints));
+        if (res.data.storyPoints !== undefined || res.data.story_points !== undefined) {
+          setStoryPointsInput(String(res.data.storyPoints ?? res.data.story_points ?? 1));
         }
       }
       toast.success('Updated successfully');
@@ -605,18 +607,19 @@ export const TaskIdClient = () => {
               min={0}
               value={storyPointsInput}
               onChange={(e) => setStoryPointsInput(e.target.value)}
-              onBlur={(e) => {
-                const val = Number(e.target.value);
-                if (val !== (task.storyPoints ?? task.story_points ?? 1)) {
-                  handleUpdate({ storyPoints: val });
+              onBlur={() => {
+                const val = parseInt(storyPointsInput, 10);
+                if (!isNaN(val) && val >= 0) {
+                  if (val !== (task?.storyPoints ?? task?.story_points ?? 1)) {
+                    handleUpdate({ storyPoints: val });
+                  }
+                } else {
+                  setStoryPointsInput(String(task?.storyPoints ?? task?.story_points ?? 1));
                 }
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  const val = Number(e.currentTarget.value);
-                  if (val !== (task.storyPoints ?? task.story_points ?? 1)) {
-                    handleUpdate({ storyPoints: val });
-                  }
+                  e.currentTarget.blur();
                 }
               }}
               className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"

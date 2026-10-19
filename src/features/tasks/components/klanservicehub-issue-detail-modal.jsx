@@ -84,6 +84,13 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
   const [subtaskTitle, setSubtaskTitle] = useState('');
   const [logHoursInput, setLogHoursInput] = useState(1);
+  const [storyPointsInput, setStoryPointsInput] = useState('1');
+
+  useEffect(() => {
+    if (task) {
+      setStoryPointsInput(String(task.storyPoints ?? task.story_points ?? 1));
+    }
+  }, [task?.storyPoints, task?.story_points]);
 
   const fetchTaskDetails = async () => {
     if (!taskId) return;
@@ -124,17 +131,27 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
   const handleUpdateProperty = async (fields) => {
     try {
+      setTask((prev) => ({
+        ...prev,
+        ...fields,
+        storyPoints: fields.storyPoints !== undefined ? fields.storyPoints : (prev?.storyPoints ?? prev?.story_points),
+        story_points: fields.storyPoints !== undefined ? fields.storyPoints : (prev?.story_points ?? prev?.storyPoints),
+      }));
+
       const res = await tasksApi.updateTask(taskId, fields);
       if (res?.data) {
         setTask(res.data);
+        if (res.data.storyPoints !== undefined || res.data.story_points !== undefined) {
+          setStoryPointsInput(String(res.data.storyPoints ?? res.data.story_points ?? 1));
+        }
         if (onUpdated) onUpdated(res.data);
       } else {
-        setTask((prev) => ({ ...prev, ...fields }));
         if (onUpdated) onUpdated({ ...task, ...fields });
       }
       toast.success('Issue updated');
     } catch (err) {
       toast.error(err.message || 'Failed to update issue');
+      fetchTaskDetails();
     }
   };
 
@@ -684,9 +701,24 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               <label className="block text-[11px] font-bold text-neutral-500 mb-1">Story Points Estimate</label>
               <input
                 type="number"
-                min={1}
-                value={task?.storyPoints || 1}
-                onChange={(e) => handleUpdateProperty({ storyPoints: e.target.value })}
+                min={0}
+                value={storyPointsInput}
+                onChange={(e) => setStoryPointsInput(e.target.value)}
+                onBlur={() => {
+                  const val = parseInt(storyPointsInput, 10);
+                  if (!isNaN(val) && val >= 0) {
+                    if (val !== (task?.storyPoints ?? task?.story_points ?? 1)) {
+                      handleUpdateProperty({ storyPoints: val });
+                    }
+                  } else {
+                    setStoryPointsInput(String(task?.storyPoints ?? task?.story_points ?? 1));
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.currentTarget.blur();
+                  }
+                }}
                 className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
               />
             </div>
