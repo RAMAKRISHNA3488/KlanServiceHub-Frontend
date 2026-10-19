@@ -29,6 +29,24 @@ export const BoardFilters = ({
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(true);
 
+  // Defensively ensure all lists are guaranteed arrays regardless of backend payload shape
+  const safeProjects = Array.isArray(projects)
+    ? projects
+    : (Array.isArray(projects?.documents) ? projects.documents : []);
+  const safeTeams = Array.isArray(teams)
+    ? teams
+    : (Array.isArray(teams?.teams) ? teams.teams : (Array.isArray(teams?.data) ? teams.data : []));
+  const safeMembers = Array.isArray(members)
+    ? members
+    : (Array.isArray(members?.documents) ? members.documents : []);
+  const safeSprints = Array.isArray(sprints)
+    ? sprints
+    : (Array.isArray(sprints?.sprints) ? sprints.sprints : (Array.isArray(sprints?.data) ? sprints.data : []));
+  const safeStatuses = Array.isArray(statuses) ? statuses : [];
+  const safeIssueTypes = Array.isArray(issueTypes)
+    ? issueTypes
+    : (Array.isArray(issueTypes?.data) ? issueTypes.data : []);
+
   const datePresets = [
     { label: 'Today', value: 'today' },
     { label: 'Last 7 Days', value: '7d' },
@@ -43,7 +61,7 @@ export const BoardFilters = ({
   const availableWorkTypes = Array.from(
     new Set([
       ...defaultWorkTypes,
-      ...(issueTypes || []).map((t) => t.name || t.id).filter(Boolean),
+      ...safeIssueTypes.map((t) => t.name || t.id).filter(Boolean),
     ])
   );
 
@@ -55,8 +73,8 @@ export const BoardFilters = ({
     { id: 'DONE', label: 'Done' },
   ];
 
-  const availableStatuses = (statuses && statuses.length > 0)
-    ? statuses.map((s) => ({
+  const availableStatuses = (safeStatuses && safeStatuses.length > 0)
+    ? safeStatuses.map((s) => ({
         id: s.id || s.rawName || s.name,
         label: s.label || s.name || s.id,
       }))
@@ -214,7 +232,7 @@ export const BoardFilters = ({
               className="w-full rounded-lg border border-neutral-200 bg-neutral-50/70 px-2 py-1.5 text-xs text-neutral-800 focus:bg-white focus:border-blue-500 focus:outline-none transition"
             >
               <option value="ALL">All Projects</option>
-              {projects.map((p) => {
+              {safeProjects.map((p) => {
                 const id = p.$id || p.id;
                 return (
                   <option key={id} value={id}>
@@ -237,7 +255,7 @@ export const BoardFilters = ({
               className="w-full rounded-lg border border-neutral-200 bg-neutral-50/70 px-2 py-1.5 text-xs text-neutral-800 focus:bg-white focus:border-blue-500 focus:outline-none transition"
             >
               <option value="ALL">All Teams</option>
-              {teams.map((t) => (
+              {safeTeams.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}
                 </option>
@@ -258,7 +276,7 @@ export const BoardFilters = ({
             >
               <option value="ALL">All Assignees</option>
               <option value="UNASSIGNED">Unassigned</option>
-              {members.map((m) => {
+              {safeMembers.map((m) => {
                 const id = m.memberId || m.id || m.$id;
                 return (
                   <option key={id} value={id}>
@@ -341,7 +359,7 @@ export const BoardFilters = ({
               className="w-full rounded-lg border border-neutral-200 bg-neutral-50/70 px-2 py-1.5 text-xs text-neutral-800 focus:bg-white focus:border-blue-500 focus:outline-none transition"
             >
               <option value="ALL">All Sprints</option>
-              {sprints.map((sp) => (
+              {safeSprints.map((sp) => (
                 <option key={sp.id} value={sp.id}>
                   {sp.name}
                 </option>

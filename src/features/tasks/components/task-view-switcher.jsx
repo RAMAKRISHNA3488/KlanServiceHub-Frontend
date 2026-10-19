@@ -99,8 +99,8 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
           workflowsAdminApi.getIssueTypes(workspaceId).catch(() => ({ data: [] })),
         ]);
         return {
-          teams: teamsRes?.data || [],
-          sprints: sprintsRes?.data || [],
+          teams: Array.isArray(teamsRes?.data) ? teamsRes.data : (teamsRes?.data?.teams || []),
+          sprints: Array.isArray(sprintsRes?.data) ? sprintsRes.data : (sprintsRes?.data?.sprints || []),
           workflows: wfRes?.data || [],
           issueTypes: typesRes?.data || [],
         };

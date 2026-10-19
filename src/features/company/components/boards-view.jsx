@@ -159,8 +159,8 @@ export const BoardsView = () => {
         tasks: tasksRes?.data?.documents || [],
         workflows: wfRes?.data || [],
         issueTypes: typesRes?.data || [],
-        teams: teamsRes?.data || [],
-        sprints: sprintsRes?.data || [],
+        teams: Array.isArray(teamsRes?.data) ? teamsRes.data : (teamsRes?.data?.teams || []),
+        sprints: Array.isArray(sprintsRes?.data) ? sprintsRes.data : (sprintsRes?.data?.sprints || []),
       };
     },
     enabled: !!workspaceId,
