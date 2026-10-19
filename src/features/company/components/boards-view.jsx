@@ -68,6 +68,7 @@ export const BoardsView = () => {
   const [issueTypes, setIssueTypes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
+  const [draggedOverCol, setDraggedOverCol] = useState(null);
 
   useEffect(() => {
     if (queryProjectId && queryProjectId !== filters.projectId) {
@@ -817,10 +818,34 @@ export const BoardsView = () => {
           const columnTasks = getTasksForColumn(col.id);
           const Icon = col.icon;
 
+          const isOver = draggedOverCol === col.id;
+
           return (
             <div
               key={col.id}
-              className={`flex flex-col rounded-2xl border ${col.border} ${col.bg} p-3 min-w-[280px] flex-1 min-h-[550px] shadow-xs shrink-0`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (draggedOverCol !== col.id) setDraggedOverCol(col.id);
+              }}
+              onDragLeave={(e) => {
+                if (e.currentTarget === e.target) {
+                  setDraggedOverCol(null);
+                }
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDraggedOverCol(null);
+                const droppedTaskId = e.dataTransfer.getData('text/plain');
+                if (droppedTaskId) {
+                  handleMoveStatus(droppedTaskId, col.id);
+                }
+              }}
+              className={`flex flex-col rounded-2xl border transition-all ${
+                isOver
+                  ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-400/40 shadow-md'
+                  : `${col.border} ${col.bg}`
+              } p-3 min-w-[280px] flex-1 min-h-[550px] shadow-xs shrink-0`}
             >
               {/* Column Header */}
               <div className="flex items-center justify-between pb-3 border-b border-neutral-200/80 mb-3">
@@ -907,9 +932,34 @@ export const BoardsView = () => {
                     return (
                       <div
                         key={taskId}
-                        onDoubleClick={() => setSelectedDetailTaskId(taskId)}
-                        className="shrink-0 w-full rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-md hover:border-blue-400 transition-all space-y-2 cursor-pointer select-none"
-                        title="Double-click to open ticket details"
+                        draggable={true}
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', taskId);
+                          e.dataTransfer.effectAllowed = 'move';
+                          e.currentTarget.style.opacity = '0.4';
+                        }}
+                        onDragEnd={(e) => {
+                          e.currentTarget.style.opacity = '1';
+                          setDraggedOverCol(null);
+                        }}
+                        onDoubleClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const nextCol = columns[colIndex + 1];
+                          if (nextCol) {
+                            const isDone = nextCol.category === 'DONE' || nextCol.id === 'DONE';
+                            if (isDone && !isAdmin) {
+                              toast.error('Permission denied: Only administrators can move issues to DONE.');
+                              return;
+                            }
+                            handleMoveStatus(taskId, nextCol.id);
+                            toast.success(`Moved ${task.key || 'issue'} to ${nextCol.label}`);
+                          } else {
+                            toast.info(`Ticket is already at the final stage (${col.label})`);
+                          }
+                        }}
+                        className="shrink-0 w-full rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-md hover:border-blue-400 transition-all space-y-2 cursor-grab active:cursor-grabbing select-none"
+                        title="Double-click to advance stage • Drag to move • Click to view details"
                       >
                         {/* Task Key, Issue Type Badge & Priority */}
                         <div className="flex items-center justify-between gap-1 flex-wrap">
@@ -923,9 +973,17 @@ export const BoardsView = () => {
                                 <span>{matchedType.name}</span>
                               </span>
                             )}
-                            <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDetailTaskId(taskId);
+                              }}
+                              className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded hover:bg-blue-100 transition cursor-pointer"
+                              title="Click to view ticket details"
+                            >
                               {task.key || 'TASK'}
-                            </span>
+                            </button>
                           </div>
                           <div className="flex items-center gap-1.5">
                             <span
@@ -970,7 +1028,14 @@ export const BoardsView = () => {
                         </div>
 
                         {/* Task Summary */}
-                        <p className="text-xs font-semibold text-neutral-900 leading-snug break-words">
+                        <p
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDetailTaskId(taskId);
+                          }}
+                          className="text-xs font-semibold text-neutral-900 leading-snug break-words hover:text-blue-600 transition cursor-pointer"
+                          title="Click to view ticket details"
+                        >
                           {task.name}
                         </p>
 
