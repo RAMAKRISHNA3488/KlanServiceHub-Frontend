@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useCurrent } from '@/features/auth/api/use-current';
+import { useConfirm } from '@/hooks/use-confirm';
 import { tasksApi, sprintsApi, workflowsAdminApi } from '@/lib/api-client';
 import { toast } from 'sonner';
 import {
@@ -58,6 +59,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const [workflowStatuses, setWorkflowStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
+
+  const [DeleteCommentDialog, confirmDeleteComment] = useConfirm(
+    'Delete Comment',
+    'Are you sure you want to delete this comment? This action cannot be undone.',
+    'destructive'
+  );
   const [newComment, setNewComment] = useState('');
   const [addingComment, setAddingComment] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -173,7 +180,13 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm('Are you sure you want to delete this comment?')) return;
+    const ok = await confirmDeleteComment({
+      title: 'Delete Comment',
+      subtitle: 'Permanent deletion',
+      message: 'Are you sure you want to delete this comment? This action cannot be undone.',
+      confirmText: 'Delete Comment',
+    });
+    if (!ok) return;
     try {
       await tasksApi.deleteComment(taskId, commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
@@ -708,6 +721,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           </div>
         </div>
       </div>
+      <DeleteCommentDialog />
     </div>
   );
 };

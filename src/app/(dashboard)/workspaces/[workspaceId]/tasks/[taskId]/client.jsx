@@ -4,6 +4,7 @@ import { useTaskId } from '@/features/tasks/hooks/use-task-id';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useCurrent } from '@/features/auth/api/use-current';
+import { useConfirm } from '@/hooks/use-confirm';
 import { tasksApi, sprintsApi } from '@/lib/api-client';
 import { PageLoader } from '@/components/page-loader';
 import { PageError } from '@/components/page-error';
@@ -66,6 +67,12 @@ export const TaskIdClient = () => {
   const [logHours, setLogHours] = useState(1);
   const [activeTab, setActiveTab] = useState('COMMENTS');
   const [storyPointsInput, setStoryPointsInput] = useState('1');
+
+  const [DeleteCommentDialog, confirmDeleteComment] = useConfirm(
+    'Delete Comment',
+    'Are you sure you want to delete this comment? This action cannot be undone.',
+    'destructive'
+  );
 
   // Determine current user permissions
   const currentMember = members.find(
@@ -174,7 +181,13 @@ export const TaskIdClient = () => {
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm('Are you sure you want to delete this comment?')) return;
+    const ok = await confirmDeleteComment({
+      title: 'Delete Comment',
+      subtitle: 'Permanent deletion',
+      message: 'Are you sure you want to delete this comment? This action cannot be undone.',
+      confirmText: 'Delete Comment',
+    });
+    if (!ok) return;
     try {
       await tasksApi.deleteComment(taskId, commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
@@ -639,6 +652,7 @@ export const TaskIdClient = () => {
           </div>
         </div>
       </div>
+      <DeleteCommentDialog />
     </div>
   );
 };
