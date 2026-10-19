@@ -145,17 +145,21 @@ export const DataProcessingPage = () => {
           </div>
         </div>
 
-        {/* INTERACTIVE CONSENT MANAGEMENT CENTER */}
-        <div className="rounded-3xl border border-neutral-200 bg-neutral-900 text-white p-6 sm:p-8 shadow-xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-neutral-800">
+        {/* INTERACTIVE CONSENT MANAGEMENT CENTER (GLASSMORHPISM FORMAT) */}
+        <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-neutral-950/75 sm:bg-neutral-900/65 text-white p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl backdrop-saturate-150 space-y-6">
+          {/* Ambient Specular Glow Orbs */}
+          <div className="pointer-events-none absolute -top-16 -left-12 size-60 bg-blue-500/15 rounded-full blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -right-12 size-60 bg-indigo-500/15 rounded-full blur-3xl" />
+
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10">
             <div>
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-2">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-300 text-xs font-semibold mb-2 backdrop-blur-md">
                 <FileCheck2 className="size-3.5" /> Live Consent Preference Center
               </div>
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
                 Manage Data Processing Consents
               </h2>
-              <p className="text-xs sm:text-sm text-neutral-400 mt-1">
+              <p className="text-xs sm:text-sm text-neutral-300 mt-1">
                 Adjust how klanservicehub handles your workspace caching, local storage state, and diagnostics.
               </p>
             </div>
@@ -164,7 +168,7 @@ export const DataProcessingPage = () => {
               <div className="flex items-center gap-2 self-start sm:self-auto">
                 <button
                   onClick={handleCopyReceipt}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white border border-neutral-700 text-xs font-medium transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-neutral-200 hover:text-white border border-white/15 backdrop-blur-md text-xs font-medium transition cursor-pointer"
                   title="Copy cryptographic audit receipt"
                 >
                   {copiedReceipt ? (
@@ -183,15 +187,15 @@ export const DataProcessingPage = () => {
             )}
           </div>
 
-          {/* Consent Toggles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Consent Toggles Grid (Frosted Glass Tiles) */}
+          <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 1. Necessary */}
-            <div className="p-4 rounded-2xl bg-neutral-950/70 border border-neutral-800 space-y-2">
+            <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-white flex items-center gap-2">
                   <Lock className="size-4 text-neutral-400" /> Strictly Necessary & Session Auth
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 bg-neutral-800 px-2 py-0.5 rounded-md border border-neutral-700">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-300 bg-white/10 px-2.5 py-0.5 rounded-md border border-white/15">
                   Always Active
                 </span>
               </div>
@@ -201,9 +205,9 @@ export const DataProcessingPage = () => {
             </div>
 
             {/* 2. Turbocache */}
-            <div className="p-4 rounded-2xl bg-neutral-950/70 border border-neutral-800 space-y-2 hover:border-blue-900/60 transition">
+            <div className="p-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-blue-400/30 backdrop-blur-md space-y-2 transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-white flex items-center gap-2">
+                <span className="text-sm font-bold text-blue-300 flex items-center gap-2">
                   <Zap className="size-4 text-blue-400" /> Edge Turbocache & Route Pre-warming
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -213,7 +217,7 @@ export const DataProcessingPage = () => {
                     onChange={(e) => setPerformanceConsent(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-10 h-5.5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-10 h-5.5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white/30 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-500 peer-checked:shadow-[0_0_12px_rgba(37,99,235,0.6)]"></div>
                 </label>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
@@ -222,7 +226,7 @@ export const DataProcessingPage = () => {
             </div>
 
             {/* 3. Layout Memory */}
-            <div className="p-4 rounded-2xl bg-neutral-950/70 border border-neutral-800 space-y-2 hover:border-blue-900/60 transition">
+            <div className="p-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-indigo-400/30 backdrop-blur-md space-y-2 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-white flex items-center gap-2">
                   <SlidersHorizontal className="size-4 text-indigo-400" /> Workspace Layout Memory
@@ -234,7 +238,7 @@ export const DataProcessingPage = () => {
                     onChange={(e) => setFunctionalConsent(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-10 h-5.5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-10 h-5.5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white/30 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-500 peer-checked:shadow-[0_0_12px_rgba(37,99,235,0.6)]"></div>
                 </label>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
@@ -243,7 +247,7 @@ export const DataProcessingPage = () => {
             </div>
 
             {/* 4. Diagnostics */}
-            <div className="p-4 rounded-2xl bg-neutral-950/70 border border-neutral-800 space-y-2 hover:border-blue-900/60 transition">
+            <div className="p-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-sky-400/30 backdrop-blur-md space-y-2 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-white flex items-center gap-2">
                   <Cpu className="size-4 text-sky-400" /> Latency Diagnostics & Edge Health
@@ -255,7 +259,7 @@ export const DataProcessingPage = () => {
                     onChange={(e) => setTelemetryConsent(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-10 h-5.5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-10 h-5.5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white/30 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-500 peer-checked:shadow-[0_0_12px_rgba(37,99,235,0.6)]"></div>
                 </label>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
@@ -265,14 +269,14 @@ export const DataProcessingPage = () => {
           </div>
 
           {/* Action Toolbar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-neutral-800">
-            <div className="flex items-center gap-2 text-xs text-neutral-400">
+          <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-white/10">
+            <div className="flex items-center gap-2 text-xs text-neutral-300">
               {consentState?.consentId ? (
                 <span>
                   Consent Active: <strong className="text-white font-mono">{consentState.consentId}</strong>
                 </span>
               ) : (
-                <span className="text-amber-400 flex items-center gap-1">
+                <span className="text-amber-300 flex items-center gap-1">
                   <AlertCircle className="size-3.5" /> No active consent recorded on this browser.
                 </span>
               )}
@@ -282,20 +286,20 @@ export const DataProcessingPage = () => {
               {consentState && (
                 <button
                   onClick={handleReset}
-                  className="px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-semibold transition cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-neutral-200 text-xs font-semibold border border-white/10 backdrop-blur-md transition cursor-pointer"
                 >
                   Reset Consent
                 </button>
               )}
               <button
                 onClick={handleAcceptAll}
-                className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold border border-white/15 backdrop-blur-md transition cursor-pointer"
               >
                 Accept All
               </button>
               <button
                 onClick={handleSave}
-                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-lg shadow-blue-600/20 cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600/90 to-indigo-600/90 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold transition border border-blue-400/40 shadow-[0_0_20px_rgba(37,99,235,0.35)] backdrop-blur-md cursor-pointer flex items-center gap-1.5"
               >
                 {saveSuccess ? (
                   <>
