@@ -4,8 +4,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useCurrent } from '@/features/auth/api/use-current';
-import { boardsApi, tasksApi, workflowsAdminApi } from '@/lib/api-client';
+import { boardsApi, tasksApi, workflowsAdminApi, teamsAdminApi, sprintsApi } from '@/lib/api-client';
 import { KlanserviceHubIssueDetailModal } from '@/features/tasks/components/klanservicehub-issue-detail-modal';
+import { BoardFilters } from './board-filters';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { toast } from 'sonner';
@@ -50,27 +51,67 @@ export const BoardsView = () => {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const queryProjectId = searchParams.get('projectId');
-  const [selectedProject, setSelectedProject] = useState(queryProjectId || 'ALL');
+  const [filters, setFilters] = useState({
+    dateRange: null,
+    startDate: '',
+    endDate: '',
+    projectId: queryProjectId || 'ALL',
+    teamId: 'ALL',
+    assigneeId: 'ALL',
+    workType: 'ALL',
+    status: 'ALL',
+    priority: 'ALL',
+    sprintId: 'ALL',
+  });
+  const [teams, setTeams] = useState([]);
+  const [sprints, setSprints] = useState([]);
   const [issueTypes, setIssueTypes] = useState([]);
-  const [selectedPriority, setSelectedPriority] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
 
   useEffect(() => {
-    if (queryProjectId && queryProjectId !== selectedProject) {
-      setSelectedProject(queryProjectId);
+    if (queryProjectId && queryProjectId !== filters.projectId) {
+      setFilters((prev) => ({ ...prev, projectId: queryProjectId }));
     }
   }, [queryProjectId]);
 
-  const handleProjectChange = (newProjId) => {
-    setSelectedProject(newProjId);
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => {
+      const updated = { ...prev, [key]: value };
+      if (key === 'projectId') {
+        const nextParams = new URLSearchParams(searchParams);
+        if (value === 'ALL' || !value) {
+          nextParams.delete('projectId');
+        } else {
+          nextParams.set('projectId', value);
+        }
+        setSearchParams(nextParams);
+      }
+      return updated;
+    });
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      dateRange: null,
+      startDate: '',
+      endDate: '',
+      projectId: 'ALL',
+      teamId: 'ALL',
+      assigneeId: 'ALL',
+      workType: 'ALL',
+      status: 'ALL',
+      priority: 'ALL',
+      sprintId: 'ALL',
+    });
+    setSearchQuery('');
     const nextParams = new URLSearchParams(searchParams);
-    if (newProjId === 'ALL') {
-      nextParams.delete('projectId');
-    } else {
-      nextParams.set('projectId', newProjId);
-    }
+    nextParams.delete('projectId');
     setSearchParams(nextParams);
+  };
+
+  const handleProjectChange = (newProjId) => {
+    handleFilterChange('projectId', newProjId);
   };
 
   const { data: projectsData } = useGetProjects({ workspaceId });
@@ -105,17 +146,21 @@ export const BoardsView = () => {
   const { data: boardsData, isLoading: isQueryLoading } = useQuery({
     queryKey: ['boards-view-data', workspaceId],
     queryFn: async () => {
-      const [boardsRes, tasksRes, wfRes, typesRes] = await Promise.all([
+      const [boardsRes, tasksRes, wfRes, typesRes, teamsRes, sprintsRes] = await Promise.all([
         boardsApi.getBoards(workspaceId),
         tasksApi.getTasks({ workspaceId }),
         workflowsAdminApi.getWorkflows(workspaceId).catch(() => ({ data: [] })),
         workflowsAdminApi.getIssueTypes(workspaceId).catch(() => ({ data: [] })),
+        teamsAdminApi.getTeams(workspaceId).catch(() => ({ data: [] })),
+        sprintsApi.getSprints(workspaceId).catch(() => ({ data: [] })),
       ]);
       return {
         boards: boardsRes?.data || [],
         tasks: tasksRes?.data?.documents || [],
         workflows: wfRes?.data || [],
         issueTypes: typesRes?.data || [],
+        teams: teamsRes?.data || [],
+        sprints: sprintsRes?.data || [],
       };
     },
     enabled: !!workspaceId,
@@ -127,6 +172,8 @@ export const BoardsView = () => {
       setTasks(boardsData.tasks);
       setWorkflows(boardsData.workflows);
       setIssueTypes(boardsData.issueTypes);
+      setTeams(boardsData.teams || []);
+      setSprints(boardsData.sprints || []);
       if (boardsData.boards.length > 0 && !selectedBoardId) {
         setSelectedBoardId(boardsData.boards[0].id);
       }
@@ -310,7 +357,7 @@ export const BoardsView = () => {
 
   const handleQuickCreateTask = async (status) => {
     if (!newTaskName.trim()) return;
-    const targetProject = newTaskProject || (selectedProject !== 'ALL' ? selectedProject : (projects[0]?.$id || projects[0]?.id));
+    const targetProject = newTaskProject || (filters.projectId !== 'ALL' ? filters.projectId : (projects[0]?.$id || projects[0]?.id));
     if (!targetProject) {
       toast.error('Please create a project first before adding tasks.');
       return;
@@ -340,6 +387,47 @@ export const BoardsView = () => {
     }
   };
 
+  const isWithinDateRange = (taskDateStr, range, startDate, endDate) => {
+    if (!range || range === 'ALL') return true;
+    if (!taskDateStr) return false;
+
+    const taskDate = new Date(taskDateStr);
+    if (isNaN(taskDate.getTime())) return false;
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (range === 'today') {
+      return taskDate >= startOfToday;
+    }
+    if (range === '7d') {
+      const past7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return taskDate >= past7;
+    }
+    if (range === '30d') {
+      const past30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return taskDate >= past30;
+    }
+    if (range === '90d') {
+      const past90 = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      return taskDate >= past90;
+    }
+    if (range === 'thisYear') {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      return taskDate >= startOfYear;
+    }
+    if (range === 'custom') {
+      if (startDate && new Date(taskDateStr) < new Date(startDate)) return false;
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        if (new Date(taskDateStr) > end) return false;
+      }
+      return true;
+    }
+    return true;
+  };
+
   const uniqueTasks = useMemo(() => {
     const seen = new Set();
     return tasks.filter((t) => {
@@ -357,22 +445,107 @@ export const BoardsView = () => {
   }, [tasks]);
 
   const filteredTasks = uniqueTasks.filter((task) => {
+    // 1. Search Query
     const matchesSearch =
       !searchQuery ||
       task.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.key?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.description?.toLowerCase().includes(searchQuery.toLowerCase());
 
+    if (!matchesSearch) return false;
+
+    // 2. Project Filter
     const matchesProject =
-      selectedProject === 'ALL' ||
-      task.projectId === selectedProject ||
-      task.project_id === selectedProject ||
-      task.project?.$id === selectedProject;
+      !filters.projectId ||
+      filters.projectId === 'ALL' ||
+      task.projectId === filters.projectId ||
+      task.project_id === filters.projectId ||
+      task.project?.$id === filters.projectId ||
+      task.project?.id === filters.projectId;
 
-    const matchesPriority =
-      selectedPriority === 'ALL' || task.priority === selectedPriority;
+    if (!matchesProject) return false;
 
-    return matchesSearch && matchesProject && matchesPriority;
+    // 3. Team Filter
+    if (filters.teamId && filters.teamId !== 'ALL') {
+      const selectedTeam = teams.find((t) => t.id === filters.teamId);
+      if (selectedTeam) {
+        const teamMemberIds = new Set((selectedTeam.members || []).map((m) => m.id || m.userId || m.user_id));
+        const teamProjectIds = new Set((selectedTeam.projects || []).map((p) => p.id || p.$id));
+        const assigneeUserId = task.assignee?.userId || task.assignee?.user_id || task.assignee?.id || task.assigneeId;
+        const taskProjId = task.projectId || task.project_id;
+        const inTeamMembers = assigneeUserId && teamMemberIds.has(assigneeUserId);
+        const inTeamProjects = taskProjId && teamProjectIds.has(taskProjId);
+        if (!inTeamMembers && !inTeamProjects) return false;
+      }
+    }
+
+    // 4. Assignee Filter
+    if (filters.assigneeId && filters.assigneeId !== 'ALL') {
+      if (filters.assigneeId === 'UNASSIGNED') {
+        if (task.assigneeId || task.assignee) return false;
+      } else {
+        const matchesAssignee =
+          task.assigneeId === filters.assigneeId ||
+          task.assignee?.$id === filters.assigneeId ||
+          task.assignee?.id === filters.assigneeId ||
+          task.assignee?.userId === filters.assigneeId ||
+          (Array.isArray(task.assignees) &&
+            task.assignees.some(
+              (a) =>
+                a.id === filters.assigneeId ||
+                a.memberId === filters.assigneeId ||
+                a.userId === filters.assigneeId
+            ));
+        if (!matchesAssignee) return false;
+      }
+    }
+
+    // 5. Work Type Filter
+    if (filters.workType && filters.workType !== 'ALL') {
+      const taskType = (task.issueType || task.issue_type || 'Task').toUpperCase();
+      if (taskType !== filters.workType.toUpperCase()) return false;
+    }
+
+    // 6. Status Filter
+    if (filters.status && filters.status !== 'ALL') {
+      const taskStatus = (task.status || '').toUpperCase().trim();
+      const filterStatus = filters.status.toUpperCase().trim();
+      if (taskStatus !== filterStatus) return false;
+    }
+
+    // 7. Priority Filter
+    if (filters.priority && filters.priority !== 'ALL') {
+      const taskPriority = (task.priority || '').toUpperCase().trim();
+      const filterPriority = filters.priority.toUpperCase().trim();
+      if (taskPriority !== filterPriority) return false;
+    }
+
+    // 8. Sprint Filter
+    if (filters.sprintId && filters.sprintId !== 'ALL') {
+      const taskSprint = task.sprintId || task.sprint_id;
+      if (taskSprint !== filters.sprintId) return false;
+    }
+
+    // 9. Date Range Filter
+    if (filters.dateRange && filters.dateRange !== 'ALL') {
+      const taskDates = [
+        task.createdAt,
+        task.created_at,
+        task.updatedAt,
+        task.updated_at,
+        task.dueDate,
+        task.due_date,
+      ].filter(Boolean);
+
+      if (taskDates.length > 0) {
+        const anyMatches = taskDates.some((d) =>
+          isWithinDateRange(d, filters.dateRange, filters.startDate, filters.endDate)
+        );
+        if (!anyMatches) return false;
+      }
+    }
+
+    return true;
   });
 
   const resolveTaskColumnId = (task, cols) => {
@@ -496,7 +669,7 @@ export const BoardsView = () => {
   }
 
   const activeBoard = boards.find((b) => b.id === selectedBoardId) || boards[0];
-  const activeProjectObj = projects.find((p) => (p.$id || p.id) === selectedProject);
+  const activeProjectObj = projects.find((p) => (p.$id || p.id) === filters.projectId);
   const boardDisplayName = activeProjectObj
     ? `${activeProjectObj.name} • Engineering Kanban Board`
     : (activeBoard?.name || 'Engineering Kanban Board');
@@ -595,7 +768,7 @@ export const BoardsView = () => {
           <button
             onClick={() => handleProjectChange('ALL')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer ${
-              selectedProject === 'ALL'
+              filters.projectId === 'ALL'
                 ? 'bg-neutral-900 text-white shadow-xs'
                 : 'bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200'
             }`}
@@ -604,7 +777,7 @@ export const BoardsView = () => {
           </button>
           {projects.map((p) => {
             const pId = p.$id || p.id;
-            const isSelected = selectedProject === pId;
+            const isSelected = filters.projectId === pId;
             return (
               <button
                 key={pId}
@@ -623,51 +796,20 @@ export const BoardsView = () => {
         </div>
       )}
 
-      {/* Board Filters Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-xl border border-neutral-200 shadow-xs">
-        <div className="flex items-center gap-2 flex-1 max-w-sm">
-          <div className="relative w-full">
-            <Search className="absolute left-2.5 top-2.5 size-3.5 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="Filter board by summary or key..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 pl-8 pr-3 py-1.5 text-xs focus:border-blue-500 focus:outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Project Filter */}
-          <select
-            value={selectedProject}
-            onChange={(e) => handleProjectChange(e.target.value)}
-            className="rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs font-medium text-neutral-700"
-          >
-            <option value="ALL">All Projects</option>
-            {projects.map((p) => (
-              <option key={p.$id || p.id} value={p.$id || p.id}>
-                {p.name} ({p.key || 'PROJ'})
-              </option>
-            ))}
-          </select>
-
-          {/* Priority Filter */}
-          <select
-            value={selectedPriority}
-            onChange={(e) => setSelectedPriority(e.target.value)}
-            className="rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs font-medium text-neutral-700"
-          >
-            <option value="ALL">All Priorities</option>
-            <option value="CRITICAL">P0 - Critical</option>
-            <option value="HIGH">P1 - High</option>
-            <option value="MEDIUM">P2 - Medium</option>
-            <option value="LOW">P3 - Low</option>
-            <option value="LOWEST">P4 - Lowest</option>
-          </select>
-        </div>
-      </div>
+      {/* Board Filters Bar Matching Reference Image Exactly */}
+      <BoardFilters
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onResetFilters={handleResetFilters}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        projects={projects}
+        teams={teams}
+        members={members}
+        sprints={sprints}
+        statuses={columns}
+        issueTypes={issueTypes}
+      />
 
       {/* Interactive Kanban Board Columns */}
       <div className="flex overflow-x-auto gap-4 items-start pb-6 custom-scrollbar">
