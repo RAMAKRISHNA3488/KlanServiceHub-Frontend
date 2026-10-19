@@ -6,6 +6,7 @@ import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { workflowsAdminApi } from '@/lib/api-client';
 import { KanbanCard } from './kanban-card';
 import { KanbanColumnHeader } from './kanban-column-header';
+import { KlanserviceHubIssueDetailModal } from './klanservicehub-issue-detail-modal';
 
 const DEFAULT_BOARDS = [
   { id: TaskStatus.BACKLOG, label: 'Backlog', color: '#94A3B8', category: 'TODO' },
@@ -18,6 +19,7 @@ const DEFAULT_BOARDS = [
 export const DataKanban = ({ data, onChange, isAdmin }) => {
     const workspaceId = useWorkspaceId();
     const [workflows, setWorkflows] = useState([]);
+    const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
 
     useEffect(() => {
         if (workspaceId) {
@@ -244,7 +246,8 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
     }, [tasks, onChange, columns, isAdmin, boardIds]);
 
     return (
-      <DragDropContext onDragEnd={onDragEnd}>
+      <>
+        <DragDropContext onDragEnd={onDragEnd}>
         <div className="custom-scrollbar flex overflow-x-auto pb-4 gap-3">
           {columns.map((col) => (
             <div
@@ -276,7 +279,10 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
                               {...provided.dragHandleProps}
                               ref={provided.innerRef}
                             >
-                              <KanbanCard task={task} />
+                              <KanbanCard
+                                task={task}
+                                onDoubleClick={() => setSelectedDetailTaskId(task?.$id || task?.id)}
+                              />
                             </div>
                           )}
                         </Draggable>
@@ -291,5 +297,26 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
           ))}
         </div>
       </DragDropContext>
-    );
+
+      {selectedDetailTaskId && (
+        <KlanserviceHubIssueDetailModal
+          taskId={selectedDetailTaskId}
+          open={!!selectedDetailTaskId}
+          onClose={() => setSelectedDetailTaskId(null)}
+          onUpdated={(updatedTask) => {
+            const uId = updatedTask?.$id || updatedTask?.id;
+            setTasks((prev) => {
+              const next = { ...prev };
+              Object.keys(next).forEach((colId) => {
+                next[colId] = next[colId].map((t) =>
+                  (t?.$id || t?.id) === uId ? { ...t, ...updatedTask } : t
+                );
+              });
+              return next;
+            });
+          }}
+        />
+      )}
+    </>
+  );
 };

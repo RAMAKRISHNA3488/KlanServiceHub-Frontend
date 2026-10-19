@@ -5,6 +5,7 @@ import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useCurrent } from '@/features/auth/api/use-current';
 import { boardsApi, tasksApi, workflowsAdminApi } from '@/lib/api-client';
+import { KlanserviceHubIssueDetailModal } from '@/features/tasks/components/klanservicehub-issue-detail-modal';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { toast } from 'sonner';
@@ -53,6 +54,7 @@ export const BoardsView = () => {
   const [issueTypes, setIssueTypes] = useState([]);
   const [selectedPriority, setSelectedPriority] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
 
   useEffect(() => {
     if (queryProjectId && queryProjectId !== selectedProject) {
@@ -763,7 +765,9 @@ export const BoardsView = () => {
                     return (
                       <div
                         key={taskId}
-                        className="shrink-0 w-full rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-md hover:border-blue-300 transition-all space-y-2"
+                        onDoubleClick={() => setSelectedDetailTaskId(taskId)}
+                        className="shrink-0 w-full rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-md hover:border-blue-400 transition-all space-y-2 cursor-pointer select-none"
+                        title="Double-click to open ticket details"
                       >
                         {/* Task Key, Issue Type Badge & Priority */}
                         <div className="flex items-center justify-between gap-1 flex-wrap">
@@ -811,7 +815,10 @@ export const BoardsView = () => {
                             {isAdmin && (
                               <button
                                 title="Delete ticket (Admin Only)"
-                                onClick={() => handleDeleteTask(taskId, task.key, task.name)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteTask(taskId, task.key, task.name);
+                                }}
                                 className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                               >
                                 <Trash2 className="size-3.5" />
@@ -841,7 +848,10 @@ export const BoardsView = () => {
                             {colIndex > 0 && (
                               <button
                                 title={`Move back to ${columns[colIndex - 1].label}`}
-                                onClick={() => handleMoveStatus(taskId, columns[colIndex - 1].id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveStatus(taskId, columns[colIndex - 1].id);
+                                }}
                                 className="p-1 rounded bg-neutral-50 hover:bg-neutral-200 text-neutral-600 transition"
                               >
                                 <ArrowLeft className="size-3" />
@@ -850,7 +860,10 @@ export const BoardsView = () => {
                             {colIndex < columns.length - 1 && (columns[colIndex + 1].category !== 'DONE' || isAdmin) && (
                               <button
                                 title={`Advance to ${columns[colIndex + 1].label}`}
-                                onClick={() => handleMoveStatus(taskId, columns[colIndex + 1].id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveStatus(taskId, columns[colIndex + 1].id);
+                                }}
                                 className="p-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition"
                               >
                                 <ArrowRight className="size-3" />
@@ -1022,6 +1035,21 @@ export const BoardsView = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Issue Detail Modal (Open on Double Click) */}
+      {selectedDetailTaskId && (
+        <KlanserviceHubIssueDetailModal
+          taskId={selectedDetailTaskId}
+          open={!!selectedDetailTaskId}
+          onClose={() => setSelectedDetailTaskId(null)}
+          onUpdated={(updatedTask) => {
+            const uId = updatedTask?.$id || updatedTask?.id;
+            setTasks((prev) =>
+              prev.map((t) => ((t.$id || t.id) === uId ? { ...t, ...updatedTask } : t))
+            );
+          }}
+        />
       )}
 
       {/* Reusable Confirm Dialog */}

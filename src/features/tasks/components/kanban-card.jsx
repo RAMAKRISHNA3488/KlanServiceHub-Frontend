@@ -4,7 +4,7 @@ import { MemberAvatar } from '@/features/members/components/member-avatar';
 import { ProjectAvatar } from '@/features/projects/components/project-avatar';
 import { TaskActions } from './task-actions';
 import { TaskDate } from './task-date';
-export const KanbanCard = ({ task }) => {
+export const KanbanCard = ({ task, onDoubleClick }) => {
     const assignees = (task.assignees && task.assignees.length > 0) 
       ? task.assignees 
       : (task.assignee ? [task.assignee] : []);
@@ -12,7 +12,11 @@ export const KanbanCard = ({ task }) => {
     const projectName = task.project?.name || 'Project';
     const projectImage = task.project?.imageUrl;
 
-    return (<div className="mb-2.5 space-y-2.5 rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-sm transition-shadow">
+    return (<div
+      onDoubleClick={onDoubleClick}
+      className="mb-2.5 space-y-2.5 rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-sm hover:border-blue-400 transition-all cursor-pointer select-none"
+      title="Double-click to open issue details"
+    >
       <div className="flex items-start justify-between gap-x-2">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 flex-wrap">
