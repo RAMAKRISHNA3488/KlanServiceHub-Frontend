@@ -32,6 +32,7 @@ import { TermsPage } from '@/features/legal/components/terms-page';
 import { PrivacyPage } from '@/features/legal/components/privacy-page';
 import { SecurityPage } from '@/features/legal/components/security-page';
 import { AcceptableUsePage } from '@/features/legal/components/acceptable-use-page';
+import { DataProcessingPage } from '@/features/legal/components/data-processing-page';
 
 // Product Solutions Deep-Dive Pages
 import { SolutionDetailPage } from '@/features/solutions/components/solution-detail-page';
@@ -121,6 +122,9 @@ export const App = () => {
       <Route path="/terms-of-service" element={<TermsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/privacy-policy" element={<PrivacyPage />} />
+      <Route path="/data-processing" element={<DataProcessingPage />} />
+      <Route path="/dpa" element={<DataProcessingPage />} />
+      <Route path="/consent" element={<DataProcessingPage />} />
       <Route path="/security" element={<SecurityPage />} />
       <Route path="/trust" element={<SecurityPage />} />
       <Route path="/acceptable-use" element={<AcceptableUsePage />} />

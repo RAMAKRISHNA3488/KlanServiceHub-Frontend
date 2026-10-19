@@ -7,6 +7,7 @@ export const LegalLayout = ({ title, subtitle, lastUpdated, children, activeTab 
   const tabs = [
     { name: 'Terms of Service', href: '/terms', id: 'terms' },
     { name: 'Privacy Policy', href: '/privacy', id: 'privacy' },
+    { name: 'Data Processing (DPA)', href: '/data-processing', id: 'data-processing' },
     { name: 'Security & Trust', href: '/security', id: 'security' },
     { name: 'Acceptable Use', href: '/acceptable-use', id: 'acceptable-use' },
   ];

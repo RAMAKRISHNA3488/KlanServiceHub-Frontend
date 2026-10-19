@@ -106,6 +106,11 @@ export const LandingFooter = ({ className = '' }) => {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/data-processing" className="hover:text-blue-600 transition">
+                    Data Processing (DPA)
+                  </Link>
+                </li>
+                <li>
                   <Link href="/security" className="hover:text-blue-600 transition">
                     Security & Trust
                   </Link>

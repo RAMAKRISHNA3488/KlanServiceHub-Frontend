@@ -52,6 +52,7 @@ export const BoardsView = () => {
   const [selectedProject, setSelectedProject] = useState(queryProjectId || 'ALL');
   const [issueTypes, setIssueTypes] = useState([]);
   const [selectedPriority, setSelectedPriority] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (queryProjectId && queryProjectId !== selectedProject) {

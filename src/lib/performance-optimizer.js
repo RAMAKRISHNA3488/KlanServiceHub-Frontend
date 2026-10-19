@@ -21,11 +21,14 @@ export const getCookieConsent = () => {
 export const setCookieConsent = (preferences) => {
   if (typeof window === 'undefined') return;
   try {
+    const existing = getCookieConsent();
+    const consentId = existing?.consentId || ('cst_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36));
     const consent = {
       necessary: true, // Always required for auth & tenant isolation
       performance: preferences.performance ?? true,
       functional: preferences.functional ?? true,
       telemetry: preferences.telemetry ?? true,
+      consentId,
       timestamp: new Date().toISOString(),
       version: '1.0',
     };
@@ -36,8 +39,19 @@ export const setCookieConsent = (preferences) => {
     
     // Trigger performance engine with new settings
     applyPerformanceOptimizations(consent);
+    return consent;
   } catch (err) {
     console.warn('[PerformanceOptimizer] Failed to persist cookie preferences:', err);
+  }
+};
+
+export const resetCookieConsent = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(COOKIE_CONSENT_KEY);
+    window.dispatchEvent(new CustomEvent('cookie-consent-updated', { detail: null }));
+  } catch (err) {
+    console.warn('[PerformanceOptimizer] Failed to reset cookie preferences:', err);
   }
 };
 
