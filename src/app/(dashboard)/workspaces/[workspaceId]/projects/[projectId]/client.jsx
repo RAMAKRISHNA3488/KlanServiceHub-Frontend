@@ -22,39 +22,84 @@ export const ProjectIdClient = () => {
     const { data: tasks } = useGetTasks({ workspaceId, projectId });
 
     const safeAnalytics = useMemo(() => {
-      const taskDocs = tasks?.documents || [];
-      const total = tasks?.total || taskDocs.length;
-      const completed = taskDocs.filter((t) => t.status === 'DONE').length;
-      const incomplete = Math.max(0, total - completed);
-      const assigned = taskDocs.filter((t) => 
-        Boolean(t.assigneeId || t.assignee_id || t.assignee || (Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0))
-      ).length;
-      const overdue = taskDocs.filter((t) => 
-        t.status !== 'DONE' && t.dueDate && !isNaN(new Date(t.dueDate).getTime()) && new Date(t.dueDate).getTime() < Date.now()
-      ).length;
+      const taskDocs = tasks?.documents;
 
-      if (projectAnalytics && (projectAnalytics.taskCount > 0 || total === 0)) {
+      if (Array.isArray(taskDocs)) {
+        const isCompleted = (t) => {
+          const s = String(t?.status || '').toUpperCase().trim();
+          return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED';
+        };
+
+        const isAssigned = (t) => {
+          return Boolean(
+            t?.assigneeId ||
+            t?.assignee_id ||
+            t?.assignee ||
+            (Array.isArray(t?.assignees) && t.assignees.length > 0) ||
+            (Array.isArray(t?.assigneeIds) && t.assigneeIds.length > 0)
+          );
+        };
+
+        const isOverdue = (t) => {
+          if (isCompleted(t)) return false;
+          const dStr = t?.dueDate || t?.due_date;
+          if (!dStr) return false;
+          try {
+            const raw = String(dStr).trim();
+            const normalized = raw.includes(' ') && !raw.includes('T') ? raw.replace(' ', 'T') + 'Z' : raw;
+            const d = new Date(normalized);
+            return !isNaN(d.getTime()) && d.getTime() < Date.now();
+          } catch {
+            return false;
+          }
+        };
+
+        const total = tasks?.total ?? taskDocs.length;
+        const completed = taskDocs.filter(isCompleted).length;
+        const incomplete = Math.max(0, total - completed);
+        const assigned = taskDocs.filter(isAssigned).length;
+        const overdue = taskDocs.filter(isOverdue).length;
+
+        return {
+          taskCount: total,
+          taskDifference: projectAnalytics?.taskDifference || 0,
+          assignedTaskCount: assigned,
+          assignedTaskDifference: projectAnalytics?.assignedTaskDifference || 0,
+          completedTaskCount: completed,
+          completedTaskDifference: projectAnalytics?.completedTaskDifference || 0,
+          incompleteTaskCount: incomplete,
+          incompleteTaskDifference: projectAnalytics?.incompleteTaskDifference || 0,
+          overdueTaskCount: overdue,
+          overdueTaskDifference: projectAnalytics?.overdueTaskDifference || 0,
+        };
+      }
+
+      if (projectAnalytics) {
+        const total = Number(projectAnalytics.taskCount || 0);
+        const completed = Number(projectAnalytics.completedTaskCount || 0);
+        const incomplete = Math.max(0, total - completed);
+
         return {
           ...projectAnalytics,
-          taskCount: Math.max(projectAnalytics.taskCount || 0, total),
-          assignedTaskCount: Math.max(projectAnalytics.assignedTaskCount || 0, assigned),
-          completedTaskCount: Math.max(projectAnalytics.completedTaskCount || 0, completed),
-          incompleteTaskCount: Math.max(projectAnalytics.incompleteTaskCount || 0, incomplete),
-          overdueTaskCount: Math.max(projectAnalytics.overdueTaskCount || 0, overdue),
+          taskCount: total,
+          completedTaskCount: completed,
+          incompleteTaskCount: incomplete,
+          assignedTaskCount: Number(projectAnalytics.assignedTaskCount || 0),
+          overdueTaskCount: Number(projectAnalytics.overdueTaskCount || 0),
         };
       }
 
       return {
-        taskCount: total,
-        taskDifference: projectAnalytics?.taskDifference || 0,
-        assignedTaskCount: assigned,
-        assignedTaskDifference: projectAnalytics?.assignedTaskDifference || 0,
-        completedTaskCount: completed,
-        completedTaskDifference: projectAnalytics?.completedTaskDifference || 0,
-        incompleteTaskCount: incomplete,
-        incompleteTaskDifference: projectAnalytics?.incompleteTaskDifference || 0,
-        overdueTaskCount: overdue,
-        overdueTaskDifference: projectAnalytics?.overdueTaskDifference || 0,
+        taskCount: 0,
+        taskDifference: 0,
+        assignedTaskCount: 0,
+        assignedTaskDifference: 0,
+        completedTaskCount: 0,
+        completedTaskDifference: 0,
+        incompleteTaskCount: 0,
+        incompleteTaskDifference: 0,
+        overdueTaskCount: 0,
+        overdueTaskDifference: 0,
       };
     }, [projectAnalytics, tasks]);
 

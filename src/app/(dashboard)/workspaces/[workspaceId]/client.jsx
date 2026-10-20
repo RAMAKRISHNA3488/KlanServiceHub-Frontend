@@ -124,41 +124,88 @@ export const WorkspaceIdClient = () => {
 
   const isLoading = (isLoadingAnalytics || isLoadingTasks || isLoadingProjects || isLoadingMembers) && !tasks && !projects;
 
-  // Compute resilient live analytics
+  // Compute mathematically consistent live analytics
   const safeAnalytics = useMemo(() => {
-    const taskDocs = tasks?.documents || [];
-    const total = tasks?.total || taskDocs.length;
-    const completed = taskDocs.filter((t) => t.status === 'DONE').length;
-    const incomplete = Math.max(0, total - completed);
-    const assigned = taskDocs.filter((t) => 
-      Boolean(t.assigneeId || t.assignee_id || t.assignee || (Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0))
-    ).length;
-    const overdue = taskDocs.filter((t) => 
-      t.status !== 'DONE' && t.dueDate && !isNaN(new Date(t.dueDate).getTime()) && new Date(t.dueDate).getTime() < Date.now()
-    ).length;
+    const taskDocs = tasks?.documents;
 
-    if (workspaceAnalytics && (workspaceAnalytics.taskCount > 0 || total === 0)) {
+    // If tasks collection is loaded, compute ground-truth metrics directly from active items
+    if (Array.isArray(taskDocs)) {
+      const isCompleted = (t) => {
+        const s = String(t?.status || '').toUpperCase().trim();
+        return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED';
+      };
+
+      const isAssigned = (t) => {
+        return Boolean(
+          t?.assigneeId ||
+          t?.assignee_id ||
+          t?.assignee ||
+          (Array.isArray(t?.assignees) && t.assignees.length > 0) ||
+          (Array.isArray(t?.assigneeIds) && t.assigneeIds.length > 0)
+        );
+      };
+
+      const isOverdue = (t) => {
+        if (isCompleted(t)) return false;
+        const dStr = t?.dueDate || t?.due_date;
+        if (!dStr) return false;
+        try {
+          const raw = String(dStr).trim();
+          const normalized = raw.includes(' ') && !raw.includes('T') ? raw.replace(' ', 'T') + 'Z' : raw;
+          const d = new Date(normalized);
+          return !isNaN(d.getTime()) && d.getTime() < Date.now();
+        } catch {
+          return false;
+        }
+      };
+
+      const total = tasks?.total ?? taskDocs.length;
+      const completed = taskDocs.filter(isCompleted).length;
+      const incomplete = Math.max(0, total - completed);
+      const assigned = taskDocs.filter(isAssigned).length;
+      const overdue = taskDocs.filter(isOverdue).length;
+
+      return {
+        taskCount: total,
+        taskDifference: workspaceAnalytics?.taskDifference || 0,
+        assignedTaskCount: assigned,
+        assignedTaskDifference: workspaceAnalytics?.assignedTaskDifference || 0,
+        completedTaskCount: completed,
+        completedTaskDifference: workspaceAnalytics?.completedTaskDifference || 0,
+        incompleteTaskCount: incomplete,
+        incompleteTaskDifference: workspaceAnalytics?.incompleteTaskDifference || 0,
+        overdueTaskCount: overdue,
+        overdueTaskDifference: workspaceAnalytics?.overdueTaskDifference || 0,
+      };
+    }
+
+    // Fallback cleanly to workspaceAnalytics before tasks finish loading
+    if (workspaceAnalytics) {
+      const total = Number(workspaceAnalytics.taskCount || 0);
+      const completed = Number(workspaceAnalytics.completedTaskCount || 0);
+      const incomplete = Math.max(0, total - completed);
+
       return {
         ...workspaceAnalytics,
-        taskCount: Math.max(workspaceAnalytics.taskCount || 0, total),
-        assignedTaskCount: Math.max(workspaceAnalytics.assignedTaskCount || 0, assigned),
-        completedTaskCount: Math.max(workspaceAnalytics.completedTaskCount || 0, completed),
-        incompleteTaskCount: Math.max(workspaceAnalytics.incompleteTaskCount || 0, incomplete),
-        overdueTaskCount: Math.max(workspaceAnalytics.overdueTaskCount || 0, overdue),
+        taskCount: total,
+        completedTaskCount: completed,
+        incompleteTaskCount: incomplete,
+        assignedTaskCount: Number(workspaceAnalytics.assignedTaskCount || 0),
+        overdueTaskCount: Number(workspaceAnalytics.overdueTaskCount || 0),
       };
     }
 
     return {
-      taskCount: total,
-      taskDifference: workspaceAnalytics?.taskDifference || 0,
-      assignedTaskCount: assigned,
-      assignedTaskDifference: workspaceAnalytics?.assignedTaskDifference || 0,
-      completedTaskCount: completed,
-      completedTaskDifference: workspaceAnalytics?.completedTaskDifference || 0,
-      incompleteTaskCount: incomplete,
-      incompleteTaskDifference: workspaceAnalytics?.incompleteTaskDifference || 0,
-      overdueTaskCount: overdue,
-      overdueTaskDifference: workspaceAnalytics?.overdueTaskDifference || 0,
+      taskCount: 0,
+      taskDifference: 0,
+      assignedTaskCount: 0,
+      assignedTaskDifference: 0,
+      completedTaskCount: 0,
+      completedTaskDifference: 0,
+      incompleteTaskCount: 0,
+      incompleteTaskDifference: 0,
+      overdueTaskCount: 0,
+      overdueTaskDifference: 0,
     };
   }, [workspaceAnalytics, tasks]);
 
@@ -404,7 +451,7 @@ export const TaskList = ({ data = [], total = 0 }) => {
             <p className="text-sm font-bold text-neutral-900">
               Recent Issues &amp; Tasks{' '}
               <span className="text-xs font-medium text-neutral-500">
-                ({showAll ? `All ${sortedTasks.length}` : `5 of ${totalCount}`})
+                ({totalCount === 0 ? '0' : totalCount <= 5 ? totalCount : showAll ? `All ${totalCount}` : `5 of ${totalCount}`})
               </span>
             </p>
           </div>
