@@ -124,26 +124,41 @@ export const WorkspaceIdClient = () => {
 
   const isLoading = (isLoadingAnalytics || isLoadingTasks || isLoadingProjects || isLoadingMembers) && !tasks && !projects;
 
-  // Compute safe fallback analytics
+  // Compute resilient live analytics
   const safeAnalytics = useMemo(() => {
-    if (workspaceAnalytics) return workspaceAnalytics;
-
     const taskDocs = tasks?.documents || [];
     const total = tasks?.total || taskDocs.length;
     const completed = taskDocs.filter((t) => t.status === 'DONE').length;
-    const incomplete = total - completed;
+    const incomplete = Math.max(0, total - completed);
+    const assigned = taskDocs.filter((t) => 
+      Boolean(t.assigneeId || t.assignee_id || t.assignee || (Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0))
+    ).length;
+    const overdue = taskDocs.filter((t) => 
+      t.status !== 'DONE' && t.dueDate && !isNaN(new Date(t.dueDate).getTime()) && new Date(t.dueDate).getTime() < Date.now()
+    ).length;
+
+    if (workspaceAnalytics && (workspaceAnalytics.taskCount > 0 || total === 0)) {
+      return {
+        ...workspaceAnalytics,
+        taskCount: Math.max(workspaceAnalytics.taskCount || 0, total),
+        assignedTaskCount: Math.max(workspaceAnalytics.assignedTaskCount || 0, assigned),
+        completedTaskCount: Math.max(workspaceAnalytics.completedTaskCount || 0, completed),
+        incompleteTaskCount: Math.max(workspaceAnalytics.incompleteTaskCount || 0, incomplete),
+        overdueTaskCount: Math.max(workspaceAnalytics.overdueTaskCount || 0, overdue),
+      };
+    }
 
     return {
       taskCount: total,
-      taskDifference: 0,
-      assignedTaskCount: taskDocs.filter((t) => !!t.assigneeId).length,
-      assignedTaskDifference: 0,
+      taskDifference: workspaceAnalytics?.taskDifference || 0,
+      assignedTaskCount: assigned,
+      assignedTaskDifference: workspaceAnalytics?.assignedTaskDifference || 0,
       completedTaskCount: completed,
-      completedTaskDifference: 0,
+      completedTaskDifference: workspaceAnalytics?.completedTaskDifference || 0,
       incompleteTaskCount: incomplete,
-      incompleteTaskDifference: 0,
-      overdueTaskCount: 0,
-      overdueTaskDifference: 0,
+      incompleteTaskDifference: workspaceAnalytics?.incompleteTaskDifference || 0,
+      overdueTaskCount: overdue,
+      overdueTaskDifference: workspaceAnalytics?.overdueTaskDifference || 0,
     };
   }, [workspaceAnalytics, tasks]);
 
