@@ -121,7 +121,7 @@ export const RolesAdminView = () => {
         body: JSON.stringify({ roleId, permissionCode, granted })
       }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['rbac-matrix', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['rbac-matrix', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to update permission')
   });
@@ -131,8 +131,8 @@ export const RolesAdminView = () => {
     mutationFn: (roleId) => apiFetch(`/api/roles/${workspaceId}/${roleId}`, { method: 'DELETE' }),
     onSuccess: (data) => {
       toast.success(data?.message || 'Custom role deleted');
-      queryClient.invalidateQueries(['rbac-matrix', workspaceId]);
-      queryClient.invalidateQueries(['rbac-members', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['rbac-matrix', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['rbac-members', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to delete role')
   });
@@ -142,8 +142,8 @@ export const RolesAdminView = () => {
     mutationFn: () => apiFetch(`/api/roles/${workspaceId}/seed-sample`, { method: 'POST' }),
     onSuccess: (data) => {
       toast.success(data?.message || 'Enterprise standard RBAC matrix restored!');
-      queryClient.invalidateQueries(['rbac-matrix', workspaceId]);
-      queryClient.invalidateQueries(['rbac-members', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['rbac-matrix', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['rbac-members', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to reset RBAC matrix')
   });
@@ -582,7 +582,7 @@ export const RolesAdminView = () => {
           workspaceId={workspaceId}
           onCreated={() => {
             setIsCreateModalOpen(false);
-            queryClient.invalidateQueries(['rbac-matrix', workspaceId]);
+            queryClient.invalidateQueries({ queryKey: ['rbac-matrix', workspaceId] });
           }}
         />
       )}
@@ -601,8 +601,8 @@ export const RolesAdminView = () => {
           onAssigned={() => {
             setIsAssignModalOpen(false);
             setAssignTargetUser(null);
-            queryClient.invalidateQueries(['rbac-matrix', workspaceId]);
-            queryClient.invalidateQueries(['rbac-members', workspaceId]);
+            queryClient.invalidateQueries({ queryKey: ['rbac-matrix', workspaceId] });
+            queryClient.invalidateQueries({ queryKey: ['rbac-members', workspaceId] });
           }}
         />
       )}

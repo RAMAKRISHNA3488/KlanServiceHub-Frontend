@@ -97,7 +97,8 @@ export const CmdbView = () => {
     mutationFn: () => apiFetch(`/api/assets/${workspaceId}/seed-sample`, { method: 'POST' }),
     onSuccess: (data) => {
       toast.success(data?.message || 'Sample Enterprise Infrastructure Topology seeded!');
-      queryClient.invalidateQueries(['cmdb-topology', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['cmdb-topology', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['assets', workspaceId] });
     },
     onError: (err) => {
       toast.error(err?.message || 'Failed to seed sample topology.');
@@ -112,7 +113,8 @@ export const CmdbView = () => {
     }),
     onSuccess: () => {
       toast.success('Asset status updated');
-      queryClient.invalidateQueries(['cmdb-topology', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['cmdb-topology', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['assets', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to update asset status')
   });
@@ -123,7 +125,8 @@ export const CmdbView = () => {
     onSuccess: () => {
       toast.success('Configuration item decommissioned');
       setSelectedAssetId(null);
-      queryClient.invalidateQueries(['cmdb-topology', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['cmdb-topology', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['assets', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to decommission asset')
   });
@@ -133,7 +136,8 @@ export const CmdbView = () => {
     mutationFn: (depId) => apiFetch(`/api/assets/${workspaceId}/dependencies/${depId}`, { method: 'DELETE' }),
     onSuccess: () => {
       toast.success('Dependency link removed');
-      queryClient.invalidateQueries(['cmdb-topology', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['cmdb-topology', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['assets', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to remove dependency')
   });
@@ -831,7 +835,8 @@ export const CmdbView = () => {
           workspaceId={workspaceId}
           onCreated={() => {
             setIsRegisterModalOpen(false);
-            queryClient.invalidateQueries(['cmdb-topology', workspaceId]);
+            queryClient.invalidateQueries({ queryKey: ['cmdb-topology', workspaceId] });
+            queryClient.invalidateQueries({ queryKey: ['assets', workspaceId] });
           }}
         />
       )}
@@ -845,7 +850,8 @@ export const CmdbView = () => {
           nodes={nodes}
           onCreated={() => {
             setIsLinkModalOpen(false);
-            queryClient.invalidateQueries(['cmdb-topology', workspaceId]);
+            queryClient.invalidateQueries({ queryKey: ['cmdb-topology', workspaceId] });
+            queryClient.invalidateQueries({ queryKey: ['assets', workspaceId] });
           }}
         />
       )}

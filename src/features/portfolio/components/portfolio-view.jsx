@@ -115,10 +115,10 @@ export const PortfoliosView = () => {
     mutationFn: () => apiFetch(`/api/portfolio/${workspaceId}/seed-sample`, { method: 'POST' }),
     onSuccess: (data) => {
       toast.success(data?.message || 'Sample strategic portfolio & initiatives seeded!');
-      queryClient.invalidateQueries(['portfolio-overview', workspaceId]);
-      queryClient.invalidateQueries(['portfolios', workspaceId]);
-      queryClient.invalidateQueries(['initiatives', workspaceId]);
-      queryClient.invalidateQueries(['strategic-goals', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['portfolio-overview', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['portfolios', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['initiatives', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['strategic-goals', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to seed sample portfolio.'),
   });
@@ -130,9 +130,9 @@ export const PortfoliosView = () => {
     }),
     onSuccess: () => {
       toast.success('Portfolio removed');
-      queryClient.invalidateQueries(['portfolio-overview', workspaceId]);
-      queryClient.invalidateQueries(['portfolios', workspaceId]);
-      queryClient.invalidateQueries(['initiatives', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['portfolio-overview', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['portfolios', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['initiatives', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to remove portfolio')
   });
@@ -145,14 +145,18 @@ export const PortfoliosView = () => {
     onSuccess: () => {
       toast.success('Initiative removed');
       setSelectedInitiative(null);
-      queryClient.invalidateQueries(['portfolio-overview', workspaceId]);
-      queryClient.invalidateQueries(['initiatives', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['portfolio-overview', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['initiatives', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to remove initiative')
   });
 
   // Refetch all queries
   const handleRefreshAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['portfolio-overview', workspaceId] });
+    queryClient.invalidateQueries({ queryKey: ['portfolios', workspaceId] });
+    queryClient.invalidateQueries({ queryKey: ['initiatives', workspaceId] });
+    queryClient.invalidateQueries({ queryKey: ['strategic-goals', workspaceId] });
     refetchOverview();
     refetchPortfolios();
     refetchInitiatives();

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
 import { useGetMembers } from '@/features/members/api/use-get-members';
@@ -42,6 +43,7 @@ const PRIORITIES = [
 
 export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defaultProjectId = null, defaultSprintId = null }) => {
   const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
   const { data: projectsData } = useGetProjects({ workspaceId });
   const { data: membersData } = useGetMembers({ workspaceId });
 
@@ -138,6 +140,12 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
       });
 
       toast.success(`Issue created: ${res.data?.key || 'Issue'}`);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['sprints'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['dependencies-graph'] });
       if (onCreated) onCreated(res.data);
       window.dispatchEvent(new CustomEvent('klanservicehub-issue-created', { detail: res.data }));
 

@@ -105,13 +105,13 @@ export const DeploymentsView = () => {
     });
   }, [deployments, searchTerm, filterEnv, filterStatus, filterService]);
 
-  // Seed sample telemetry mutation
+  // Seed Sample Telemetry Mutation
   const seedMutation = useMutation({
     mutationFn: () => apiFetch(`/api/deployments/workspace/${workspaceId}/seed-sample`, { method: 'POST' }),
     onSuccess: (data) => {
       toast.success(data?.message || 'Sample 14-day deployment telemetry seeded!');
-      queryClient.invalidateQueries(['dora-metrics', workspaceId]);
-      queryClient.invalidateQueries(['deployments-stream', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['dora-metrics', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['deployments-stream', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to seed deployments.'),
   });
@@ -124,8 +124,8 @@ export const DeploymentsView = () => {
     onSuccess: () => {
       toast.success('Rollback deployment initiated successfully');
       setRollbackItem(null);
-      queryClient.invalidateQueries(['dora-metrics', workspaceId]);
-      queryClient.invalidateQueries(['deployments-stream', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['dora-metrics', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['deployments-stream', workspaceId] });
     },
     onError: (err) => toast.error(err?.message || 'Failed to initiate rollback'),
   });
@@ -506,8 +506,8 @@ export const DeploymentsView = () => {
           workspaceId={workspaceId}
           onCreated={() => {
             setIsDeployModalOpen(false);
-            queryClient.invalidateQueries(['dora-metrics', workspaceId]);
-            queryClient.invalidateQueries(['deployments-stream', workspaceId]);
+            queryClient.invalidateQueries({ queryKey: ['dora-metrics', workspaceId] });
+            queryClient.invalidateQueries({ queryKey: ['deployments-stream', workspaceId] });
           }}
         />
       )}

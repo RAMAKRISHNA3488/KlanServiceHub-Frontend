@@ -179,6 +179,11 @@ export const GovernanceView = () => {
   const milestones = milestonesData || [];
 
   const refetchAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['governance-health'] });
+    queryClient.invalidateQueries({ queryKey: ['governance-approvals'] });
+    queryClient.invalidateQueries({ queryKey: ['governance-risks'] });
+    queryClient.invalidateQueries({ queryKey: ['governance-decisions'] });
+    queryClient.invalidateQueries({ queryKey: ['governance-milestones'] });
     refetchHealth();
     refetchApprovals();
     refetchRisks();
@@ -192,6 +197,8 @@ export const GovernanceView = () => {
     try {
       await governanceApi.decideApproval(approvalId, status, notes);
       toast.success(`Approval request marked as ${status}`);
+      queryClient.invalidateQueries({ queryKey: ['governance-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchApprovals();
       refetchHealth();
       setVerdictModalData(null);
@@ -204,6 +211,8 @@ export const GovernanceView = () => {
     try {
       await governanceApi.deleteApproval(approvalId);
       toast.success('Approval request deleted');
+      queryClient.invalidateQueries({ queryKey: ['governance-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchApprovals();
       refetchHealth();
     } catch (err) {
@@ -237,6 +246,8 @@ export const GovernanceView = () => {
         urgency: 'HIGH',
         projectId: '',
       });
+      queryClient.invalidateQueries({ queryKey: ['governance-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchApprovals();
       refetchHealth();
     } catch (err) {
@@ -268,6 +279,8 @@ export const GovernanceView = () => {
         dueDate: '',
         projectId: '',
       });
+      queryClient.invalidateQueries({ queryKey: ['governance-risks'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchRisks();
       refetchHealth();
     } catch (err) {
@@ -279,6 +292,8 @@ export const GovernanceView = () => {
     try {
       await governanceApi.updateRisk(riskId, { status: newStatus });
       toast.success(`Risk status updated to ${newStatus}`);
+      queryClient.invalidateQueries({ queryKey: ['governance-risks'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchRisks();
       refetchHealth();
     } catch (err) {
@@ -290,6 +305,8 @@ export const GovernanceView = () => {
     try {
       await governanceApi.deleteRisk(riskId);
       toast.success('Risk item removed');
+      queryClient.invalidateQueries({ queryKey: ['governance-risks'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchRisks();
       refetchHealth();
     } catch (err) {
@@ -319,6 +336,8 @@ export const GovernanceView = () => {
         description: '',
         projectId: '',
       });
+      queryClient.invalidateQueries({ queryKey: ['governance-decisions'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchDecisions();
     } catch (err) {
       toast.error(err.message || 'Failed to record decision');
@@ -329,6 +348,8 @@ export const GovernanceView = () => {
     try {
       await governanceApi.deleteDecision(decisionId);
       toast.success('Decision removed');
+      queryClient.invalidateQueries({ queryKey: ['governance-decisions'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchDecisions();
     } catch (err) {
       toast.error(err.message || 'Failed to delete decision');
@@ -357,6 +378,8 @@ export const GovernanceView = () => {
         status: 'PLANNED',
         projectId: '',
       });
+      queryClient.invalidateQueries({ queryKey: ['governance-milestones'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchMilestones();
     } catch (err) {
       toast.error(err.message || 'Failed to create milestone');
@@ -367,6 +390,8 @@ export const GovernanceView = () => {
     try {
       await governanceApi.updateMilestone(milestoneId, { status: newStatus });
       toast.success(`Milestone updated to ${newStatus}`);
+      queryClient.invalidateQueries({ queryKey: ['governance-milestones'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchMilestones();
     } catch (err) {
       toast.error(err.message || 'Failed to update milestone');
@@ -377,6 +402,8 @@ export const GovernanceView = () => {
     try {
       await governanceApi.deleteMilestone(milestoneId);
       toast.success('Milestone removed');
+      queryClient.invalidateQueries({ queryKey: ['governance-milestones'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-health'] });
       refetchMilestones();
     } catch (err) {
       toast.error(err.message || 'Failed to delete milestone');

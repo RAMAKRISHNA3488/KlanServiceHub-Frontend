@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useCurrent } from '@/features/auth/api/use-current';
@@ -49,6 +50,7 @@ const STATUS_COLORS = {
 
 export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdated }) => {
   const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
   const { data: currentUser } = useCurrent();
   const { data: membersData } = useGetMembers({ workspaceId });
   const members = membersData?.documents || [];
@@ -139,6 +141,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       }));
 
       const res = await tasksApi.updateTask(taskId, fields);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['sprints'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['dependencies-graph'] });
       if (res?.data) {
         setTask(res.data);
         if (res.data.storyPoints !== undefined || res.data.story_points !== undefined) {
@@ -225,6 +233,8 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         parentTaskId: taskId,
         status: 'TODO',
       });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
       toast.success('Sub-task added');
       setSubtaskTitle('');
       fetchTaskDetails();
@@ -237,6 +247,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     e.preventDefault();
     try {
       await tasksApi.updateTask(taskId, { loggedHours: Number(logHoursInput) });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       toast.success(`Logged ${logHoursInput} hours`);
       fetchTaskDetails();
     } catch (err) {
