@@ -390,14 +390,28 @@ export const capacityApi = {
 export const governanceApi = {
   getMilestones: (projectId) => apiFetch(`/api/governance/milestones/${projectId}`),
   createMilestone: (projectId, data) => apiFetch(`/api/governance/milestones/${projectId}`, { method: 'POST', body: JSON.stringify(data) }),
+  updateMilestone: (milestoneId, data) => apiFetch(`/api/governance/milestones/item/${milestoneId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteMilestone: (milestoneId) => apiFetch(`/api/governance/milestones/item/${milestoneId}`, { method: 'DELETE' }),
+
   getHealth: (projectId) => apiFetch(`/api/governance/health/${projectId}`),
+  getWorkspaceHealth: (workspaceId) => apiFetch(`/api/governance/health-workspace/${workspaceId}`),
+
   getRisks: (projectId) => apiFetch(`/api/governance/risks/${projectId}`),
   createRisk: (projectId, data) => apiFetch(`/api/governance/risks/${projectId}`, { method: 'POST', body: JSON.stringify(data) }),
+  updateRisk: (riskId, data) => apiFetch(`/api/governance/risks/item/${riskId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteRisk: (riskId) => apiFetch(`/api/governance/risks/item/${riskId}`, { method: 'DELETE' }),
+
   getDecisions: (projectId) => apiFetch(`/api/governance/decisions/${projectId}`),
   createDecision: (projectId, data) => apiFetch(`/api/governance/decisions/${projectId}`, { method: 'POST', body: JSON.stringify(data) }),
-  getApprovals: (workspaceId) => apiFetch(`/api/governance/approvals/${workspaceId}`),
+  deleteDecision: (decisionId) => apiFetch(`/api/governance/decisions/item/${decisionId}`, { method: 'DELETE' }),
+
+  getApprovals: (workspaceId, projectId) => {
+    const q = projectId && projectId !== 'ALL' ? `?projectId=${projectId}` : '';
+    return apiFetch(`/api/governance/approvals/${workspaceId}${q}`);
+  },
   createApproval: (workspaceId, data) => apiFetch(`/api/governance/approvals/${workspaceId}`, { method: 'POST', body: JSON.stringify(data) }),
-  decideApproval: (approvalId, status) => apiFetch(`/api/governance/approvals/item/${approvalId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  decideApproval: (approvalId, status, reviewNotes = '') => apiFetch(`/api/governance/approvals/item/${approvalId}`, { method: 'PATCH', body: JSON.stringify({ status, reviewNotes }) }),
+  deleteApproval: (approvalId) => apiFetch(`/api/governance/approvals/item/${approvalId}`, { method: 'DELETE' }),
 };
 
 export const serviceManagementApi = {

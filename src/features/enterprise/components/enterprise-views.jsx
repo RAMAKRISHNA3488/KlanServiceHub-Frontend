@@ -89,51 +89,13 @@ export const CapacityView = () => {
     </div>
   );
 };
+import { GovernanceView as FullGovernanceView } from '@/features/governance/components/governance-view';
+
 // ==========================================
 // 3. Project Governance, Health & Risks View
 // ==========================================
 export const GovernanceView = () => {
-  const workspaceId = useWorkspaceId();
-  const { data: approvalsData } = useQuery({
-    queryKey: ['governance-approvals', workspaceId],
-    queryFn: () => apiFetch(`/api/governance/approvals/${workspaceId}`),
-  });
-
-  const approvals = approvalsData?.data || [];
-
-  return (
-    <div className="flex flex-col gap-y-5 p-6">
-      <div className="border-b pb-3">
-        <h1 className="text-lg font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-          <ShieldCheck className="size-5 text-purple-600" /> Project Governance & Approval Engine
-        </h1>
-        <p className="text-[11px] text-neutral-500">
-          Enforce change approval workflows, project health scores, and risk mitigations.
-        </p>
-      </div>
-
-      <div className="rounded-xl border bg-white p-4 shadow-xs">
-        <h2 className="text-xs font-bold text-neutral-900 mb-3">Pending & Historical Change Approvals</h2>
-        {approvals.length === 0 ? (
-          <div className="py-6 text-center text-xs text-neutral-500">No approval requests submitted.</div>
-        ) : (
-          <div className="divide-y text-xs">
-            {approvals.map((a) => (
-              <div key={a.id} className="py-2.5 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-neutral-900 text-xs">{a.resource_type}</p>
-                  <p className="text-[11px] text-neutral-500">Requested by: {a.requester_name || 'Member'}</p>
-                </div>
-                <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${a.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                  {a.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return <FullGovernanceView />;
 };
 
 import { ServiceManagementView as KsmServiceManagementView } from '@/features/service-management/components/service-management-view';
