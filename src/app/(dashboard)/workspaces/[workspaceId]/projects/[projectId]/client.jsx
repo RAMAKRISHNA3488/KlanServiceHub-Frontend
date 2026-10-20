@@ -13,6 +13,8 @@ import { ProjectAvatar } from '@/features/projects/components/project-avatar';
 import { useProjectId } from '@/features/projects/hooks/use-project-id';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { TaskViewSwitcher } from '@/features/tasks/components/task-view-switcher';
+import { useQuery } from '@tanstack/react-query';
+import { workflowsAdminApi } from '@/lib/api-client';
 
 export const ProjectIdClient = () => {
     const projectId = useProjectId();
@@ -21,18 +23,45 @@ export const ProjectIdClient = () => {
     const { data: projectAnalytics, isLoading: isLoadingProjectAnalytics } = useGetProjectAnalytics({ projectId });
     const { data: tasks } = useGetTasks({ workspaceId, projectId });
 
+    const { data: workflowsData } = useQuery({
+      queryKey: ['workflows', workspaceId],
+      queryFn: async () => {
+        const res = await workflowsAdminApi.getWorkflows(workspaceId).catch(() => ({ data: [] }));
+        return res?.data || [];
+      },
+      enabled: !!workspaceId,
+    });
+
+    const workflowStatuses = useMemo(() => {
+      return workflowsData?.[0]?.statuses || [];
+    }, [workflowsData]);
+
     const safeAnalytics = useMemo(() => {
       const taskDocs = tasks?.documents;
 
       if (Array.isArray(taskDocs)) {
         const isCompleted = (t) => {
-          const s = String(t?.status || '').toUpperCase().trim();
-          return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED' || s === 'CLOSED';
+          const s = String(t?.status || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+          const matched = workflowStatuses.find((st) => {
+            const sName = String(st.name || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+            return sName === s;
+          });
+          if (matched?.category) {
+            return String(matched.category).toUpperCase().trim() === 'DONE';
+          }
+          return ['DONE', 'COMPLETED', 'RESOLVED', 'CLOSED'].includes(s);
         };
 
         const isBacklog = (t) => {
-          const s = String(t?.status || '').toUpperCase().trim();
-          return s === 'BACKLOG' || s === 'BACK_LOG';
+          const s = String(t?.status || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+          const matched = workflowStatuses.find((st) => {
+            const sName = String(st.name || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+            return sName === s;
+          });
+          if (matched?.category) {
+            return String(matched.category).toUpperCase().trim() === 'BACKLOG' || s.includes('BACKLOG');
+          }
+          return s.includes('BACKLOG') || s === 'BACK_LOG';
         };
 
         const isAssigned = (t) => {
@@ -106,7 +135,7 @@ export const ProjectIdClient = () => {
         overdueTaskCount: 0,
         overdueTaskDifference: 0,
       };
-    }, [projectAnalytics, tasks]);
+    }, [projectAnalytics, tasks, workflowStatuses]);
 
     const isLoading = isLoadingProject && !project;
     if (isLoading)

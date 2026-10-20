@@ -33,7 +33,8 @@ import { useGetTasks } from '@/features/tasks/api/use-get-tasks';
 import { useCreateTaskModal } from '@/features/tasks/hooks/use-create-task-modal';
 import { useGetWorkspaceAnalytics } from '@/features/workspaces/api/use-get-workspace-analytics';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
-import { usersAdminApi } from '@/lib/api-client';
+import { useQuery } from '@tanstack/react-query';
+import { usersAdminApi, workflowsAdminApi, rolesAdminApi } from '@/lib/api-client';
 import { toast } from 'sonner';
 
 // Helper for safe relative date parsing
@@ -51,39 +52,54 @@ const safeFormatDistance = (dateStr) => {
   }
 };
 
-const getStatusBadge = (status) => {
+export const DynamicStatusBadge = ({ status, workflowStatuses = [] }) => {
   const clean = String(status || '').toUpperCase().trim();
-  switch (clean) {
-    case 'DONE':
-    case 'COMPLETED':
-    case 'RESOLVED':
-    case 'CLOSED':
-      return <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">DONE</span>;
-    case 'IN_PROGRESS':
-    case 'IN PROGRESS':
-      return <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800">IN PROGRESS</span>;
-    case 'CODE_REVIEW':
-    case 'CODE REVIEW':
-      return <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">CODE REVIEW</span>;
-    case 'IN_REVIEW':
-    case 'IN REVIEW':
-    case 'REVIEW':
-      return <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">IN REVIEW</span>;
-    case 'TESTING':
-    case 'TEST':
-    case 'QA':
-      return <span className="rounded bg-cyan-100 px-2 py-0.5 text-[10px] font-bold text-cyan-800">TESTING</span>;
-    case 'BACKLOG':
-    case 'BACK_LOG':
-      return <span className="rounded bg-neutral-200 px-2 py-0.5 text-[10px] font-bold text-neutral-700">BACKLOG</span>;
-    case 'TODO':
-    case 'TO DO':
-    case 'TO_DO':
-    case 'OPEN':
-      return <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">TO DO</span>;
-    default:
-      return <span className="rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-700">{clean.replace(/_/g, ' ') || 'TO DO'}</span>;
+  const cleanUnderscore = clean.replace(/[\s-]+/g, '_');
+
+  // Match dynamic workflow status from workspace definition
+  const matched = workflowStatuses?.find((st) => {
+    const sName = String(st.name || '').toUpperCase().trim();
+    return sName === clean || sName.replace(/[\s-]+/g, '_') === cleanUnderscore;
+  });
+
+  if (matched) {
+    const color = matched.color || '#3B82F6';
+    const label = (matched.name || clean).replace(/_/g, ' ');
+    return (
+      <span
+        className="rounded px-2 py-0.5 text-[10px] font-bold border transition-colors shrink-0"
+        style={{
+          backgroundColor: `${color}18`,
+          color: color,
+          borderColor: `${color}40`,
+        }}
+      >
+        {label}
+      </span>
+    );
   }
+
+  // Graceful fallback for standard known categories
+  let bgClass = 'bg-neutral-100 text-neutral-700';
+  if (['DONE', 'COMPLETED', 'RESOLVED', 'CLOSED'].includes(cleanUnderscore)) {
+    bgClass = 'bg-emerald-100 text-emerald-800';
+  } else if (['IN_PROGRESS', 'INPROGRESS'].includes(cleanUnderscore)) {
+    bgClass = 'bg-blue-100 text-blue-800';
+  } else if (['CODE_REVIEW', 'IN_REVIEW', 'REVIEW'].includes(cleanUnderscore)) {
+    bgClass = 'bg-purple-100 text-purple-800';
+  } else if (['TESTING', 'TEST', 'QA'].includes(cleanUnderscore)) {
+    bgClass = 'bg-cyan-100 text-cyan-800';
+  } else if (['BACKLOG', 'BACK_LOG'].includes(cleanUnderscore)) {
+    bgClass = 'bg-neutral-200 text-neutral-700';
+  } else if (['TODO', 'TO_DO', 'OPEN'].includes(cleanUnderscore)) {
+    bgClass = 'bg-amber-100 text-amber-800';
+  }
+
+  return (
+    <span className={`rounded px-2 py-0.5 text-[10px] font-bold shrink-0 ${bgClass}`}>
+      {clean.replace(/_/g, ' ') || 'TO DO'}
+    </span>
+  );
 };
 
 export const WorkspaceIdClient = () => {
@@ -95,6 +111,29 @@ export const WorkspaceIdClient = () => {
   const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({ workspaceId });
   const { data: projects, isLoading: isLoadingProjects } = useGetProjects({ workspaceId });
   const { data: members, isLoading: isLoadingMembers, refetch: refetchMembers } = useGetMembers({ workspaceId });
+
+  // 100% Dynamic Workflows and Roles from Cloudflare D1
+  const { data: workflowsData } = useQuery({
+    queryKey: ['workflows', workspaceId],
+    queryFn: async () => {
+      const res = await workflowsAdminApi.getWorkflows(workspaceId).catch(() => ({ data: [] }));
+      return res?.data || [];
+    },
+    enabled: !!workspaceId,
+  });
+
+  const { data: rolesData } = useQuery({
+    queryKey: ['roles', workspaceId],
+    queryFn: async () => {
+      const res = await rolesAdminApi.getRoles(workspaceId).catch(() => ({ data: [] }));
+      return res?.data || [];
+    },
+    enabled: !!workspaceId,
+  });
+
+  const workflowStatuses = useMemo(() => {
+    return workflowsData?.[0]?.statuses || [];
+  }, [workflowsData]);
 
   // Quick Invite Modal State
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -151,13 +190,27 @@ export const WorkspaceIdClient = () => {
     // If tasks collection is loaded, compute ground-truth metrics directly from active items
     if (Array.isArray(taskDocs)) {
       const isCompleted = (t) => {
-        const s = String(t?.status || '').toUpperCase().trim();
-        return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED' || s === 'CLOSED';
+        const s = String(t?.status || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+        const matched = workflowStatuses.find((st) => {
+          const sName = String(st.name || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+          return sName === s;
+        });
+        if (matched?.category) {
+          return String(matched.category).toUpperCase().trim() === 'DONE';
+        }
+        return ['DONE', 'COMPLETED', 'RESOLVED', 'CLOSED'].includes(s);
       };
 
       const isBacklog = (t) => {
-        const s = String(t?.status || '').toUpperCase().trim();
-        return s === 'BACKLOG' || s === 'BACK_LOG';
+        const s = String(t?.status || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+        const matched = workflowStatuses.find((st) => {
+          const sName = String(st.name || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+          return sName === s;
+        });
+        if (matched?.category) {
+          return String(matched.category).toUpperCase().trim() === 'BACKLOG' || s.includes('BACKLOG');
+        }
+        return s.includes('BACKLOG') || s === 'BACK_LOG';
       };
 
       const isAssigned = (t) => {
@@ -232,7 +285,7 @@ export const WorkspaceIdClient = () => {
       overdueTaskCount: 0,
       overdueTaskDifference: 0,
     };
-  }, [workspaceAnalytics, tasks]);
+  }, [workspaceAnalytics, tasks, workflowStatuses]);
 
   if (isLoading) {
     return <PageLoader />;
@@ -274,7 +327,7 @@ export const WorkspaceIdClient = () => {
 
       {/* Main Grid: Tasks, Projects, Members */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <TaskList data={taskDocs} total={tasks?.total ?? taskDocs.length} />
+        <TaskList data={taskDocs} total={tasks?.total ?? taskDocs.length} workflowStatuses={workflowStatuses} />
         <ProjectList data={projectDocs} total={projects?.total ?? projectDocs.length} />
         <div className="xl:col-span-2">
           <MemberList
@@ -420,10 +473,20 @@ export const WorkspaceIdClient = () => {
                     onChange={(e) => setInviteRole(e.target.value)}
                     className="w-full rounded-xl border border-neutral-300 px-3.5 py-2.5 text-sm bg-white focus:border-blue-600 focus:outline-none font-medium"
                   >
-                    <option value="Developer">Developer (Standard Member)</option>
-                    <option value="Product Manager">Product Manager</option>
-                    <option value="Company Admin">Company Admin (Full Access)</option>
-                    <option value="QA Engineer">QA Engineer</option>
+                    {rolesData && rolesData.length > 0 ? (
+                      rolesData.map((r) => (
+                        <option key={r.id || r.name} value={r.name}>
+                          {r.name} {r.description ? `(${r.description})` : ''}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Developer">Developer (Standard Member)</option>
+                        <option value="Product Manager">Product Manager</option>
+                        <option value="Company Admin">Company Admin (Full Access)</option>
+                        <option value="QA Engineer">QA Engineer</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -445,7 +508,7 @@ export const WorkspaceIdClient = () => {
   );
 };
 
-export const TaskList = ({ data = [], total = 0 }) => {
+export const TaskList = ({ data = [], total = 0, workflowStatuses = [] }) => {
   const workspaceId = useWorkspaceId();
   const { open: createTask } = useCreateTaskModal();
   const [showAll, setShowAll] = useState(false);
@@ -524,7 +587,7 @@ export const TaskList = ({ data = [], total = 0 }) => {
                       )}
                       <p className="truncate text-xs font-semibold text-neutral-900">{task.name || 'Untitled Issue'}</p>
                     </div>
-                    {getStatusBadge(task.status)}
+                    <DynamicStatusBadge status={task.status} workflowStatuses={workflowStatuses} />
                   </div>
 
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 text-[11px] text-neutral-500">
