@@ -143,12 +143,15 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       const res = await tasksApi.updateTask(taskId, fields);
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['boards-view-data'] });
       queryClient.invalidateQueries({ queryKey: ['sprints'] });
       queryClient.invalidateQueries({ queryKey: ['dashboards'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
       queryClient.invalidateQueries({ queryKey: ['team-workload'] });
       queryClient.invalidateQueries({ queryKey: ['dependencies-graph'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       if (res?.data) {
         setTask(res.data);
         if (res.data.storyPoints !== undefined || res.data.story_points !== undefined) {
@@ -237,6 +240,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['boards-view-data'] });
       toast.success('Sub-task added');
       setSubtaskTitle('');
       fetchTaskDetails();
@@ -251,6 +257,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       await tasksApi.updateTask(taskId, { loggedHours: Number(logHoursInput) });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['boards-view-data'] });
       queryClient.invalidateQueries({ queryKey: ['reports'] });
       toast.success(`Logged ${logHoursInput} hours`);
       fetchTaskDetails();

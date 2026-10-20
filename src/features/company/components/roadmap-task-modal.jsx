@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { tasksApi } from '@/lib/api-client';
@@ -76,6 +77,7 @@ export const RoadmapTaskModal = ({
   onUpdated,
 }) => {
   const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
   const { data: membersData } = useGetMembers({ workspaceId });
   const members = membersData?.documents || [];
 
@@ -195,6 +197,13 @@ export const RoadmapTaskModal = ({
       };
 
       await tasksApi.updateTask(id, payload);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task', id] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['boards-view-data'] });
+      queryClient.invalidateQueries({ queryKey: ['sprints'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
       toast.success('Task updated successfully!');
 
       const updatedObj = {

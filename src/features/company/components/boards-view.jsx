@@ -324,6 +324,16 @@ export const BoardsView = () => {
 
       await tasksApi.bulkUpdate([{ $id: taskId, status: newStatus }]);
       toast.success(`Moved to ${newStatus.replace(/_/g, ' ')}`);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['sprints'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+      queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
     } catch (err) {
       toast.error(err.message || 'Failed to update task status');
       fetchBoardsAndTasks();
@@ -350,6 +360,16 @@ export const BoardsView = () => {
       setTasks((prev) => prev.filter((t) => t.$id !== taskId && t.id !== taskId));
       await tasksApi.deleteTask(taskId);
       toast.success(`Ticket ${taskKey || ''} permanently deleted.`);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['sprints'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+      queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
     } catch (err) {
       toast.error(err.message || 'Failed to delete ticket');
       fetchBoardsAndTasks();
@@ -380,6 +400,15 @@ export const BoardsView = () => {
         toast.success(`Created issue in ${status.replace(/_/g, ' ')}`);
         setNewTaskName('');
         setQuickCreateOpen(null);
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+        queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+        queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
+        queryClient.invalidateQueries({ queryKey: ['sprints'] });
+        queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+        queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+        queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+        queryClient.invalidateQueries({ queryKey: ['reports'] });
       }
     } catch (err) {
       toast.error(err.message || 'Failed to create task');
@@ -1259,6 +1288,16 @@ export const BoardsView = () => {
             setTasks((prev) =>
               prev.map((t) => ((t.$id || t.id) === uId ? { ...t, ...updatedTask } : t))
             );
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            queryClient.invalidateQueries({ queryKey: ['task'] });
+            queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+            queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+            queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
+            queryClient.invalidateQueries({ queryKey: ['sprints'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+            queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
           }}
         />
       )}

@@ -141,6 +141,8 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
 
       toast.success(`Issue created: ${res.data?.key || 'Issue'}`);
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['boards-view-data'] });
       queryClient.invalidateQueries({ queryKey: ['sprints'] });
       queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['reports'] });
