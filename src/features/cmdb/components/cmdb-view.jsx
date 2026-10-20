@@ -154,12 +154,6 @@ export const CmdbView = () => {
 
   // Topology node positioning by architectural tiers
   const tieredTopology = useMemo(() => {
-    // 5 Tiers:
-    // Tier 1: Ingress & Edge (CLOUD_RESOURCE, NETWORK)
-    // Tier 2: Gateways & Load Balancers (API_GATEWAY)
-    // Tier 3: Core Microservices & Applications (APPLICATION, SERVER)
-    // Tier 4: Cache & Message Brokers (CACHE, QUEUE)
-    // Tier 5: Persistence & Storage (DATABASE, Object stores)
     const tiers = {
       1: { name: 'Tier 1: Edge & Ingress', nodes: [] },
       2: { name: 'Tier 2: Gateways & Proxies', nodes: [] },
@@ -188,23 +182,23 @@ export const CmdbView = () => {
   }, [nodes]);
 
   return (
-    <div className="flex flex-col gap-y-5 p-6 min-h-[calc(100vh-4rem)] bg-neutral-50/50">
+    <div className="flex flex-col gap-y-4 p-5 min-h-[calc(100vh-4rem)] bg-neutral-50/50 text-[11px]">
       {/* Top Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 bg-white p-5 rounded-2xl shadow-xs border-neutral-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-3.5 bg-white p-4 rounded-xl shadow-xs border-neutral-200">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 shadow-xs">
-              <Server className="size-5" />
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 shadow-xs">
+              <Server className="size-4" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
+              <h1 className="text-sm font-bold tracking-tight text-neutral-900 flex items-center gap-2">
                 CMDB Assets & Infrastructure Topology
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   LIVE TELEMETRY
                 </span>
               </h1>
-              <p className="text-xs text-neutral-500 mt-0.5">
+              <p className="text-[10px] text-neutral-500 mt-0.5">
                 Real-time configuration items (CIs), multi-tier dependency mapping, and automated blast radius modeling.
               </p>
             </div>
@@ -218,9 +212,9 @@ export const CmdbView = () => {
             size="sm"
             onClick={() => refetch()}
             disabled={isFetching}
-            className="text-xs h-9 gap-1.5 font-medium text-neutral-600 hover:text-neutral-900"
+            className="text-[11px] h-8 gap-1.5 font-medium text-neutral-600 hover:text-neutral-900"
           >
-            <RefreshCw className={cn('size-3.5', isFetching && 'animate-spin text-indigo-600')} />
+            <RefreshCw className={cn('size-3', isFetching && 'animate-spin text-indigo-600')} />
             Sync Telemetry
           </Button>
 
@@ -230,10 +224,10 @@ export const CmdbView = () => {
               size="sm"
               onClick={() => seedMutation.mutate()}
               disabled={seedMutation.isPending}
-              className="text-xs h-9 gap-1.5 font-medium bg-indigo-50/60 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+              className="text-[11px] h-8 gap-1.5 font-medium bg-indigo-50/60 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
             >
-              <Zap className="size-3.5 text-indigo-600" />
-              {seedMutation.isPending ? 'Seeding...' : 'Load Sample Enterprise Topology'}
+              <Zap className="size-3 text-indigo-600" />
+              {seedMutation.isPending ? 'Seeding...' : 'Load Sample Blueprint'}
             </Button>
           )}
 
@@ -242,92 +236,92 @@ export const CmdbView = () => {
             size="sm"
             onClick={() => setIsLinkModalOpen(true)}
             disabled={nodes.length < 2}
-            className="text-xs h-9 gap-1.5 font-medium text-neutral-700"
+            className="text-[11px] h-8 gap-1.5 font-medium text-neutral-700"
           >
-            <Link2 className="size-3.5 text-neutral-500" />
+            <Link2 className="size-3 text-neutral-500" />
             Link Dependency
           </Button>
 
           <Button
             size="sm"
             onClick={() => setIsRegisterModalOpen(true)}
-            className="text-xs h-9 gap-1.5 font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
+            className="text-[11px] h-8 gap-1.5 font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
           >
-            <Plus className="size-3.5" />
-            Register Configuration Item
+            <Plus className="size-3" />
+            Register CI
           </Button>
         </div>
       </div>
 
       {/* Real-time Infrastructure KPI Health Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between text-neutral-500 mb-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Total CIs</span>
-            <Boxes className="size-4 text-neutral-400" />
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
+        <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Total CIs</span>
+            <Boxes className="size-3.5 text-neutral-400" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-neutral-900">{stats.totalNodes || 0}</span>
-            <span className="text-[11px] text-neutral-400 font-medium">assets monitored</span>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between text-neutral-500 mb-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Health Status</span>
-            <Activity className="size-4 text-emerald-500" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-emerald-600">{stats.healthyPercent || 100}%</span>
-            <span className="text-[11px] text-emerald-700 font-semibold">{stats.healthyCount || 0} Active</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-lg font-bold text-neutral-900">{stats.totalNodes || 0}</span>
+            <span className="text-[10px] text-neutral-400 font-medium">assets</span>
           </div>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between text-neutral-500 mb-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Degraded CIs</span>
-            <AlertTriangle className="size-4 text-amber-500" />
+        <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Health Status</span>
+            <Activity className="size-3.5 text-emerald-500" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className={cn('text-2xl font-black', (stats.degradedCount || 0) > 0 ? 'text-amber-600' : 'text-neutral-900')}>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-lg font-bold text-emerald-600">{stats.healthyPercent || 100}%</span>
+            <span className="text-[10px] text-emerald-700 font-semibold">{stats.healthyCount || 0} Active</span>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Degraded CIs</span>
+            <AlertTriangle className="size-3.5 text-amber-500" />
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn('text-lg font-bold', (stats.degradedCount || 0) > 0 ? 'text-amber-600' : 'text-neutral-900')}>
               {stats.degradedCount || 0}
             </span>
-            <span className="text-[11px] text-amber-700 font-medium">investigation req.</span>
+            <span className="text-[10px] text-amber-700 font-medium">investigation</span>
           </div>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between text-neutral-500 mb-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Critical Outages</span>
-            <AlertOctagon className="size-4 text-rose-500" />
+        <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Critical Outages</span>
+            <AlertOctagon className="size-3.5 text-rose-500" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className={cn('text-2xl font-black', (stats.offlineCount || 0) > 0 ? 'text-rose-600' : 'text-neutral-900')}>
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn('text-lg font-bold', (stats.offlineCount || 0) > 0 ? 'text-rose-600' : 'text-neutral-900')}>
               {stats.offlineCount || 0}
             </span>
-            <span className="text-[11px] text-neutral-400 font-medium">offline assets</span>
+            <span className="text-[10px] text-neutral-400 font-medium">offline</span>
           </div>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between text-neutral-500 mb-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Topology Edges</span>
-            <Network className="size-4 text-indigo-500" />
+        <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Topology Edges</span>
+            <Network className="size-3.5 text-indigo-500" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-indigo-600">{stats.totalEdges || 0}</span>
-            <span className="text-[11px] text-neutral-400 font-medium">service links</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-lg font-bold text-indigo-600">{stats.totalEdges || 0}</span>
+            <span className="text-[10px] text-neutral-400 font-medium">links</span>
           </div>
         </div>
       </div>
 
       {/* Main Tabs Navigation */}
       <div className="flex items-center justify-between border-b border-neutral-200 pb-1">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setActiveTab('topology')}
             className={cn(
-              'flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all',
+              'flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all',
               activeTab === 'topology'
                 ? 'bg-white text-indigo-600 border border-neutral-200 shadow-xs'
                 : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
@@ -335,7 +329,7 @@ export const CmdbView = () => {
           >
             <Layers className="size-3.5" />
             Infrastructure Topology Map
-            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-neutral-100 font-bold">
+            <Badge variant="secondary" className="text-[9px] py-0 px-1 bg-neutral-100 font-bold">
               {nodes.length}
             </Badge>
           </button>
@@ -343,7 +337,7 @@ export const CmdbView = () => {
           <button
             onClick={() => setActiveTab('inventory')}
             className={cn(
-              'flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all',
+              'flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all',
               activeTab === 'inventory'
                 ? 'bg-white text-indigo-600 border border-neutral-200 shadow-xs'
                 : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
@@ -351,25 +345,25 @@ export const CmdbView = () => {
           >
             <Server className="size-3.5" />
             Asset Inventory & Telemetry
-            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-neutral-100 font-bold">
+            <Badge variant="secondary" className="text-[9px] py-0 px-1 bg-neutral-100 font-bold">
               {filteredNodes.length}
             </Badge>
           </button>
         </div>
 
         {activeTab === 'topology' && (
-          <div className="hidden md:flex items-center gap-4 text-[11px] text-neutral-500">
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-emerald-500" /> Healthy
+          <div className="hidden md:flex items-center gap-3 text-[10px] text-neutral-500">
+            <span className="flex items-center gap-1">
+              <span className="size-1.5 rounded-full bg-emerald-500" /> Healthy
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-amber-500" /> Degraded
+            <span className="flex items-center gap-1">
+              <span className="size-1.5 rounded-full bg-amber-500" /> Degraded
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-blue-500" /> Maintenance
+            <span className="flex items-center gap-1">
+              <span className="size-1.5 rounded-full bg-blue-500" /> Maintenance
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-rose-500" /> Offline
+            <span className="flex items-center gap-1">
+              <span className="size-1.5 rounded-full bg-rose-500" /> Offline
             </span>
           </div>
         )}
@@ -377,50 +371,50 @@ export const CmdbView = () => {
 
       {/* TAB 1: VISUAL TOPOLOGY GRAPH */}
       {activeTab === 'topology' && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           {nodes.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-neutral-200 bg-white p-12 text-center flex flex-col items-center justify-center">
-              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mb-4">
-                <Network className="size-8" />
+            <div className="rounded-xl border-2 border-dashed border-neutral-200 bg-white p-8 text-center flex flex-col items-center justify-center">
+              <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 mb-3">
+                <Network className="size-6" />
               </div>
-              <h3 className="text-sm font-bold text-neutral-900">No Infrastructure Assets Registered</h3>
-              <p className="text-xs text-neutral-500 max-w-md mt-1 mb-6">
+              <h3 className="text-xs font-bold text-neutral-900">No Infrastructure Assets Registered</h3>
+              <p className="text-[10px] text-neutral-500 max-w-md mt-1 mb-4">
                 Register your configuration items (APIs, databases, microservices, caches) or load the standard enterprise architecture blueprint.
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Button
                   onClick={() => seedMutation.mutate()}
                   disabled={seedMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-9 gap-2 font-semibold shadow-xs"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] h-8 gap-1.5 font-semibold shadow-xs"
                 >
-                  <Zap className="size-3.5" />
-                  {seedMutation.isPending ? 'Provisioning...' : 'Provision Enterprise Architecture (10 CIs)'}
+                  <Zap className="size-3" />
+                  {seedMutation.isPending ? 'Provisioning...' : 'Provision Enterprise Blueprint (10 CIs)'}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setIsRegisterModalOpen(true)}
-                  className="text-xs h-9"
+                  className="text-[11px] h-8"
                 >
-                  <Plus className="size-3.5 mr-1.5" />
+                  <Plus className="size-3 mr-1" />
                   Add First CI Manually
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col xl:flex-row gap-5 items-start">
+            <div className="flex flex-col xl:flex-row gap-4 items-start">
               {/* Interactive Topology Board */}
-              <div className="flex-1 w-full bg-white rounded-2xl border border-neutral-200 p-6 shadow-xs relative overflow-hidden">
-                <div className="flex items-center justify-between mb-6 pb-3 border-b border-neutral-100">
+              <div className="flex-1 w-full bg-white rounded-xl border border-neutral-200 p-4 shadow-xs relative overflow-hidden">
+                <div className="flex items-center justify-between mb-4 pb-2.5 border-b border-neutral-100">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-neutral-700 uppercase tracking-wider">Multi-Tier Architecture Layout</span>
-                    <span className="text-[11px] text-neutral-400">Click any CI to inspect blast radius & telemetry</span>
+                    <span className="text-[10px] font-bold text-neutral-700 uppercase tracking-wider">Multi-Tier Architecture Layout</span>
+                    <span className="text-[10px] text-neutral-400">Click any CI to inspect blast radius</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => seedMutation.mutate()}
-                      className="text-[11px] h-7 text-neutral-500 hover:text-indigo-600"
+                      className="text-[10px] h-6 px-2 text-neutral-500 hover:text-indigo-600"
                     >
                       Reset / Reseed Blueprint
                     </Button>
@@ -428,22 +422,22 @@ export const CmdbView = () => {
                 </div>
 
                 {/* 5 Architectural Tiers */}
-                <div className="flex flex-col gap-6 relative">
+                <div className="flex flex-col gap-4 relative">
                   {[1, 2, 3, 4, 5].map((tierNum) => {
                     const tier = tieredTopology[tierNum];
                     if (!tier || tier.nodes.length === 0) return null;
 
                     return (
-                      <div key={tierNum} className="flex flex-col gap-2.5">
+                      <div key={tierNum} className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-black uppercase tracking-wider text-neutral-400">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                             {tier.name}
                           </span>
                           <div className="h-px bg-neutral-100 flex-1" />
                         </div>
 
                         {/* Nodes in this tier */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                           {tier.nodes.map((node) => {
                             const typeCfg = TYPE_CONFIG[node.type] || TYPE_CONFIG.SERVER;
                             const statusCfg = STATUS_CONFIG[node.status] || STATUS_CONFIG.ACTIVE;
@@ -456,43 +450,43 @@ export const CmdbView = () => {
                                 key={node.id}
                                 onClick={() => setSelectedAssetId(node.id)}
                                 className={cn(
-                                  'group cursor-pointer rounded-xl border p-3.5 transition-all relative select-none',
+                                  'group cursor-pointer rounded-lg border p-2.5 transition-all relative select-none',
                                   isSelected
-                                    ? 'bg-indigo-50/50 border-indigo-500 ring-2 ring-indigo-500/20 shadow-md'
+                                    ? 'bg-indigo-50/50 border-indigo-500 ring-1 ring-indigo-500/20 shadow-xs'
                                     : isBlastRisk
                                     ? 'bg-amber-50/40 border-amber-300 ring-1 ring-amber-400/30'
                                     : 'bg-white hover:bg-neutral-50 border-neutral-200 hover:border-neutral-300 shadow-xs'
                                 )}
                               >
                                 {isBlastRisk && (
-                                  <div className="absolute -top-2 right-3 px-1.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[9px] uppercase tracking-wider shadow-xs flex items-center gap-1">
-                                    <AlertTriangle className="size-2.5" /> Blast Impact
+                                  <div className="absolute -top-1.5 right-2 px-1.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[8px] uppercase tracking-wider shadow-xs flex items-center gap-1">
+                                    <AlertTriangle className="size-2" /> Blast Impact
                                   </div>
                                 )}
 
-                                <div className="flex items-start justify-between gap-2 mb-2">
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className={cn('p-2 rounded-lg border shrink-0', typeCfg.color)}>
-                                      <Icon className="size-4" />
+                                <div className="flex items-start justify-between gap-1.5 mb-1.5">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <div className={cn('p-1.5 rounded-md border shrink-0', typeCfg.color)}>
+                                      <Icon className="size-3.5" />
                                     </div>
                                     <div className="min-w-0">
-                                      <h4 className="text-xs font-bold text-neutral-900 truncate group-hover:text-indigo-600 transition">
+                                      <h4 className="text-[11px] font-bold text-neutral-900 truncate group-hover:text-indigo-600 transition">
                                         {node.name}
                                       </h4>
-                                      <p className="text-[10px] text-neutral-500 font-mono truncate">
+                                      <p className="text-[9px] text-neutral-500 font-mono truncate">
                                         {node.ip_address || node.location || 'Cluster Host'}
                                       </p>
                                     </div>
                                   </div>
 
-                                  <span className={cn('size-2 rounded-full shrink-0 mt-1', statusCfg.dot, node.status === 'OFFLINE' && 'animate-ping')} />
+                                  <span className={cn('size-1.5 rounded-full shrink-0 mt-1', statusCfg.dot, node.status === 'OFFLINE' && 'animate-ping')} />
                                 </div>
 
-                                <div className="flex items-center justify-between text-[10px] pt-2 border-t border-neutral-100">
+                                <div className="flex items-center justify-between text-[9px] pt-1.5 border-t border-neutral-100">
                                   <span className="font-mono text-neutral-400">
                                     {node.uptime_percent || 99.98}% uptime
                                   </span>
-                                  <span className={cn('px-1.5 py-0.5 rounded font-bold border text-[9px]', statusCfg.badge)}>
+                                  <span className={cn('px-1.5 py-0.5 rounded font-bold border text-[8px]', statusCfg.badge)}>
                                     {node.status}
                                   </span>
                                 </div>
@@ -507,17 +501,17 @@ export const CmdbView = () => {
 
                 {/* Relationship Links Sub-view */}
                 {edges.length > 0 && (
-                  <div className="mt-8 pt-5 border-t border-neutral-200">
-                    <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <Link2 className="size-3.5 text-indigo-500" />
+                  <div className="mt-6 pt-4 border-t border-neutral-200">
+                    <h4 className="text-[10px] font-bold text-neutral-700 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                      <Link2 className="size-3 text-indigo-500" />
                       Active Dependency Routing ({edges.length})
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 text-[10px]">
                       {edges.map((e) => (
-                        <div key={e.id} className="flex items-center justify-between p-2 rounded-lg bg-neutral-50 border border-neutral-200">
-                          <div className="flex items-center gap-2 text-[11px] truncate">
+                        <div key={e.id} className="flex items-center justify-between p-1.5 px-2 rounded-lg bg-neutral-50 border border-neutral-200">
+                          <div className="flex items-center gap-1.5 text-[10px] truncate">
                             <span className="font-bold text-neutral-800 truncate">{e.source_name}</span>
-                            <span className="text-[10px] text-indigo-600 font-semibold px-1 rounded bg-indigo-50 border border-indigo-100">
+                            <span className="text-[9px] text-indigo-600 font-semibold px-1 rounded bg-indigo-50 border border-indigo-100">
                               {e.relationship}
                             </span>
                             <span className="font-bold text-neutral-800 truncate">{e.target_name}</span>
@@ -527,10 +521,10 @@ export const CmdbView = () => {
                               ev.stopPropagation();
                               deleteDependencyMutation.mutate(e.id);
                             }}
-                            className="text-neutral-400 hover:text-rose-600 p-1"
+                            className="text-neutral-400 hover:text-rose-600 p-0.5"
                             title="Unlink dependency"
                           >
-                            <Trash2 className="size-3" />
+                            <Trash2 className="size-2.5" />
                           </button>
                         </div>
                       ))}
@@ -541,42 +535,42 @@ export const CmdbView = () => {
 
               {/* Side Drawer / Inspector for Selected Asset */}
               {selectedAsset ? (
-                <div className="w-full xl:w-80 shrink-0 bg-white rounded-2xl border border-neutral-200 p-5 shadow-xs flex flex-col gap-4">
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-neutral-900">CI Telemetry Inspector</span>
+                <div className="w-full xl:w-72 shrink-0 bg-white rounded-xl border border-neutral-200 p-4 shadow-xs flex flex-col gap-3">
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-neutral-900">CI Telemetry Inspector</span>
                     </div>
                     <button
                       onClick={() => setSelectedAssetId(null)}
                       className="p-1 rounded-md text-neutral-400 hover:text-neutral-700"
                     >
-                      <X className="size-4" />
+                      <X className="size-3.5" />
                     </button>
                   </div>
 
                   {/* Header of Inspector */}
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-bold text-neutral-900">{selectedAsset.name}</span>
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-xs font-bold text-neutral-900">{selectedAsset.name}</span>
                     </div>
-                    <p className="text-[11px] text-neutral-500 font-medium">
+                    <p className="text-[10px] text-neutral-500 font-medium">
                       {selectedAsset.type} • {selectedAsset.environment}
                     </p>
                   </div>
 
                   {/* Quick Status Control */}
-                  <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 flex flex-col gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                  <div className="p-2.5 rounded-lg bg-neutral-50 border border-neutral-200 flex flex-col gap-1.5">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">
                       Live Telemetry State
                     </span>
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="grid grid-cols-2 gap-1">
                       {['ACTIVE', 'MAINTENANCE', 'DEGRADED', 'OFFLINE'].map((st) => (
                         <button
                           key={st}
                           onClick={() => updateStatusMutation.mutate({ assetId: selectedAsset.id, status: st })}
                           disabled={updateStatusMutation.isPending}
                           className={cn(
-                            'px-2 py-1.5 rounded-lg text-[10px] font-bold border transition text-center',
+                            'px-1.5 py-1 rounded text-[9px] font-bold border transition text-center',
                             selectedAsset.status === st
                               ? 'bg-neutral-900 text-white border-neutral-900 shadow-xs'
                               : 'bg-white text-neutral-600 hover:bg-neutral-100 border-neutral-200'
@@ -589,14 +583,14 @@ export const CmdbView = () => {
                   </div>
 
                   {/* Blast Radius Analysis Card */}
-                  <div className="p-3.5 rounded-xl border border-neutral-200 bg-white flex flex-col gap-2.5">
+                  <div className="p-2.5 rounded-lg border border-neutral-200 bg-white flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-neutral-800 flex items-center gap-1.5">
-                        <AlertTriangle className={cn('size-3.5', blastRadius.riskLevel === 'HIGH' ? 'text-rose-500' : 'text-amber-500')} />
+                      <span className="text-[10px] font-bold text-neutral-800 flex items-center gap-1">
+                        <AlertTriangle className={cn('size-3', blastRadius.riskLevel === 'HIGH' ? 'text-rose-500' : 'text-amber-500')} />
                         Blast Radius Impact
                       </span>
                       <span className={cn(
-                        'px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border',
+                        'px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border',
                         blastRadius.riskLevel === 'HIGH' 
                           ? 'bg-rose-50 text-rose-700 border-rose-200' 
                           : blastRadius.riskLevel === 'MEDIUM' 
@@ -607,36 +601,36 @@ export const CmdbView = () => {
                       </span>
                     </div>
 
-                    <div className="text-[11px] text-neutral-600">
-                      <p className="font-semibold text-neutral-700 mb-1">
-                        Upstream Services at Risk ({blastRadius.upstream.length}):
+                    <div className="text-[10px] text-neutral-600">
+                      <p className="font-semibold text-neutral-700 mb-0.5">
+                        Upstream at Risk ({blastRadius.upstream.length}):
                       </p>
                       {blastRadius.upstream.length === 0 ? (
-                        <p className="text-[10px] text-neutral-400 italic">No upstream services will experience failure.</p>
+                        <p className="text-[9px] text-neutral-400 italic">No upstream service failure.</p>
                       ) : (
                         <div className="flex flex-col gap-1">
                           {blastRadius.upstream.map(u => (
-                            <div key={u.id} className="flex items-center justify-between text-[10px] bg-neutral-50 px-2 py-1 rounded border border-neutral-200">
-                              <span className="font-bold text-neutral-800">{u.name}</span>
-                              <span className="text-rose-600 font-semibold">Affected</span>
+                            <div key={u.id} className="flex items-center justify-between text-[9px] bg-neutral-50 px-1.5 py-0.5 rounded border border-neutral-200">
+                              <span className="font-bold text-neutral-800 truncate">{u.name}</span>
+                              <span className="text-rose-600 font-semibold shrink-0">Affected</span>
                             </div>
                           ))}
                         </div>
                       )}
                     </div>
 
-                    <div className="text-[11px] text-neutral-600 mt-1">
-                      <p className="font-semibold text-neutral-700 mb-1">
-                        Downstream Dependencies ({blastRadius.downstream.length}):
+                    <div className="text-[10px] text-neutral-600 mt-0.5">
+                      <p className="font-semibold text-neutral-700 mb-0.5">
+                        Downstream Deps ({blastRadius.downstream.length}):
                       </p>
                       {blastRadius.downstream.length === 0 ? (
-                        <p className="text-[10px] text-neutral-400 italic">This CI operates independently.</p>
+                        <p className="text-[9px] text-neutral-400 italic">Operates independently.</p>
                       ) : (
                         <div className="flex flex-col gap-1">
                           {blastRadius.downstream.map(d => (
-                            <div key={d.id} className="flex items-center justify-between text-[10px] bg-neutral-50 px-2 py-1 rounded border border-neutral-200">
-                              <span className="font-bold text-neutral-800">{d.name}</span>
-                              <span className="text-neutral-500">{d.status}</span>
+                            <div key={d.id} className="flex items-center justify-between text-[9px] bg-neutral-50 px-1.5 py-0.5 rounded border border-neutral-200">
+                              <span className="font-bold text-neutral-800 truncate">{d.name}</span>
+                              <span className="text-neutral-500 shrink-0">{d.status}</span>
                             </div>
                           ))}
                         </div>
@@ -645,44 +639,44 @@ export const CmdbView = () => {
                   </div>
 
                   {/* Metadata Specs */}
-                  <div className="text-xs space-y-2 border-t pt-3">
+                  <div className="text-[10px] space-y-1.5 border-t pt-2.5">
                     <div className="flex justify-between">
-                      <span className="text-neutral-400 text-[11px]">Provider:</span>
+                      <span className="text-neutral-400 text-[10px]">Provider:</span>
                       <span className="font-bold text-neutral-800">{selectedAsset.provider || 'AWS'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-neutral-400 text-[11px]">Region / Location:</span>
+                      <span className="text-neutral-400 text-[10px]">Region:</span>
                       <span className="font-bold text-neutral-800">{selectedAsset.location || 'us-east-1'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-neutral-400 text-[11px]">IP Address:</span>
-                      <span className="font-mono text-[11px] text-neutral-800">{selectedAsset.ip_address || '10.0.1.10'}</span>
+                      <span className="text-neutral-400 text-[10px]">IP / Endpoint:</span>
+                      <span className="font-mono text-[9px] text-neutral-800">{selectedAsset.ip_address || '10.0.1.10'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-neutral-400 text-[11px]">Uptime SLA:</span>
+                      <span className="text-neutral-400 text-[10px]">Uptime SLA:</span>
                       <span className="font-bold text-emerald-600">{selectedAsset.uptime_percent || 99.98}%</span>
                     </div>
                   </div>
 
                   {/* Decommission Button */}
-                  <div className="pt-2 border-t flex flex-col gap-2">
+                  <div className="pt-2 border-t flex flex-col gap-1.5">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => deleteAssetMutation.mutate(selectedAsset.id)}
                       disabled={deleteAssetMutation.isPending}
-                      className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 h-8 font-semibold gap-1.5"
+                      className="text-[10px] text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 h-7 font-semibold gap-1"
                     >
-                      <Trash2 className="size-3.5" />
-                      Decommission Configuration Item
+                      <Trash2 className="size-3" />
+                      Decommission CI
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="w-full xl:w-80 shrink-0 bg-neutral-50/70 rounded-2xl border border-dashed border-neutral-200 p-8 text-center flex flex-col items-center justify-center">
-                  <Info className="size-6 text-neutral-400 mb-2" />
-                  <h4 className="text-xs font-bold text-neutral-700">CI Telemetry Inspector</h4>
-                  <p className="text-[11px] text-neutral-400 mt-1">
+                <div className="w-full xl:w-72 shrink-0 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-200 p-6 text-center flex flex-col items-center justify-center">
+                  <Info className="size-5 text-neutral-400 mb-1.5" />
+                  <h4 className="text-[11px] font-bold text-neutral-700">CI Telemetry Inspector</h4>
+                  <p className="text-[10px] text-neutral-400 mt-1">
                     Select any node on the topology canvas to inspect live metrics, upstream blast radius, and dependencies.
                   </p>
                 </div>
@@ -694,26 +688,26 @@ export const CmdbView = () => {
 
       {/* TAB 2: INVENTORY & TELEMETRY TABLE */}
       {activeTab === 'inventory' && (
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col gap-4">
+        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs flex flex-col gap-3">
           {/* Search and Filters Bar */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="size-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="size-3 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <Input
-                placeholder="Search by name, IP address, or region..."
+                placeholder="Search by name, IP, region..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-9 text-xs rounded-xl"
+                className="pl-8 h-8 text-[11px] rounded-lg"
               />
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs text-neutral-700 font-medium"
+                className="h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[10px] text-neutral-700 font-medium"
               >
-                <option value="ALL">All CI Types</option>
+                <option value="ALL">All Types</option>
                 <option value="SERVER">Server</option>
                 <option value="DATABASE">Database</option>
                 <option value="APPLICATION">Microservice</option>
@@ -726,7 +720,7 @@ export const CmdbView = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs text-neutral-700 font-medium"
+                className="h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[10px] text-neutral-700 font-medium"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="ACTIVE">Active</option>
@@ -738,7 +732,7 @@ export const CmdbView = () => {
               <select
                 value={filterEnv}
                 onChange={(e) => setFilterEnv(e.target.value)}
-                className="h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs text-neutral-700 font-medium"
+                className="h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[10px] text-neutral-700 font-medium"
               >
                 <option value="ALL">All Environments</option>
                 <option value="PRODUCTION">Production</option>
@@ -750,22 +744,22 @@ export const CmdbView = () => {
 
           {/* Table */}
           {filteredNodes.length === 0 ? (
-            <div className="py-12 text-center text-xs text-neutral-500">
+            <div className="py-8 text-center text-[11px] text-neutral-500">
               No configuration items matched your search criteria.
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-neutral-200">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-neutral-50 border-b border-neutral-200 text-neutral-500 font-semibold">
+            <div className="overflow-x-auto rounded-lg border border-neutral-200">
+              <table className="w-full text-left text-[11px]">
+                <thead className="bg-neutral-50 border-b border-neutral-200 text-neutral-500 font-semibold text-[10px]">
                   <tr>
-                    <th className="py-2.5 px-4">Configuration Item</th>
-                    <th className="py-2.5 px-3">Type</th>
-                    <th className="py-2.5 px-3">Environment</th>
-                    <th className="py-2.5 px-3">Status</th>
-                    <th className="py-2.5 px-3">Endpoint / IP</th>
-                    <th className="py-2.5 px-3">Location</th>
-                    <th className="py-2.5 px-3">Uptime</th>
-                    <th className="py-2.5 px-3 text-right">Actions</th>
+                    <th className="py-2 px-3">Configuration Item</th>
+                    <th className="py-2 px-2.5">Type</th>
+                    <th className="py-2 px-2.5">Environment</th>
+                    <th className="py-2 px-2.5">Status</th>
+                    <th className="py-2 px-2.5">Endpoint / IP</th>
+                    <th className="py-2 px-2.5">Location</th>
+                    <th className="py-2 px-2.5">Uptime</th>
+                    <th className="py-2 px-2.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-100">
@@ -776,28 +770,28 @@ export const CmdbView = () => {
 
                     return (
                       <tr key={n.id} className="hover:bg-neutral-50/80 transition">
-                        <td className="py-3 px-4 font-bold text-neutral-900 flex items-center gap-2">
-                          <div className={cn('p-1.5 rounded-md border shrink-0', typeCfg.color)}>
-                            <Icon className="size-3.5" />
+                        <td className="py-2 px-3 font-bold text-neutral-900 flex items-center gap-2">
+                          <div className={cn('p-1 rounded-md border shrink-0', typeCfg.color)}>
+                            <Icon className="size-3" />
                           </div>
-                          <span>{n.name}</span>
+                          <span className="truncate max-w-[200px]">{n.name}</span>
                         </td>
-                        <td className="py-3 px-3 text-neutral-600 font-medium">{typeCfg.label}</td>
-                        <td className="py-3 px-3">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-neutral-700">
+                        <td className="py-2 px-2.5 text-neutral-600 font-medium">{typeCfg.label}</td>
+                        <td className="py-2 px-2.5">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-neutral-100 text-neutral-700">
                             {n.environment}
                           </span>
                         </td>
-                        <td className="py-3 px-3">
-                          <span className={cn('px-2 py-0.5 rounded text-[10px] font-bold border', statusCfg.badge)}>
+                        <td className="py-2 px-2.5">
+                          <span className={cn('px-1.5 py-0.5 rounded text-[9px] font-bold border', statusCfg.badge)}>
                             {n.status}
                           </span>
                         </td>
-                        <td className="py-3 px-3 font-mono text-[11px] text-neutral-600">{n.ip_address || '—'}</td>
-                        <td className="py-3 px-3 text-neutral-600">{n.location || '—'}</td>
-                        <td className="py-3 px-3 font-bold text-emerald-600">{n.uptime_percent || 99.98}%</td>
-                        <td className="py-3 px-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        <td className="py-2 px-2.5 font-mono text-[10px] text-neutral-600">{n.ip_address || '—'}</td>
+                        <td className="py-2 px-2.5 text-neutral-600">{n.location || '—'}</td>
+                        <td className="py-2 px-2.5 font-bold text-emerald-600">{n.uptime_percent || 99.98}%</td>
+                        <td className="py-2 px-2.5 text-right">
+                          <div className="flex items-center justify-end gap-1">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -805,7 +799,7 @@ export const CmdbView = () => {
                                 setSelectedAssetId(n.id);
                                 setActiveTab('topology');
                               }}
-                              className="h-7 px-2 text-[11px] text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-medium"
+                              className="h-6 px-1.5 text-[10px] text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-medium"
                             >
                               Inspect
                             </Button>
@@ -813,9 +807,9 @@ export const CmdbView = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => deleteAssetMutation.mutate(n.id)}
-                              className="h-7 px-2 text-[11px] text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                              className="h-6 px-1.5 text-[10px] text-rose-600 hover:text-rose-700 hover:bg-rose-50"
                             >
-                              <Trash2 className="size-3" />
+                              <Trash2 className="size-2.5" />
                             </Button>
                           </div>
                         </td>
@@ -898,36 +892,36 @@ const CreateAssetModal = ({ isOpen, onClose, workspaceId, onCreated }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-neutral-200">
-        <div className="flex items-center justify-between pb-3 border-b mb-4">
-          <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-            <Plus className="size-4 text-indigo-600" /> Register Configuration Item (CI)
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-3">
+      <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl border border-neutral-200 text-[11px]">
+        <div className="flex items-center justify-between pb-2.5 border-b mb-3">
+          <h3 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+            <Plus className="size-3.5 text-indigo-600" /> Register CI
           </h3>
           <button onClick={onClose} className="p-1 rounded-md text-neutral-400 hover:text-neutral-700">
-            <X className="size-4" />
+            <X className="size-3.5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 text-xs">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
           <div>
-            <label className="block font-bold text-neutral-700 mb-1">CI Name / Identifier</label>
+            <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">CI Name / Identifier</label>
             <Input
               required
               placeholder="e.g. Auth & Identity Service, Postgres Replica"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="text-xs h-9 rounded-xl"
+              className="text-[11px] h-8 rounded-lg"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block font-bold text-neutral-700 mb-1">CI Type</label>
+              <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">CI Type</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="w-full h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs text-neutral-700 font-medium"
+                className="w-full h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[10px] text-neutral-700 font-medium"
               >
                 <option value="APPLICATION">Microservice</option>
                 <option value="API_GATEWAY">API Gateway</option>
@@ -941,11 +935,11 @@ const CreateAssetModal = ({ isOpen, onClose, workspaceId, onCreated }) => {
             </div>
 
             <div>
-              <label className="block font-bold text-neutral-700 mb-1">Environment</label>
+              <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">Environment</label>
               <select
                 value={environment}
                 onChange={(e) => setEnvironment(e.target.value)}
-                className="w-full h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs text-neutral-700 font-medium"
+                className="w-full h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[10px] text-neutral-700 font-medium"
               >
                 <option value="PRODUCTION">Production</option>
                 <option value="STAGING">Staging</option>
@@ -954,55 +948,55 @@ const CreateAssetModal = ({ isOpen, onClose, workspaceId, onCreated }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block font-bold text-neutral-700 mb-1">Provider</label>
+              <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">Provider</label>
               <Input
-                placeholder="AWS, Cloudflare, GCP"
+                placeholder="AWS, Cloudflare"
                 value={provider}
                 onChange={(e) => setProvider(e.target.value)}
-                className="text-xs h-9 rounded-xl"
+                className="text-[11px] h-8 rounded-lg"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-neutral-700 mb-1">IP Address / Host</label>
+              <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">IP / Host</label>
               <Input
                 placeholder="10.0.1.20"
                 value={ipAddress}
                 onChange={(e) => setIpAddress(e.target.value)}
-                className="text-xs h-9 rounded-xl font-mono"
+                className="text-[11px] h-8 rounded-lg font-mono"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block font-bold text-neutral-700 mb-1">Location / Region</label>
+              <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">Location / Region</label>
               <Input
                 placeholder="AWS us-east-1"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="text-xs h-9 rounded-xl"
+                className="text-[11px] h-8 rounded-lg"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-neutral-700 mb-1">Target Uptime (%)</label>
+              <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">Target Uptime (%)</label>
               <Input
                 placeholder="99.99"
                 value={uptimePercent}
                 onChange={(e) => setUptimePercent(e.target.value)}
-                className="text-xs h-9 rounded-xl font-mono"
+                className="text-[11px] h-8 rounded-lg font-mono"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t mt-2">
-            <Button variant="outline" type="button" onClick={onClose} className="text-xs h-9">
+          <div className="flex items-center justify-end gap-2 pt-2.5 border-t mt-1">
+            <Button variant="outline" type="button" onClick={onClose} className="text-[10px] h-7 px-2.5">
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-9 font-semibold">
+            <Button type="submit" disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] h-7 px-3 font-semibold">
               {isSubmitting ? 'Registering...' : 'Register CI'}
             </Button>
           </div>
@@ -1044,24 +1038,24 @@ const CreateDependencyModal = ({ isOpen, onClose, workspaceId, nodes, onCreated 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-neutral-200">
-        <div className="flex items-center justify-between pb-3 border-b mb-4">
-          <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-            <Link2 className="size-4 text-indigo-600" /> Link Service Dependency
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-3">
+      <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl border border-neutral-200 text-[11px]">
+        <div className="flex items-center justify-between pb-2.5 border-b mb-3">
+          <h3 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+            <Link2 className="size-3.5 text-indigo-600" /> Link Service Dependency
           </h3>
           <button onClick={onClose} className="p-1 rounded-md text-neutral-400 hover:text-neutral-700">
-            <X className="size-4" />
+            <X className="size-3.5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 text-xs">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
           <div>
-            <label className="block font-bold text-neutral-700 mb-1">Source Asset (Origin / Caller)</label>
+            <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">Source Asset (Origin / Caller)</label>
             <select
               value={sourceId}
               onChange={(e) => setSourceId(e.target.value)}
-              className="w-full h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs text-neutral-700 font-medium"
+              className="w-full h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[10px] text-neutral-700 font-medium"
             >
               {nodes.map(n => (
                 <option key={n.id} value={n.id}>{n.name} ({n.type})</option>
@@ -1070,11 +1064,11 @@ const CreateDependencyModal = ({ isOpen, onClose, workspaceId, nodes, onCreated 
           </div>
 
           <div>
-            <label className="block font-bold text-neutral-700 mb-1">Relationship Type</label>
+            <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">Relationship Type</label>
             <select
               value={relationship}
               onChange={(e) => setRelationship(e.target.value)}
-              className="w-full h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs text-neutral-700 font-medium"
+              className="w-full h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[10px] text-neutral-700 font-medium"
             >
               <option value="routes traffic to">routes traffic to</option>
               <option value="depends on">depends on</option>
@@ -1086,11 +1080,11 @@ const CreateDependencyModal = ({ isOpen, onClose, workspaceId, nodes, onCreated 
           </div>
 
           <div>
-            <label className="block font-bold text-neutral-700 mb-1">Target Asset (Destination / Service)</label>
+            <label className="block font-bold text-neutral-700 mb-0.5 text-[10px]">Target Asset (Destination / Service)</label>
             <select
               value={targetId}
               onChange={(e) => setTargetId(e.target.value)}
-              className="w-full h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs text-neutral-700 font-medium"
+              className="w-full h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[10px] text-neutral-700 font-medium"
             >
               {nodes.map(n => (
                 <option key={n.id} value={n.id}>{n.name} ({n.type})</option>
@@ -1098,11 +1092,11 @@ const CreateDependencyModal = ({ isOpen, onClose, workspaceId, nodes, onCreated 
             </select>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t mt-2">
-            <Button variant="outline" type="button" onClick={onClose} className="text-xs h-9">
+          <div className="flex items-center justify-end gap-2 pt-2.5 border-t mt-1">
+            <Button variant="outline" type="button" onClick={onClose} className="text-[10px] h-7 px-2.5">
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-9 font-semibold">
+            <Button type="submit" disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] h-7 px-3 font-semibold">
               {isSubmitting ? 'Linking...' : 'Establish Link'}
             </Button>
           </div>
