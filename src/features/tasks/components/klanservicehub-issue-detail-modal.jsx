@@ -146,6 +146,8 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['sprints'] });
       queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+      queryClient.invalidateQueries({ queryKey: ['team-workload'] });
       queryClient.invalidateQueries({ queryKey: ['dependencies-graph'] });
       if (res?.data) {
         setTask(res.data);

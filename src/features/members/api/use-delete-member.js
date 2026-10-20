@@ -12,10 +12,10 @@ export const useDeleteMember = () => {
         },
         onSuccess: ({ data }) => {
             toast.success('Member deleted.');
-            queryClient.invalidateQueries({
-                queryKey: ['members', data.workspaceId],
-                exact: true,
-            });
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+            queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
         },
         onError: (error) => {
             console.error('[DELETE_MEMBER]: ', error);

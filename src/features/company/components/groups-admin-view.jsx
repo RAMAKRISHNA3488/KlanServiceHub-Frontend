@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { groupsApi, usersAdminApi, rolesAdminApi } from '@/lib/api-client';
@@ -65,6 +66,7 @@ const PRESET_TEMPLATES = [
 
 export const GroupsAdminView = () => {
   const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
 
   const [ConfirmDialog, confirmAction] = useConfirm(
     'Delete Access Group',
@@ -148,6 +150,10 @@ export const GroupsAdminView = () => {
       if (usersRes?.data) setAllUsers(usersRes.data);
       if (rolesRes?.data) setRoles(rolesRes.data);
       if (rulesRes?.data) setDomainRules(rulesRes.data);
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (err) {
       toast.error('Failed to load user groups and directory data');
     } finally {

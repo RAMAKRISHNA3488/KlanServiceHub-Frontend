@@ -145,6 +145,8 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
       queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['reports'] });
       queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+      queryClient.invalidateQueries({ queryKey: ['team-workload'] });
       queryClient.invalidateQueries({ queryKey: ['dependencies-graph'] });
       if (onCreated) onCreated(res.data);
       window.dispatchEvent(new CustomEvent('klanservicehub-issue-created', { detail: res.data }));

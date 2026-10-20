@@ -64,7 +64,12 @@ export const SprintsView = () => {
   const [showClosedSprints, setShowClosedSprints] = useState(false);
 
   const fetchData = () => {
-    queryClient.invalidateQueries({ queryKey: ['sprints', workspaceId] });
+    queryClient.invalidateQueries({ queryKey: ['sprints'] });
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+    queryClient.invalidateQueries({ queryKey: ['reports'] });
   };
 
   const handleCreateSprint = async (e) => {

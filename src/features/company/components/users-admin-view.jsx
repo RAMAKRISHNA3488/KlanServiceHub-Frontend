@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { usersAdminApi, rolesAdminApi, companyApi } from '@/lib/api-client';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ import {
 
 export const UsersAdminView = () => {
   const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,11 @@ export const UsersAdminView = () => {
       ]);
       if (usersRes?.data) setUsers(usersRes.data);
       if (rolesRes?.data?.roles) setRoles(rolesRes.data.roles);
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
     } catch (e) {
       toast.error('Failed to load user directory');
     } finally {

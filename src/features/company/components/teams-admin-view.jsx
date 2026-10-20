@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { teamsAdminApi, usersAdminApi } from '@/lib/api-client';
@@ -18,6 +19,7 @@ import {
 
 export const TeamsAdminView = () => {
   const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
   const [teams, setTeams] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +48,10 @@ export const TeamsAdminView = () => {
       ]);
       if (teamsRes?.data) setTeams(teamsRes.data);
       if (usersRes?.data) setUsers(usersRes.data);
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
     } catch (e) {
       toast.error('Failed to load teams');
     } finally {

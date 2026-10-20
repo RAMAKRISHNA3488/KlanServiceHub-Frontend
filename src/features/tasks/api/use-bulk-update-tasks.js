@@ -12,30 +12,16 @@ export const useBulkUpdateTasks = () => {
         },
         onSuccess: ({ data }) => {
             toast.success('Tasks updated.');
-            const wsId = data?.workspaceId;
-            if (wsId) {
-                queryClient.invalidateQueries({
-                    queryKey: ['workspace-analytics', wsId],
-                    exact: true,
-                });
-                queryClient.invalidateQueries({
-                    queryKey: ['tasks', wsId],
-                    exact: false,
-                });
-            } else {
-                queryClient.invalidateQueries({
-                    queryKey: ['workspace-analytics'],
-                    exact: false,
-                });
-            }
-            queryClient.invalidateQueries({
-                queryKey: ['tasks'],
-                exact: false,
-            });
-            queryClient.invalidateQueries({
-                queryKey: ['project-analytics'],
-                exact: false,
-            });
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            queryClient.invalidateQueries({ queryKey: ['task'] });
+            queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+            queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+            queryClient.invalidateQueries({ queryKey: ['sprints'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+            queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+            queryClient.invalidateQueries({ queryKey: ['dependencies-graph'] });
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
         },
         onError: (error) => {
             console.error('[BULK_UPDATE_TASKS]: ', error);

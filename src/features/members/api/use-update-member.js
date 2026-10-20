@@ -12,10 +12,10 @@ export const useUpdateMember = () => {
         },
         onSuccess: ({ data }) => {
             toast.success('Member updated.');
-            queryClient.invalidateQueries({
-                queryKey: ['members', data.workspaceId],
-                exact: true,
-            });
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+            queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
         },
         onError: (error) => {
             console.error('[UPDATE_MEMBER]: ', error);

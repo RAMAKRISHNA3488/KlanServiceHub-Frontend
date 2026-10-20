@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
@@ -57,6 +58,7 @@ const COLOR_PRESETS = [
 export const WorkflowsAdminView = () => {
   const navigate = useNavigate();
   const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
   const pipelineScrollRef = React.useRef(null);
   const [workflows, setWorkflows] = useState([]);
   const [issueTypes, setIssueTypes] = useState([]);
@@ -129,6 +131,10 @@ export const WorkflowsAdminView = () => {
       ]);
       if (wfRes?.data) setWorkflows(wfRes.data);
       if (typesRes?.data) setIssueTypes(typesRes.data);
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      queryClient.invalidateQueries({ queryKey: ['issue-types'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
     } catch (e) {
       toast.error('Failed to load workflows & issue types');
     } finally {

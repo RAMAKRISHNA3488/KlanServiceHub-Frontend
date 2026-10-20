@@ -211,7 +211,8 @@ export const DashboardsView = () => {
     if (!workspaceId) return;
     try {
       if (!isSilent && !data) setLoading(true);
-      await queryClient.invalidateQueries({ queryKey: ['dashboard-data', workspaceId] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboards'] });
     } catch (e) {
       if (!isSilent) toast.error('Failed to load dashboard');
     } finally {

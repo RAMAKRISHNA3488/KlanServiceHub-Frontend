@@ -41,7 +41,11 @@ export const ReleasesView = () => {
   const [releaseForm, setReleaseForm] = useState({ name: '', description: '', releaseDate: '' });
 
   const fetchReleases = () => {
-    queryClient.invalidateQueries({ queryKey: ['releases', workspaceId] });
+    queryClient.invalidateQueries({ queryKey: ['releases'] });
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+    queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
   };
 
   const handleCreate = async (e) => {

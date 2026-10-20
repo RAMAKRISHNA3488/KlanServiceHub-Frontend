@@ -12,10 +12,12 @@ export const useCreateProject = () => {
         },
         onSuccess: ({ data }) => {
             toast.success('Project created.');
-            queryClient.invalidateQueries({
-                queryKey: ['projects', data.workspaceId],
-                exact: true,
-            });
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            queryClient.invalidateQueries({ queryKey: ['project'] });
+            queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+            queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
         },
         onError: (error) => {
             console.error('[CREATE_PROJECT]: ', error);

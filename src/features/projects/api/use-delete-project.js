@@ -12,14 +12,13 @@ export const useDeleteProject = () => {
         },
         onSuccess: ({ data }) => {
             toast.success('Project deleted.');
-            queryClient.invalidateQueries({
-                queryKey: ['projects', data.workspaceId],
-                exact: true,
-            });
-            queryClient.invalidateQueries({
-                queryKey: ['project', data.$id],
-                exact: true,
-            });
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            queryClient.invalidateQueries({ queryKey: ['project'] });
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+            queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
         },
         onError: (error) => {
             console.error('[DELETE_PROJECT]: ', error);
