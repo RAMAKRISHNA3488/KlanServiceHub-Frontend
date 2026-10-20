@@ -427,6 +427,7 @@ export const serviceManagementApi = {
   seedDemo: (workspaceId) => apiFetch(`/api/service-management/${workspaceId}/seed-demo`, { method: 'POST' }),
   getCustomers: (workspaceId) => apiFetch(`/api/service-management/${workspaceId}/customers`),
   createCustomerOrg: (workspaceId, data) => apiFetch(`/api/service-management/${workspaceId}/customers`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteCustomerOrg: (workspaceId, id) => apiFetch(`/api/service-management/${workspaceId}/customers/${id}`, { method: 'DELETE' }),
 };
 
 export const assetsApi = {

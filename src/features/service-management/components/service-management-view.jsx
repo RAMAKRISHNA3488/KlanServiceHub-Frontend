@@ -5,6 +5,7 @@ import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useEditTaskModal } from '@/features/tasks/hooks/use-edit-task-modal';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
+import { useGetMembers } from '@/features/members/api/use-get-members';
 import { serviceManagementApi } from '@/lib/api-client';
 import {
   LifeBuoy,
@@ -32,6 +33,14 @@ import {
   Activity,
   Check,
   ArrowRight,
+  User,
+  Mail,
+  FolderGit2,
+  FileText,
+  MessageSquare,
+  Send,
+  Calendar,
+  Layers,
 } from 'lucide-react';
 
 export const ServiceManagementView = () => {
@@ -51,8 +60,12 @@ export const ServiceManagementView = () => {
   const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedPriority, setSelectedPriority] = useState('ALL');
   const [selectedRequestType, setSelectedRequestType] = useState('ALL');
+  const [selectedOrgFilter, setSelectedOrgFilter] = useState('ALL');
+  
+  // Modals & Drawers
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCustomerOrgModalOpen, setIsCustomerOrgModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
 
   // 1. Fetch Service Requests
   const {
@@ -68,6 +81,7 @@ export const ServiceManagementView = () => {
       selectedStatus,
       selectedPriority,
       selectedRequestType,
+      selectedOrgFilter,
       searchTerm,
     ],
     queryFn: () =>
@@ -76,6 +90,7 @@ export const ServiceManagementView = () => {
         status: selectedStatus,
         priority: selectedPriority,
         requestType: selectedRequestType,
+        customerOrgId: selectedOrgFilter !== 'ALL' ? selectedOrgFilter : undefined,
         search: searchTerm,
       }),
   });
@@ -96,10 +111,13 @@ export const ServiceManagementView = () => {
   const { data: projectsData } = useGetProjects({ workspaceId });
 
   // 5. Fetch Customer Organizations
-  const { data: customersData } = useQuery({
+  const { data: customersData, refetch: refetchCustomers } = useQuery({
     queryKey: ['jsm-customers', workspaceId],
     queryFn: () => serviceManagementApi.getCustomers(workspaceId),
   });
+
+  // 6. Fetch Workspace Members for Agent Assignment
+  const { data: membersData } = useGetMembers({ workspaceId });
 
   const requests = requestsData?.data || [];
   const queues = queuesData?.data || [];
@@ -108,12 +126,19 @@ export const ServiceManagementView = () => {
     resolvedRequests: 0,
     breachedRequests: 0,
     slaMetRate: 98.4,
-    mttrHours: 3.2,
-    firstResponseAvgHours: 0.6,
-    csatScore: 98.8,
+    mttrHours: 2.8,
+    firstResponseAvgHours: 0.5,
+    csatScore: 98.6,
   };
   const projects = projectsData?.documents || projectsData?.data || (Array.isArray(projectsData) ? projectsData : []);
   const customerOrgs = customersData?.data || [];
+  const members = membersData?.documents || membersData?.data || (Array.isArray(membersData) ? membersData : []);
+
+  // Sync selectedTicket with live requests update
+  const activeTicket = useMemo(() => {
+    if (!selectedTicket) return null;
+    return requests.find((r) => r.id === selectedTicket.id) || selectedTicket;
+  }, [requests, selectedTicket]);
 
   // Create Request Mutation
   const createRequestMutation = useMutation({
@@ -123,6 +148,7 @@ export const ServiceManagementView = () => {
       queryClient.invalidateQueries({ queryKey: ['jsm-requests'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-queues'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-slas'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       setIsCreateModalOpen(false);
     },
     onError: (err) => {
@@ -130,7 +156,7 @@ export const ServiceManagementView = () => {
     },
   });
 
-  // Update Request Mutation (Status / Priority)
+  // Update Request Mutation (Status / Priority / Agent / Note)
   const updateRequestMutation = useMutation({
     mutationFn: ({ id, data }) => serviceManagementApi.updateRequest(workspaceId, id, data),
     onSuccess: () => {
@@ -138,6 +164,7 @@ export const ServiceManagementView = () => {
       queryClient.invalidateQueries({ queryKey: ['jsm-requests'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-queues'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-slas'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
     onError: (err) => {
       toast.error(err?.message || 'Failed to update request.');
@@ -152,6 +179,8 @@ export const ServiceManagementView = () => {
       queryClient.invalidateQueries({ queryKey: ['jsm-requests'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-queues'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-slas'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      if (selectedTicket) setSelectedTicket(null);
     },
     onError: (err) => {
       toast.error(err?.message || 'Failed to remove request.');
@@ -166,6 +195,7 @@ export const ServiceManagementView = () => {
       queryClient.invalidateQueries({ queryKey: ['jsm-requests'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-queues'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-slas'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
     onError: (err) => {
       toast.error(err?.message || 'Failed to seed sample requests.');
@@ -187,6 +217,7 @@ export const ServiceManagementView = () => {
       'Status',
       'Customer Name',
       'Customer Email',
+      'Customer Org',
       'Assigned Agent',
       'Project',
       'SLA Remaining (Mins)',
@@ -195,13 +226,14 @@ export const ServiceManagementView = () => {
     ];
 
     const rows = requests.map((r) => [
-      `"${r.task_key || ''}"`,
+      `"${r.task_key || 'KSM'}"`,
       `"${(r.summary || '').replace(/"/g, '""')}"`,
       `"${r.request_type || 'SERVICE_REQUEST'}"`,
       `"${r.priority || 'MEDIUM'}"`,
       `"${r.status || 'OPEN'}"`,
       `"${r.customer_name || 'Customer'}"`,
       `"${r.customer_email || ''}"`,
+      `"${r.customer_org_name || ''}"`,
       `"${r.agent_name || 'Unassigned'}"`,
       `"${r.project_name || ''}"`,
       r.slaRemainingMinutes !== null ? r.slaRemainingMinutes : '',
@@ -275,7 +307,7 @@ export const ServiceManagementView = () => {
   };
 
   return (
-    <div className="space-y-5 p-6 max-w-7xl mx-auto pb-20">
+    <div className="space-y-5 p-4 sm:p-6 max-w-7xl mx-auto pb-24 select-none">
       {/* 1. Page Header & Real-Time ITSM Operations Bar */}
       <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -311,7 +343,7 @@ export const ServiceManagementView = () => {
                 toast.success('Queues and tickets refreshed!');
               }}
               disabled={requestsFetching}
-              className="h-9 px-3 rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 text-xs font-semibold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+              className="h-8.5 px-3 rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 text-xs font-semibold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
             >
               <RefreshCw className={`size-3.5 text-neutral-500 ${requestsFetching ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
@@ -321,24 +353,24 @@ export const ServiceManagementView = () => {
               <button
                 onClick={() => seedDemoMutation.mutate()}
                 disabled={seedDemoMutation.isPending}
-                className="h-9 px-3 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                className="h-8.5 px-3 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
               >
                 <Sparkles className="size-3.5 text-purple-600" />
-                <span>{seedDemoMutation.isPending ? 'Seeding...' : 'Seed Sample ITSM Tickets'}</span>
+                <span>{seedDemoMutation.isPending ? 'Generating...' : 'Seed Sample ITSM Tickets'}</span>
               </button>
             )}
 
             <button
               onClick={handleExportCSV}
-              className="h-9 px-3 rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 text-xs font-semibold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+              className="h-8.5 px-3 rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 text-xs font-semibold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
             >
-              <Download className="size-3.5 text-purple-600" />
+              <Download className="size-3.5 text-neutral-600" />
               <span>Export CSV</span>
             </button>
 
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="h-9 px-4 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+              className="h-8.5 px-4 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="size-3.5" />
               <span>+ Raise Request</span>
@@ -456,22 +488,44 @@ export const ServiceManagementView = () => {
           {/* Customer Organizations Quick Section */}
           <div className="pt-3 border-t border-neutral-100 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                Customer Organizations
+              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1">
+                <Building2 className="size-3 text-neutral-400" /> Customer Orgs
               </span>
               <button
                 onClick={() => setIsCustomerOrgModalOpen(true)}
                 className="text-[10px] font-bold text-blue-600 hover:underline cursor-pointer"
               >
-                + Add Org
+                Manage Orgs
               </button>
             </div>
+            
+            {/* Filter by organization */}
             <div className="space-y-1 text-xs">
-              {customerOrgs.slice(0, 3).map((org) => (
-                <div key={org.id} className="px-2.5 py-1.5 rounded-lg bg-neutral-50 text-neutral-700 flex items-center justify-between text-[11px]">
-                  <span className="font-semibold truncate">{org.name}</span>
-                  <Building2 className="size-3 text-neutral-400" />
-                </div>
+              <button
+                onClick={() => setSelectedOrgFilter('ALL')}
+                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition flex items-center justify-between cursor-pointer ${
+                  selectedOrgFilter === 'ALL'
+                    ? 'bg-blue-50 text-blue-700 font-bold'
+                    : 'text-neutral-600 hover:bg-neutral-50'
+                }`}
+              >
+                <span>All Organizations</span>
+                {selectedOrgFilter === 'ALL' && <Check className="size-3 text-blue-600" />}
+              </button>
+
+              {customerOrgs.map((org) => (
+                <button
+                  key={org.id}
+                  onClick={() => setSelectedOrgFilter(selectedOrgFilter === org.id ? 'ALL' : org.id)}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition flex items-center justify-between cursor-pointer ${
+                    selectedOrgFilter === org.id
+                      ? 'bg-blue-50 text-blue-700 font-bold'
+                      : 'text-neutral-600 hover:bg-neutral-50'
+                  }`}
+                >
+                  <span className="truncate">{org.name}</span>
+                  {selectedOrgFilter === org.id && <Check className="size-3 text-blue-600" />}
+                </button>
               ))}
             </div>
           </div>
@@ -564,7 +618,7 @@ export const ServiceManagementView = () => {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-xl border border-neutral-100">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-neutral-200 bg-neutral-50 text-[10px] font-bold uppercase text-neutral-500 tracking-wider">
@@ -572,6 +626,7 @@ export const ServiceManagementView = () => {
                     <th className="py-2.5 px-3">Type</th>
                     <th className="py-2.5 px-3">Priority</th>
                     <th className="py-2.5 px-3">Customer / Org</th>
+                    <th className="py-2.5 px-3">Assigned Agent</th>
                     <th className="py-2.5 px-3">SLA Countdown</th>
                     <th className="py-2.5 px-3">Status</th>
                     <th className="py-2.5 px-3 text-right">Actions</th>
@@ -579,27 +634,20 @@ export const ServiceManagementView = () => {
                 </thead>
                 <tbody className="divide-y divide-neutral-100 font-medium text-neutral-700">
                   {requests.map((req) => (
-                    <tr key={req.id} className="hover:bg-neutral-50/80 transition">
+                    <tr
+                      key={req.id}
+                      onClick={() => setSelectedTicket(req)}
+                      className={`hover:bg-blue-50/40 transition cursor-pointer ${
+                        selectedTicket?.id === req.id ? 'bg-blue-50/60 font-semibold' : ''
+                      }`}
+                    >
                       {/* Ticket Key & Summary */}
                       <td className="py-3 px-3">
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-1.5">
-                            {req.task_id ? (
-                              <button
-                                onClick={() => {
-                                  toast.info(`Opening ${req.task_key}...`);
-                                  openEditTaskModal(req.task_id);
-                                }}
-                                className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100 hover:bg-blue-100 cursor-pointer flex items-center gap-1"
-                              >
-                                <span>{req.task_key || 'KSM'}</span>
-                                <ExternalLink className="size-2.5" />
-                              </button>
-                            ) : (
-                              <span className="font-mono text-[10px] font-bold text-neutral-600 bg-neutral-100 px-1.5 py-0.2 rounded">
-                                KSM
-                              </span>
-                            )}
+                            <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
+                              {req.task_key || 'KSM'}
+                            </span>
                             <span className="font-bold text-neutral-900 text-xs truncate max-w-xs block">
                               {req.summary}
                             </span>
@@ -629,10 +677,22 @@ export const ServiceManagementView = () => {
                       {/* Customer / Org */}
                       <td className="py-3 px-3">
                         <div>
-                          <p className="font-bold text-neutral-900 text-xs">{req.customer_name}</p>
+                          <p className="font-bold text-neutral-900 text-xs">{req.customer_name || 'Customer'}</p>
                           <p className="text-[10px] text-neutral-400">
-                            {req.customer_org_name || req.customer_email || 'Client'}
+                            {req.customer_org_name || req.customer_email || 'Direct Client'}
                           </p>
+                        </div>
+                      </td>
+
+                      {/* Assigned Agent */}
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-1.5 text-xs text-neutral-700">
+                          <div className="size-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">
+                            {(req.agent_name || 'U')[0].toUpperCase()}
+                          </div>
+                          <span className="truncate max-w-[100px] text-[11px] font-semibold text-neutral-800">
+                            {req.agent_name || 'Unassigned'}
+                          </span>
                         </div>
                       </td>
 
@@ -649,7 +709,7 @@ export const ServiceManagementView = () => {
                         ) : req.slaRemainingMinutes !== null ? (
                           <span
                             className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                              req.slaRemainingMinutes < 60
+                              req.slaRemainingMinutes < 120
                                 ? 'bg-amber-50 text-amber-800 border-amber-200'
                                 : 'bg-blue-50 text-blue-700 border-blue-200'
                             }`}
@@ -665,7 +725,7 @@ export const ServiceManagementView = () => {
                       </td>
 
                       {/* Status Selector Dropdown */}
-                      <td className="py-3 px-3">
+                      <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
                         <select
                           value={req.status}
                           onChange={(e) =>
@@ -694,13 +754,13 @@ export const ServiceManagementView = () => {
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3 px-3 text-right">
+                      <td className="py-3 px-3 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
                           {req.task_id && (
                             <button
                               onClick={() => openEditTaskModal(req.task_id)}
                               className="p-1.5 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition cursor-pointer"
-                              title="Open KlanserviceHub Task"
+                              title="Open Linked Task in Modal"
                             >
                               <ExternalLink className="size-3.5" />
                             </button>
@@ -734,31 +794,48 @@ export const ServiceManagementView = () => {
         </div>
       </div>
 
-      {/* 3. Raise Service Request / Incident Modal */}
+      {/* 3. Interactive Ticket Details Drawer / Workbench Modal */}
+      {activeTicket && (
+        <TicketDetailsDrawer
+          ticket={activeTicket}
+          members={members}
+          customerOrgs={customerOrgs}
+          onClose={() => setSelectedTicket(null)}
+          onUpdate={(data) => updateRequestMutation.mutate({ id: activeTicket.id, data })}
+          onDelete={async () => {
+            const ok = await confirmAction({
+              title: 'Delete Service Desk Request',
+              message: `Are you sure you want to delete request "${activeTicket.summary}"?`,
+              variant: 'destructive',
+              confirmText: 'Delete Request',
+            });
+            if (ok) deleteRequestMutation.mutate(activeTicket.id);
+          }}
+          onOpenTask={(taskId) => openEditTaskModal(taskId)}
+          getTypeBadge={getTypeBadge}
+          getPriorityBadge={getPriorityBadge}
+        />
+      )}
+
+      {/* 4. Raise Service Request / Incident Modal */}
       {isCreateModalOpen && (
         <CreateRequestModal
           projects={projects}
           customerOrgs={customerOrgs}
+          members={members}
           onClose={() => setIsCreateModalOpen(false)}
           onSubmit={(payload) => createRequestMutation.mutate(payload)}
           loading={createRequestMutation.isPending}
         />
       )}
 
-      {/* 4. Customer Organization Modal */}
+      {/* 5. Customer Organization Management Modal */}
       {isCustomerOrgModalOpen && (
-        <CreateCustomerOrgModal
+        <ManageCustomerOrgsModal
+          customerOrgs={customerOrgs}
+          workspaceId={workspaceId}
           onClose={() => setIsCustomerOrgModalOpen(false)}
-          onSubmit={async (data) => {
-            try {
-              await serviceManagementApi.createCustomerOrg(workspaceId, data);
-              toast.success('Customer Organization created!');
-              queryClient.invalidateQueries({ queryKey: ['jsm-customers'] });
-              setIsCustomerOrgModalOpen(false);
-            } catch (e) {
-              toast.error('Failed to create customer organization.');
-            }
-          }}
+          onCreated={() => refetchCustomers()}
         />
       )}
 
@@ -769,11 +846,273 @@ export const ServiceManagementView = () => {
 };
 
 // ==========================================
+// Sub-Component: Interactive Ticket Details Drawer
+// ==========================================
+const TicketDetailsDrawer = ({
+  ticket,
+  members = [],
+  customerOrgs = [],
+  onClose,
+  onUpdate,
+  onDelete,
+  onOpenTask,
+  getTypeBadge,
+  getPriorityBadge,
+}) => {
+  const [resolutionNote, setResolutionNote] = useState(ticket.resolution_note || '');
+  const [isEditingNote, setIsEditingNote] = useState(false);
+
+  const isClosed = ['RESOLVED', 'CLOSED'].includes(ticket.status);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="w-full max-w-xl h-full bg-white shadow-2xl border-l border-neutral-200 flex flex-col justify-between animate-in slide-in-from-right duration-200 text-xs text-neutral-800">
+        {/* Drawer Header */}
+        <div className="p-5 border-b border-neutral-200 space-y-3 bg-neutral-50/60">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">
+                {ticket.task_key || 'KSM'}
+              </span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getTypeBadge(ticket.request_type)}`}>
+                {ticket.request_type}
+              </span>
+              <span className={`px-2 py-0.5 rounded-md text-[10px] border ${getPriorityBadge(ticket.priority)}`}>
+                {ticket.priority}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {ticket.task_id && (
+                <button
+                  onClick={() => onOpenTask(ticket.task_id)}
+                  className="px-2.5 py-1 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 font-bold text-[11px] text-blue-700 flex items-center gap-1 shadow-2xs cursor-pointer"
+                >
+                  <span>Open Task</span>
+                  <ExternalLink className="size-3" />
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          </div>
+
+          <h2 className="text-base font-bold text-neutral-900 leading-snug">
+            {ticket.summary}
+          </h2>
+
+          {/* SLA Status Banner */}
+          <div className={`p-3 rounded-xl border flex items-center justify-between ${
+            isClosed
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : ticket.isSlaBreached
+              ? 'bg-rose-50 border-rose-200 text-rose-800'
+              : 'bg-blue-50 border-blue-200 text-blue-800'
+          }`}>
+            <div className="flex items-center gap-2">
+              {isClosed ? (
+                <CheckCircle2 className="size-4 text-emerald-600" />
+              ) : ticket.isSlaBreached ? (
+                <AlertTriangle className="size-4 text-rose-600 animate-bounce" />
+              ) : (
+                <Clock className="size-4 text-blue-600" />
+              )}
+              <div>
+                <p className="font-bold text-[11px]">
+                  {isClosed
+                    ? 'SLA Target Successfully Met'
+                    : ticket.isSlaBreached
+                    ? 'Service Level Agreement Breached'
+                    : 'SLA Countdown Active'}
+                </p>
+                <p className="text-[10px] opacity-80">
+                  {isClosed
+                    ? `Resolved at ${new Date(ticket.resolved_at || ticket.updated_at).toLocaleString()}`
+                    : ticket.isSlaBreached
+                    ? 'Immediate escalation required under P0/P1 runbook'
+                    : ticket.slaRemainingMinutes !== null
+                    ? `${ticket.slaRemainingMinutes} minutes remaining before breach`
+                    : 'Standard turnaround target'}
+                </p>
+              </div>
+            </div>
+
+            <span className="font-mono font-bold text-xs">
+              {isClosed ? 'MET' : ticket.isSlaBreached ? 'BREACHED' : `${Math.max(0, Math.round((ticket.slaRemainingMinutes || 0) / 60))}h`}
+            </span>
+          </div>
+        </div>
+
+        {/* Drawer Body */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {/* Status Progression Bar */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">
+              Workflow Status Progression
+            </label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { id: 'OPEN', label: '1. Open Triage' },
+                { id: 'IN_PROGRESS', label: '2. In Progress' },
+                { id: 'WAITING_FOR_CUSTOMER', label: '3. Waiting Client' },
+                { id: 'PENDING_APPROVAL', label: '4. Pending Approval' },
+                { id: 'RESOLVED', label: '5. Resolved' },
+                { id: 'CLOSED', label: '6. Closed' },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => onUpdate({ status: s.id })}
+                  className={`py-1.5 px-2 rounded-xl text-[10.5px] font-bold border transition text-center cursor-pointer ${
+                    ticket.status === s.id
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                      : 'bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Description Section */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">
+              Description & Reproduction Steps
+            </label>
+            <div className="p-3.5 rounded-xl border border-neutral-200 bg-neutral-50/50 text-neutral-800 leading-relaxed font-normal whitespace-pre-wrap">
+              {ticket.description || 'No description provided for this service request.'}
+            </div>
+          </div>
+
+          {/* Two-Column Metadata (Requester & Agent) */}
+          <div className="grid grid-cols-2 gap-4 p-4 rounded-xl border border-neutral-200 bg-neutral-50/40">
+            {/* Requester Information */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold uppercase text-neutral-400 block">Customer Requester</span>
+              <p className="font-bold text-neutral-900 text-xs flex items-center gap-1.5">
+                <User className="size-3 text-neutral-500" />
+                {ticket.customer_name || 'Customer'}
+              </p>
+              {ticket.customer_email && (
+                <p className="text-[11px] text-neutral-500 flex items-center gap-1.5">
+                  <Mail className="size-3 text-neutral-400" />
+                  {ticket.customer_email}
+                </p>
+              )}
+              {ticket.customer_org_name && (
+                <p className="text-[11px] text-purple-700 font-semibold flex items-center gap-1.5 pt-0.5">
+                  <Building2 className="size-3 text-purple-600" />
+                  {ticket.customer_org_name}
+                </p>
+              )}
+            </div>
+
+            {/* Assigned Agent Selector */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold uppercase text-neutral-400 block">Assigned Support Agent</span>
+              <select
+                value={ticket.assigned_agent_id || ''}
+                onChange={(e) => onUpdate({ assignedAgentId: e.target.value || null })}
+                className="w-full h-8 rounded-lg border border-neutral-200 bg-white px-2 text-[11px] font-semibold text-neutral-800 focus:outline-hidden"
+              >
+                <option value="">Unassigned</option>
+                {members.map((m) => (
+                  <option key={m.id || m.userId} value={m.userId || m.id}>
+                    {m.name || m.email} ({m.role || 'Member'})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-neutral-400 pt-0.5">
+                Agent gets notified upon assignment.
+              </p>
+            </div>
+          </div>
+
+          {/* Resolution Note Section */}
+          <div className="space-y-2 pt-2 border-t border-neutral-100">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">
+                Resolution Summary & Root Cause Note
+              </label>
+              {!isEditingNote && (
+                <button
+                  onClick={() => setIsEditingNote(true)}
+                  className="text-[10px] font-bold text-blue-600 hover:underline cursor-pointer"
+                >
+                  Edit Note
+                </button>
+              )}
+            </div>
+
+            {isEditingNote ? (
+              <div className="space-y-2">
+                <textarea
+                  rows={3}
+                  value={resolutionNote}
+                  onChange={(e) => setResolutionNote(e.target.value)}
+                  placeholder="Document the resolution, root cause, patch link, or customer instructions..."
+                  className="w-full rounded-xl border border-neutral-200 bg-white p-3 text-xs font-normal focus:border-blue-500 focus:outline-hidden"
+                />
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => setIsEditingNote(false)}
+                    className="px-3 py-1 rounded-lg border border-neutral-200 font-semibold text-neutral-600 hover:bg-neutral-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      onUpdate({ resolutionNote });
+                      setIsEditingNote(false);
+                      toast.success('Resolution note saved.');
+                    }}
+                    className="px-3 py-1 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700"
+                  >
+                    Save Note
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl border border-neutral-200 bg-neutral-50/50 text-neutral-700 text-xs italic">
+                {ticket.resolution_note || 'No resolution note recorded yet. Add notes before closing ticket.'}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Drawer Footer */}
+        <div className="p-4 border-t border-neutral-200 bg-neutral-50/60 flex items-center justify-between">
+          <button
+            onClick={onDelete}
+            className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <Trash2 className="size-3.5" />
+            <span>Delete Request</span>
+          </button>
+
+          <button
+            onClick={onClose}
+            className="px-4 py-1.5 rounded-xl border border-neutral-300 font-bold text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
+          >
+            Close Panel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
 // Sub-Component: Create Request Modal
 // ==========================================
 const CreateRequestModal = ({
   projects = [],
   customerOrgs = [],
+  members = [],
   onClose,
   onSubmit,
   loading = false,
@@ -782,8 +1121,11 @@ const CreateRequestModal = ({
   const [description, setDescription] = useState('');
   const [requestType, setRequestType] = useState('SERVICE_REQUEST');
   const [priority, setPriority] = useState('MEDIUM');
-  const [projectId, setProjectId] = useState(projects[0]?.id || '');
+  const [projectId, setProjectId] = useState(projects[0]?.$id || projects[0]?.id || '');
   const [customerOrgId, setCustomerOrgId] = useState('');
+  const [assignedAgentId, setAssignedAgentId] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
   const [slaHours, setSlaHours] = useState('24');
 
   const handleSubmit = (e) => {
@@ -797,15 +1139,18 @@ const CreateRequestModal = ({
       description,
       requestType,
       priority,
-      projectId: projectId || projects[0]?.id,
+      projectId: projectId || projects[0]?.$id || projects[0]?.id || null,
       customerOrgId: customerOrgId || null,
+      assignedAgentId: assignedAgentId || null,
+      customerName: customerName.trim() || undefined,
+      customerEmail: customerEmail.trim() || undefined,
       slaHours: parseInt(slaHours, 10) || 24,
     });
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-neutral-200 space-y-5 animate-in zoom-in-95 duration-150">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-neutral-200 space-y-4 animate-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-sky-50 text-sky-600">
@@ -824,13 +1169,13 @@ const CreateRequestModal = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
           {/* Request Type Selector */}
           <div>
             <label className="font-bold text-neutral-700 block uppercase tracking-wider text-[10px] mb-1">
               Request Classification
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
               {[
                 { id: 'SERVICE_REQUEST', label: 'Service Request' },
                 { id: 'INCIDENT', label: 'Incident (Outage)' },
@@ -875,7 +1220,7 @@ const CreateRequestModal = ({
               Description & Reproduction Details
             </label>
             <textarea
-              rows={3}
+              rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Detailed explanation of the issue, affected users, error logs..."
@@ -899,7 +1244,7 @@ const CreateRequestModal = ({
                   else if (p === 'MEDIUM') setSlaHours('24');
                   else setSlaHours('72');
                 }}
-                className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-2.5 text-xs font-semibold focus:outline-hidden"
+                className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-2.5 text-xs font-semibold focus:outline-hidden cursor-pointer"
               >
                 <option value="CRITICAL">P0 - Critical (2h SLA)</option>
                 <option value="HIGH">P1 - High (8h SLA)</option>
@@ -921,6 +1266,35 @@ const CreateRequestModal = ({
             </div>
           </div>
 
+          {/* Customer / Requester Details */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="font-bold text-neutral-700 block uppercase tracking-wider text-[10px] mb-1">
+                Customer Name (Optional)
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="e.g. John Doe"
+                className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-3 text-xs font-semibold focus:outline-hidden"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-neutral-700 block uppercase tracking-wider text-[10px] mb-1">
+                Customer Email (Optional)
+              </label>
+              <input
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                placeholder="e.g. client@company.com"
+                className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-3 text-xs font-semibold focus:outline-hidden"
+              />
+            </div>
+          </div>
+
           {/* Project & Organization */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -930,13 +1304,16 @@ const CreateRequestModal = ({
               <select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
-                className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-2.5 text-xs font-semibold focus:outline-hidden"
+                className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-2.5 text-xs font-semibold focus:outline-hidden cursor-pointer"
               >
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.key} • {p.name}
-                  </option>
-                ))}
+                {projects.map((p) => {
+                  const id = p.$id || p.id;
+                  return (
+                    <option key={id} value={id}>
+                      {p.key || 'PROJ'} • {p.name}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -947,9 +1324,9 @@ const CreateRequestModal = ({
               <select
                 value={customerOrgId}
                 onChange={(e) => setCustomerOrgId(e.target.value)}
-                className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-2.5 text-xs font-semibold focus:outline-hidden"
+                className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-2.5 text-xs font-semibold focus:outline-hidden cursor-pointer"
               >
-                <option value="">Direct Customer (Internal)</option>
+                <option value="">Direct Client (Internal)</option>
                 {customerOrgs.map((org) => (
                   <option key={org.id} value={org.id}>
                     {org.name}
@@ -957,6 +1334,25 @@ const CreateRequestModal = ({
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Assigned Agent */}
+          <div>
+            <label className="font-bold text-neutral-700 block uppercase tracking-wider text-[10px] mb-1">
+              Assign to Support Agent
+            </label>
+            <select
+              value={assignedAgentId}
+              onChange={(e) => setAssignedAgentId(e.target.value)}
+              className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-2.5 text-xs font-semibold focus:outline-hidden cursor-pointer"
+            >
+              <option value="">Assign to Me (Default)</option>
+              {members.map((m) => (
+                <option key={m.id || m.userId} value={m.userId || m.id}>
+                  {m.name || m.email} ({m.role || 'Member'})
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Actions */}
@@ -984,13 +1380,14 @@ const CreateRequestModal = ({
 };
 
 // ==========================================
-// Sub-Component: Create Customer Org Modal
+// Sub-Component: Manage Customer Orgs Modal
 // ==========================================
-const CreateCustomerOrgModal = ({ onClose, onSubmit }) => {
+const ManageCustomerOrgsModal = ({ customerOrgs = [], workspaceId, onClose, onCreated }) => {
   const [name, setName] = useState('');
   const [domainStr, setDomainStr] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
     const domains = domainStr
@@ -998,25 +1395,78 @@ const CreateCustomerOrgModal = ({ onClose, onSubmit }) => {
       .map((d) => d.trim().replace('@', ''))
       .filter(Boolean);
 
-    onSubmit({ name, domains });
+    try {
+      setLoading(true);
+      await serviceManagementApi.createCustomerOrg(workspaceId, { name: name.trim(), domains });
+      toast.success('Customer organization created!');
+      setName('');
+      setDomainStr('');
+      onCreated();
+    } catch (e) {
+      toast.error('Failed to create customer organization.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id, orgName) => {
+    try {
+      await serviceManagementApi.deleteCustomerOrg(workspaceId, id);
+      toast.success(`Removed ${orgName}`);
+      onCreated();
+    } catch (e) {
+      toast.error('Failed to remove organization.');
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-neutral-200 space-y-4 animate-in zoom-in-95 duration-150 text-xs">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-neutral-200 space-y-4 animate-in zoom-in-95 duration-150 text-xs text-neutral-800">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+            <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
               <Building2 className="size-4" />
             </div>
-            <h3 className="text-sm font-bold text-neutral-900">Add Customer Organization</h3>
+            <div>
+              <h3 className="text-sm font-bold text-neutral-900">Customer Organizations Directory</h3>
+              <p className="text-[11px] text-neutral-500">Manage client accounts and associate email domains.</p>
+            </div>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
             <X className="size-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        {/* Existing Orgs List */}
+        <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+          {customerOrgs.length === 0 ? (
+            <p className="text-neutral-400 text-center py-4 text-[11px]">No customer organizations created yet.</p>
+          ) : (
+            customerOrgs.map((org) => (
+              <div key={org.id} className="p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-neutral-900 text-xs">{org.name}</p>
+                  <p className="text-[10px] text-neutral-500">
+                    Domains: {Array.isArray(org.domains) && org.domains.length > 0 ? org.domains.join(', ') : 'All domains'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleDelete(org.id, org.name)}
+                  className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                  title="Remove organization"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Add New Org Form */}
+        <form onSubmit={handleCreate} className="space-y-3 pt-3 border-t border-neutral-100">
+          <p className="font-bold text-[11px] text-neutral-900 uppercase tracking-wider">
+            Add New Client Organization
+          </p>
           <div>
             <label className="font-bold text-neutral-700 block text-[10px] uppercase mb-1">
               Organization Name *
@@ -1026,20 +1476,20 @@ const CreateCustomerOrgModal = ({ onClose, onSubmit }) => {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Acme Corp / Global Tech Inc"
+              placeholder="e.g. Acme Global Enterprise / FinTech Labs"
               className="h-8.5 w-full rounded-xl border border-neutral-200 bg-white px-3 font-semibold focus:outline-hidden"
             />
           </div>
 
           <div>
             <label className="font-bold text-neutral-700 block text-[10px] uppercase mb-1">
-              Associated Email Domains (Comma-separated)
+              Email Domains (Comma-separated)
             </label>
             <input
               type="text"
               value={domainStr}
               onChange={(e) => setDomainStr(e.target.value)}
-              placeholder="e.g. acme.com, acmeglobal.io"
+              placeholder="e.g. acme.com, acmecorp.io"
               className="h-8.5 w-full rounded-xl border border-neutral-200 bg-white px-3 font-medium focus:outline-hidden"
             />
           </div>
@@ -1050,13 +1500,14 @@ const CreateCustomerOrgModal = ({ onClose, onSubmit }) => {
               onClick={onClose}
               className="h-8.5 px-3 rounded-xl border border-neutral-300 font-semibold text-neutral-700 hover:bg-neutral-50"
             >
-              Cancel
+              Done
             </button>
             <button
               type="submit"
-              className="h-8.5 px-4 rounded-xl bg-blue-600 font-bold text-white hover:bg-blue-700"
+              disabled={loading || !name.trim()}
+              className="h-8.5 px-4 rounded-xl bg-blue-600 font-bold text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              Save Organization
+              {loading ? 'Adding...' : 'Add Organization'}
             </button>
           </div>
         </form>
