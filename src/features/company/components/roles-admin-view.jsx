@@ -103,7 +103,7 @@ export const RolesAdminView = () => {
       totalAssignedUsers: 0,
       ownersCount: 1,
       adminsCount: 0,
-      securityPostureScore: 96
+      securityPostureScore: 100
     }
   };
 

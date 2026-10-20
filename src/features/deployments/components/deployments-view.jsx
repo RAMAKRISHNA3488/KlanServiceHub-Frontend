@@ -65,15 +65,15 @@ export const DeploymentsView = () => {
   });
 
   const metrics = doraRes?.data || {
-    deploymentFrequency: '3.2 deploys / day',
-    deploymentFrequencyRating: 'ELITE',
-    leadTimeForChanges: '3.8 hours',
-    leadTimeRating: 'ELITE',
-    changeFailureRate: '4.2%',
+    deploymentFrequency: '0 deploys / week',
+    deploymentFrequencyRating: 'LOW',
+    leadTimeForChanges: 'N/A',
+    leadTimeRating: 'LOW',
+    changeFailureRate: '0.0%',
     changeFailureRating: 'ELITE',
-    meanTimeToRecovery: '24 minutes',
+    meanTimeToRecovery: 'Zero Incidents',
     meanTimeToRecoveryRating: 'ELITE',
-    doraRating: 'ELITE',
+    doraRating: 'MEDIUM',
     totalDeployments: 0,
     prodDeployments: 0,
     successRate: 100,

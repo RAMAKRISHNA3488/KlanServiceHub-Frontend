@@ -86,7 +86,7 @@ export const PortfoliosView = () => {
     avgProgress: 0,
     totalBudgetAllocated: 0,
     totalBudgetSpent: 0,
-    targetHorizon: 'Q4 2026'
+    targetHorizon: ''
   };
 
   const portfolios = portfoliosRes?.data || [];
