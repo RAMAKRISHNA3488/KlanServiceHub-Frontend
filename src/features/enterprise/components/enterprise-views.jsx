@@ -126,69 +126,7 @@ export const DeploymentsView = () => {
 // ==========================================
 // 7. Portfolio, Initiatives & Goals View
 // ==========================================
+import { PortfoliosView as EnterprisePortfoliosView } from '@/features/portfolio/components/portfolio-view';
 export const PortfoliosView = () => {
-  const workspaceId = useWorkspaceId();
-  const { data: portfoliosData } = useQuery({
-    queryKey: ['portfolios', workspaceId],
-    queryFn: () => apiFetch(`/api/portfolio/${workspaceId}`),
-  });
-  const { data: initiativesData } = useQuery({
-    queryKey: ['initiatives', workspaceId],
-    queryFn: () => apiFetch(`/api/portfolio/${workspaceId}/initiatives`),
-  });
-
-  const portfolios = portfoliosData?.data || [];
-  const initiatives = initiativesData?.data || [];
-
-  return (
-    <div className="flex flex-col gap-y-5 p-6">
-      <div className="border-b pb-3">
-        <h1 className="text-lg font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-          <Layers className="size-5 text-amber-600" /> Strategic Portfolio & Initiatives
-        </h1>
-        <p className="text-[11px] text-neutral-500">
-          Executive portfolio tracking aligning company OKRs to multi-project initiatives.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-xl border bg-white p-4 shadow-xs">
-          <h2 className="text-xs font-bold text-neutral-900 mb-3">Enterprise Portfolios</h2>
-          {portfolios.length === 0 ? (
-            <div className="py-5 text-center text-xs text-neutral-500">No portfolios created.</div>
-          ) : (
-            <div className="divide-y text-xs">
-              {portfolios.map((p) => (
-                <div key={p.id} className="py-2.5 flex items-center justify-between">
-                  <span className="font-semibold text-neutral-900 text-xs">{p.name}</span>
-                  <span className="text-[11px] text-neutral-500">{p.owner_name || 'Owner'}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border bg-white p-4 shadow-xs">
-          <h2 className="text-xs font-bold text-neutral-900 mb-3">Active Strategic Initiatives</h2>
-          {initiatives.length === 0 ? (
-            <div className="py-5 text-center text-xs text-neutral-500">No initiatives created.</div>
-          ) : (
-            <div className="divide-y text-xs">
-              {initiatives.map((i) => (
-                <div key={i.id} className="py-2.5 flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-neutral-900 text-xs">{i.name}</p>
-                    <p className="text-[11px] text-neutral-500">{i.description || 'Target: 2026'}</p>
-                  </div>
-                  <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold text-[10px]">
-                    {i.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  return <EnterprisePortfoliosView />;
 };
