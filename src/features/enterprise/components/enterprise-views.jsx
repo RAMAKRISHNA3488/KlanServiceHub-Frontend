@@ -118,52 +118,9 @@ export const AssetsView = () => {
 // ==========================================
 // 6. Deployments & DORA Metrics View
 // ==========================================
+import { DeploymentsView as EnterpriseDeploymentsView } from '@/features/deployments/components/deployments-view';
 export const DeploymentsView = () => {
-  const workspaceId = useWorkspaceId();
-  const { data } = useQuery({
-    queryKey: ['dora-metrics', workspaceId],
-    queryFn: () => apiFetch(`/api/deployments/dora/${workspaceId}`),
-  });
-
-  const metrics = data?.data || {
-    deploymentFrequency: '0 deploys / month',
-    leadTimeForChanges: 'N/A',
-    changeFailureRate: '0%',
-    meanTimeToRecovery: 'N/A',
-    doraRating: 'HIGH',
-  };
-
-  return (
-    <div className="flex flex-col gap-y-5 p-6">
-      <div className="border-b pb-3">
-        <h1 className="text-lg font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-          <Rocket className="size-5 text-rose-600" /> Deployments & DORA Engineering Metrics
-        </h1>
-        <p className="text-[11px] text-neutral-500">
-          Continuous delivery frequency, lead time for changes, and MTTR reliability scoring.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl border bg-white shadow-xs">
-          <p className="text-[11px] font-medium text-neutral-500">Deployment Frequency</p>
-          <p className="text-lg font-bold text-neutral-900 mt-1">{metrics.deploymentFrequency}</p>
-        </div>
-        <div className="p-3.5 rounded-xl border bg-white shadow-xs">
-          <p className="text-[11px] font-medium text-neutral-500">Lead Time for Changes</p>
-          <p className="text-lg font-bold text-neutral-900 mt-1">{metrics.leadTimeForChanges}</p>
-        </div>
-        <div className="p-3.5 rounded-xl border bg-white shadow-xs">
-          <p className="text-[11px] font-medium text-neutral-500">Change Failure Rate</p>
-          <p className="text-lg font-bold text-neutral-900 mt-1">{metrics.changeFailureRate}</p>
-        </div>
-        <div className="p-3.5 rounded-xl border bg-white shadow-xs">
-          <p className="text-[11px] font-medium text-neutral-500">DORA Rating</p>
-          <p className="text-lg font-bold text-emerald-600 mt-1">{metrics.doraRating}</p>
-        </div>
-      </div>
-    </div>
-  );
+  return <EnterpriseDeploymentsView />;
 };
 
 // ==========================================
