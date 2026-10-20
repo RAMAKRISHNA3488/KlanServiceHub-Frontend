@@ -678,29 +678,29 @@ export const BoardsView = () => {
   return (
     <div className="flex flex-col gap-y-5 max-w-7xl mx-auto pb-16">
       {/* Top Header & Project Engineering Kanban Board Info */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-200 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 border-b border-neutral-200 pb-3 sm:pb-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-lg font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-              <Kanban className="size-4 text-blue-600" />
-              {boardDisplayName}
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-neutral-900 flex items-center gap-1.5 sm:gap-2">
+              <Kanban className="size-3.5 sm:size-4 text-blue-600 shrink-0" />
+              <span>{boardDisplayName}</span>
             </h1>
-            <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+            <span className="rounded bg-blue-50 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-blue-700 shrink-0">
               {activeProjectObj ? 'PROJECT BOARD' : (activeBoard?.type || 'KANBAN')}
             </span>
           </div>
-          <p className="text-[11px] text-neutral-500 mt-0.5">
+          <p className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 line-clamp-1 sm:line-clamp-none">
             Dynamic engineering workflow syncing {columns.length} stages: {columns.map((c) => c.label).join(' ➔ ')}.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           {/* Board Switcher Dropdown */}
           {boards.length > 1 && (
             <select
               value={selectedBoardId || ''}
               onChange={(e) => setSelectedBoardId(e.target.value)}
-              className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="rounded-lg border border-neutral-300 bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-neutral-700 shadow-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               {boards.map((b) => (
                 <option key={b.id} value={b.id}>
@@ -713,48 +713,52 @@ export const BoardsView = () => {
           {activeBoard && (
             <button
               onClick={() => handleOpenEditBoard(activeBoard)}
-              className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 hover:text-blue-600 transition"
+              className="flex items-center gap-1 sm:gap-1.5 rounded-lg border border-neutral-300 bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 hover:text-blue-600 transition"
               title="Edit Board Name and Settings"
             >
-              <Pencil className="size-3.5 text-neutral-500" />
-              <span>Edit Board</span>
+              <Pencil className="size-3 sm:size-3.5 text-neutral-500" />
+              <span className="hidden sm:inline">Edit Board</span>
+              <span className="sm:hidden">Edit</span>
             </button>
           )}
 
           {activeBoard && (
             <button
               onClick={(e) => handleDeleteBoard(activeBoard.id, activeBoard.name, e)}
-              className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50/50 px-3 py-1.5 text-xs font-semibold text-red-600 shadow-xs hover:bg-red-100 hover:border-red-300 transition"
+              className="flex items-center gap-1 sm:gap-1.5 rounded-lg border border-red-200 bg-red-50/50 px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-red-600 shadow-xs hover:bg-red-100 hover:border-red-300 transition"
               title="Delete Board"
             >
-              <Trash2 className="size-3.5 text-red-600" />
-              <span>Delete Board</span>
+              <Trash2 className="size-3 sm:size-3.5 text-red-600" />
+              <span className="hidden sm:inline">Delete Board</span>
+              <span className="sm:hidden">Delete</span>
             </button>
           )}
 
           <button
             onClick={() => navigate(`/workspaces/${workspaceId}/workflows-admin`)}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 hover:text-blue-600 transition"
+            className="flex items-center gap-1 sm:gap-1.5 rounded-lg border border-neutral-300 bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 hover:text-blue-600 transition"
             title="Edit Workflows & Issue Types to reflect across all boards"
           >
-            <Settings className="size-3.5 text-blue-600" />
-            <span>Edit Workflows & Issue Types</span>
+            <Settings className="size-3 sm:size-3.5 text-blue-600" />
+            <span className="hidden md:inline">Edit Workflows & Issue Types</span>
+            <span className="md:hidden">Workflows</span>
           </button>
 
           <button
             onClick={() => setCreateBoardModal(true)}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition"
+            className="flex items-center gap-1 sm:gap-1.5 rounded-lg bg-blue-600 px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition"
           >
-            <Plus className="size-3.5" />
-            Create Board
+            <Plus className="size-3 sm:size-3.5" />
+            <span className="hidden sm:inline">Create Board</span>
+            <span className="sm:hidden">New</span>
           </button>
 
           <button
             onClick={fetchBoardsAndTasks}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition"
+            className="flex items-center gap-1 sm:gap-1.5 rounded-lg border border-neutral-300 bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition"
           >
-            <RefreshCw className="size-3.5" />
-            Refresh
+            <RefreshCw className="size-3 sm:size-3.5" />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
       </div>
@@ -762,13 +766,13 @@ export const BoardsView = () => {
       {/* Project Selector Navigation Pills */}
       {projects.length > 0 && (
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-1 shrink-0">
-            <Layers className="size-3.5 text-neutral-500" />
+          <span className="text-[10px] sm:text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-1 shrink-0">
+            <Layers className="size-3 sm:size-3.5 text-neutral-500" />
             <span>Project Boards:</span>
           </span>
           <button
             onClick={() => handleProjectChange('ALL')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer ${
+            className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition shrink-0 cursor-pointer ${
               filters.projectId === 'ALL'
                 ? 'bg-neutral-900 text-white shadow-xs'
                 : 'bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200'
@@ -783,7 +787,7 @@ export const BoardsView = () => {
               <button
                 key={pId}
                 onClick={() => handleProjectChange(pId)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition shrink-0 flex items-center gap-1.5 cursor-pointer ${
                   isSelected
                     ? 'bg-blue-600 text-white shadow-xs'
                     : 'bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-200'
@@ -813,7 +817,7 @@ export const BoardsView = () => {
       />
 
       {/* Interactive Kanban Board Columns */}
-      <div className="flex overflow-x-auto gap-4 items-start pb-6 custom-scrollbar">
+      <div className="flex overflow-x-auto gap-3 sm:gap-4 items-start pb-6 custom-scrollbar snap-x snap-mandatory">
         {columns.map((col, colIndex) => {
           const columnTasks = getTasksForColumn(col.id);
           const Icon = col.icon;
@@ -841,28 +845,28 @@ export const BoardsView = () => {
                   handleMoveStatus(droppedTaskId, col.id);
                 }
               }}
-              className={`flex flex-col rounded-2xl border transition-all ${
+              className={`flex flex-col rounded-xl sm:rounded-2xl border transition-all snap-center ${
                 isOver
                   ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-400/40 shadow-md'
                   : `${col.border} ${col.bg}`
-              } p-3 min-w-[280px] flex-1 min-h-[550px] shadow-xs shrink-0`}
+              } p-2.5 sm:p-3 min-w-[82vw] sm:min-w-[280px] flex-1 min-h-[480px] sm:min-h-[550px] shadow-xs shrink-0`}
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-neutral-200/80 mb-3">
-                <div className="flex items-center gap-2">
-                  <Icon className="size-4" style={{ color: col.color }} />
-                  <span className="text-xs font-bold text-neutral-800 tracking-wide uppercase">
+              <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-neutral-200/80 mb-2.5 sm:mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Icon className="size-3.5 sm:size-4" style={{ color: col.color }} />
+                  <span className="text-[11px] sm:text-xs font-bold text-neutral-800 tracking-wide uppercase">
                     {col.label}
                   </span>
                 </div>
-                <span className="flex items-center justify-center size-5 rounded-full bg-white text-[11px] font-bold text-neutral-600 shadow-xs">
+                <span className="flex items-center justify-center size-4.5 sm:size-5 rounded-full bg-white text-[10px] sm:text-[11px] font-bold text-neutral-600 shadow-xs">
                   {columnTasks.length}
                 </span>
               </div>
 
               {/* Add Issue Quick Button */}
               {quickCreateOpen === col.id ? (
-                <div className="mb-3 rounded-xl bg-white p-2.5 border border-neutral-200 shadow-sm space-y-2 animate-in fade-in">
+                <div className="mb-2.5 sm:mb-3 rounded-lg sm:rounded-xl bg-white p-2 sm:p-2.5 border border-neutral-200 shadow-sm space-y-2 animate-in fade-in">
                   <input
                     type="text"
                     autoFocus
@@ -870,13 +874,13 @@ export const BoardsView = () => {
                     value={newTaskName}
                     onChange={(e) => setNewTaskName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleQuickCreateTask(col.id)}
-                    className="w-full rounded border border-neutral-300 p-1.5 text-xs focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded border border-neutral-300 p-1.5 text-[11px] sm:text-xs focus:border-blue-500 focus:outline-none"
                   />
                   {projects.length > 1 && (
                     <select
                       value={newTaskProject}
                       onChange={(e) => setNewTaskProject(e.target.value)}
-                      className="w-full rounded border border-neutral-200 p-1 text-[11px] bg-neutral-50"
+                      className="w-full rounded border border-neutral-200 p-1 text-[10.5px] sm:text-[11px] bg-neutral-50"
                     >
                       {projects.map((p) => (
                         <option key={p.$id || p.id} value={p.$id || p.id}>
@@ -888,14 +892,14 @@ export const BoardsView = () => {
                   <div className="flex items-center justify-end gap-1.5 pt-1">
                     <button
                       onClick={() => setQuickCreateOpen(null)}
-                      className="px-2 py-1 text-[10px] font-medium text-neutral-500 hover:bg-neutral-100 rounded"
+                      className="px-2 py-0.5 sm:py-1 text-[9.5px] sm:text-[10px] font-medium text-neutral-500 hover:bg-neutral-100 rounded"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={() => handleQuickCreateTask(col.id)}
                       disabled={creatingTask || !newTaskName.trim()}
-                      className="px-2.5 py-1 text-[10px] font-bold text-white bg-blue-600 hover:bg-blue-700 rounded disabled:opacity-50"
+                      className="px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9.5px] sm:text-[10px] font-bold text-white bg-blue-600 hover:bg-blue-700 rounded disabled:opacity-50"
                     >
                       {creatingTask ? 'Adding...' : 'Create'}
                     </button>
@@ -908,17 +912,17 @@ export const BoardsView = () => {
                     setNewTaskName('');
                     setNewTaskProject(projects[0]?.$id || projects[0]?.id || '');
                   }}
-                  className="mb-3 flex items-center justify-center gap-1 w-full rounded-xl border border-dashed border-neutral-300 bg-white/70 py-1.5 text-xs font-semibold text-neutral-600 hover:border-blue-400 hover:bg-white hover:text-blue-600 transition shadow-2xs"
+                  className="mb-2.5 sm:mb-3 flex items-center justify-center gap-1 w-full rounded-lg sm:rounded-xl border border-dashed border-neutral-300 bg-white/70 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-neutral-600 hover:border-blue-400 hover:bg-white hover:text-blue-600 transition shadow-2xs"
                 >
-                  <Plus className="size-3.5" />
+                  <Plus className="size-3 sm:size-3.5" />
                   <span>Create issue</span>
                 </button>
               )}
 
               {/* Tasks List in Column */}
-              <div className="flex flex-col gap-3 flex-1 overflow-y-auto max-h-[calc(100vh-280px)] pr-0.5">
+              <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 overflow-y-auto max-h-[calc(100vh-280px)] pr-0.5">
                 {columnTasks.length === 0 ? (
-                  <div className="flex flex-1 items-center justify-center py-10 text-center text-xs text-neutral-400">
+                  <div className="flex flex-1 items-center justify-center py-8 sm:py-10 text-center text-[11px] sm:text-xs text-neutral-400">
                     No issues in {col.label}
                   </div>
                 ) : (
@@ -958,15 +962,15 @@ export const BoardsView = () => {
                             toast.info(`Ticket is already at the final stage (${col.label})`);
                           }
                         }}
-                        className="shrink-0 w-full rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-md hover:border-blue-400 transition-all space-y-2 cursor-grab active:cursor-grabbing select-none"
+                        className="shrink-0 w-full rounded-lg sm:rounded-xl border border-neutral-200 bg-white p-2.5 sm:p-3 shadow-xs hover:shadow-md hover:border-blue-400 transition-all space-y-1.5 sm:space-y-2 cursor-grab active:cursor-grabbing select-none"
                         title="Double-click to advance stage • Drag to move • Click to view details"
                       >
                         {/* Task Key, Issue Type Badge & Priority */}
                         <div className="flex items-center justify-between gap-1 flex-wrap">
-                          <div className="flex items-center gap-1.5 flex-wrap">
+                          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                             {matchedType && (
                               <span
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold text-white shadow-2xs"
+                                className="inline-flex items-center gap-1 px-1 sm:px-1.5 py-0.5 rounded text-[8.5px] sm:text-[9px] font-bold text-white shadow-2xs"
                                 style={{ backgroundColor: matchedType.color || '#4F46E5' }}
                                 title={`Issue Type: ${matchedType.name}`}
                               >
@@ -979,15 +983,15 @@ export const BoardsView = () => {
                                 e.stopPropagation();
                                 setSelectedDetailTaskId(taskId);
                               }}
-                              className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded hover:bg-blue-100 transition cursor-pointer"
+                              className="font-mono text-[9px] sm:text-[10px] font-bold text-blue-700 bg-blue-50 px-1 sm:px-1.5 py-0.5 rounded hover:bg-blue-100 transition cursor-pointer"
                               title="Click to view ticket details"
                             >
                               {task.key || 'TASK'}
                             </button>
                           </div>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1 sm:gap-1.5">
                             <span
-                              className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                              className={`px-1 sm:px-1.5 py-0.5 rounded text-[8.5px] sm:text-[9px] font-bold ${
                                 task.priority === 'CRITICAL' || task.priority === 'HIGHEST' || task.priority === 'P0'
                                   ? 'bg-red-100 text-red-700'
                                   : task.priority === 'HIGH' || task.priority === 'P1'
@@ -1000,16 +1004,16 @@ export const BoardsView = () => {
                               }`}
                             >
                               {task.priority === 'CRITICAL'
-                                ? 'P0 - Critical'
+                                ? 'P0'
                                 : task.priority === 'HIGH' || task.priority === 'HIGHEST'
-                                ? 'P1 - High'
+                                ? 'P1'
                                 : task.priority === 'MEDIUM'
-                                ? 'P2 - Medium'
+                                ? 'P2'
                                 : task.priority === 'LOW'
-                                ? 'P3 - Low'
+                                ? 'P3'
                                 : task.priority === 'LOWEST'
-                                ? 'P4 - Lowest'
-                                : (task.priority || 'P2 - Medium')}
+                                ? 'P4'
+                                : (task.priority || 'P2')}
                             </span>
                             {/* Admin-Only Ticket Delete Button */}
                             {isAdmin && (
@@ -1019,9 +1023,9 @@ export const BoardsView = () => {
                                   e.stopPropagation();
                                   handleDeleteTask(taskId, task.key, task.name);
                                 }}
-                                className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                className="p-0.5 sm:p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                               >
-                                <Trash2 className="size-3.5" />
+                                <Trash2 className="size-3 sm:size-3.5" />
                               </button>
                             )}
                           </div>
@@ -1033,19 +1037,19 @@ export const BoardsView = () => {
                             e.stopPropagation();
                             setSelectedDetailTaskId(taskId);
                           }}
-                          className="text-xs font-semibold text-neutral-900 leading-snug break-words hover:text-blue-600 transition cursor-pointer"
+                          className="text-[11px] sm:text-xs font-semibold text-neutral-900 leading-snug break-words hover:text-blue-600 transition cursor-pointer"
                           title="Click to view ticket details"
                         >
                           {task.name}
                         </p>
 
                         {/* Footer: Assignee & Action Controls */}
-                        <div className="flex items-center justify-between pt-1 border-t border-neutral-100 text-[11px]">
-                          <div className="flex items-center gap-1.5 text-neutral-500">
-                            <div className="size-5 rounded-full bg-neutral-100 flex items-center justify-center font-bold text-[9px] text-neutral-600 uppercase border">
-                              {task.assignee?.name?.charAt(0) || <User className="size-3" />}
+                        <div className="flex items-center justify-between pt-1 border-t border-neutral-100 text-[10px] sm:text-[11px]">
+                          <div className="flex items-center gap-1 sm:gap-1.5 text-neutral-500">
+                            <div className="size-4 sm:size-5 rounded-full bg-neutral-100 flex items-center justify-center font-bold text-[8.5px] sm:text-[9px] text-neutral-600 uppercase border">
+                              {task.assignee?.name?.charAt(0) || <User className="size-2.5 sm:size-3" />}
                             </div>
-                            <span className="truncate max-w-[90px] text-[10px]">
+                            <span className="truncate max-w-[75px] sm:max-w-[90px] text-[9.5px] sm:text-[10px]">
                               {task.assignee?.name || 'Unassigned'}
                             </span>
                           </div>
@@ -1059,9 +1063,9 @@ export const BoardsView = () => {
                                   e.stopPropagation();
                                   handleMoveStatus(taskId, columns[colIndex - 1].id);
                                 }}
-                                className="p-1 rounded bg-neutral-50 hover:bg-neutral-200 text-neutral-600 transition"
+                                className="p-0.5 sm:p-1 rounded bg-neutral-50 hover:bg-neutral-200 text-neutral-600 transition"
                               >
-                                <ArrowLeft className="size-3" />
+                                <ArrowLeft className="size-2.5 sm:size-3" />
                               </button>
                             )}
                             {colIndex < columns.length - 1 && (columns[colIndex + 1].category !== 'DONE' || isAdmin) && (
@@ -1071,9 +1075,9 @@ export const BoardsView = () => {
                                   e.stopPropagation();
                                   handleMoveStatus(taskId, columns[colIndex + 1].id);
                                 }}
-                                className="p-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition"
+                                className="p-0.5 sm:p-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition"
                               >
-                                <ArrowRight className="size-3" />
+                                <ArrowRight className="size-2.5 sm:size-3" />
                               </button>
                             )}
                           </div>

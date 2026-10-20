@@ -14,28 +14,28 @@ export const KanbanCard = ({ task, onDoubleClick }) => {
 
     return (<div
       onDoubleClick={onDoubleClick}
-      className="mb-2.5 space-y-2.5 rounded-xl border border-neutral-200 bg-white p-3 shadow-xs hover:shadow-sm hover:border-blue-400 transition-all cursor-pointer select-none"
+      className="mb-2 sm:mb-2.5 space-y-2 sm:space-y-2.5 rounded-lg sm:rounded-xl border border-neutral-200 bg-white p-2.5 sm:p-3 shadow-xs hover:shadow-sm hover:border-blue-400 transition-all cursor-pointer select-none"
       title="Double-click to open issue details"
     >
       <div className="flex items-start justify-between gap-x-2">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 flex-wrap">
             {(task.issueType || task.issue_type) && (
-              <span className="text-[10px] font-bold text-neutral-600 bg-neutral-100 px-1.5 py-0.5 rounded">
+              <span className="text-[9px] sm:text-[10px] font-bold text-neutral-600 bg-neutral-100 px-1.5 py-0.5 rounded">
                 {task.issueType || task.issue_type}
               </span>
             )}
             {task.key && (
-              <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+              <span className="font-mono text-[9px] sm:text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
                 {task.key}
               </span>
             )}
           </div>
-          <p className="line-clamp-2 text-xs font-semibold text-neutral-900 break-words">{task.name}</p>
+          <p className="line-clamp-2 text-[11px] sm:text-xs font-semibold text-neutral-900 break-words">{task.name}</p>
         </div>
 
         <TaskActions id={task.$id} projectId={task.projectId}>
-          <MoreHorizontal className="size-[18px] shrink-0 cursor-pointer stroke-1 text-neutral-700 transition hover:opacity-75"/>
+          <MoreHorizontal className="size-4 sm:size-[18px] shrink-0 cursor-pointer stroke-1 text-neutral-700 transition hover:opacity-75"/>
         </TaskActions>
       </div>
 
@@ -46,28 +46,28 @@ export const KanbanCard = ({ task, onDoubleClick }) => {
           {assignees.length > 1 ? (
             <div className="flex items-center -space-x-1.5 overflow-hidden">
               {assignees.slice(0, 3).map((a, idx) => (
-                <MemberAvatar key={a.$id || a.id || idx} name={a.name} className="size-5 ring-1 ring-white" fallbackClassName="text-[9px]" />
+                <MemberAvatar key={a.$id || a.id || idx} name={a.name} className="size-4 sm:size-5 ring-1 ring-white" fallbackClassName="text-[8.5px] sm:text-[9px]" />
               ))}
               {assignees.length > 3 && (
-                <span className="flex size-5 items-center justify-center rounded-full bg-neutral-100 ring-1 ring-white text-[9px] font-bold text-neutral-600">
+                <span className="flex size-4 sm:size-5 items-center justify-center rounded-full bg-neutral-100 ring-1 ring-white text-[8.5px] sm:text-[9px] font-bold text-neutral-600">
                   +{assignees.length - 3}
                 </span>
               )}
             </div>
           ) : (
-            <MemberAvatar name={assignees[0]?.name || 'Unassigned'} className="size-5" fallbackClassName="text-[10px]"/>
+            <MemberAvatar name={assignees[0]?.name || 'Unassigned'} className="size-4 sm:size-5" fallbackClassName="text-[9px] sm:text-[10px]"/>
           )}
-          <span className="text-[11px] text-neutral-500 truncate max-w-[110px]">
+          <span className="text-[10px] sm:text-[11px] text-neutral-500 truncate max-w-[100px] sm:max-w-[110px]">
             {assignees.length > 1 ? `${assignees.length} Assignees` : (assignees[0]?.name || 'Unassigned')}
           </span>
         </div>
 
-        <TaskDate value={task.dueDate} className="text-xs shrink-0"/>
+        <TaskDate value={task.dueDate} className="text-[10px] sm:text-xs shrink-0"/>
       </div>
 
       <div className="flex items-center gap-x-1.5">
-        <ProjectAvatar name={projectName} image={projectImage} fallbackClassName="text-[10px]"/>
-        <span className="text-xs font-medium text-neutral-600 truncate">{projectName}</span>
+        <ProjectAvatar name={projectName} image={projectImage} fallbackClassName="text-[9px] sm:text-[10px]"/>
+        <span className="text-[10px] sm:text-xs font-medium text-neutral-600 truncate">{projectName}</span>
       </div>
     </div>);
 };
