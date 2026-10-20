@@ -187,18 +187,18 @@ export const ServiceManagementView = () => {
     },
   });
 
-  // Seed Demo ITSM Requests Mutation
-  const seedDemoMutation = useMutation({
-    mutationFn: () => serviceManagementApi.seedDemo(workspaceId),
+  // Purge Demo Tickets Mutation
+  const purgeDemoMutation = useMutation({
+    mutationFn: () => serviceManagementApi.purgeDemo(workspaceId),
     onSuccess: (res) => {
-      toast.success(res?.message || 'Generated sample ITSM incident and service requests!');
+      toast.success(res?.message || 'Purged demo and sample tickets from workspace!');
       queryClient.invalidateQueries({ queryKey: ['jsm-requests'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-queues'] });
       queryClient.invalidateQueries({ queryKey: ['jsm-slas'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
     onError: (err) => {
-      toast.error(err?.message || 'Failed to seed sample requests.');
+      toast.error(err?.message || 'Failed to purge demo tickets.');
     },
   });
 
@@ -349,16 +349,15 @@ export const ServiceManagementView = () => {
               <span>Refresh</span>
             </button>
 
-            {requests.length === 0 && (
-              <button
-                onClick={() => seedDemoMutation.mutate()}
-                disabled={seedDemoMutation.isPending}
-                className="h-8.5 px-3 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-              >
-                <Sparkles className="size-3.5 text-purple-600" />
-                <span>{seedDemoMutation.isPending ? 'Generating...' : 'Seed Sample ITSM Tickets'}</span>
-              </button>
-            )}
+            <button
+              onClick={() => purgeDemoMutation.mutate()}
+              disabled={purgeDemoMutation.isPending}
+              className="h-8.5 px-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-semibold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+              title="Clean up any sample demo tickets from workspace"
+            >
+              <Trash2 className="size-3.5 text-rose-600" />
+              <span>{purgeDemoMutation.isPending ? 'Purging...' : 'Purge Demo Data'}</span>
+            </button>
 
             <button
               onClick={handleExportCSV}
@@ -604,17 +603,16 @@ export const ServiceManagementView = () => {
           ) : requests.length === 0 ? (
             <div className="py-12 text-center space-y-3">
               <LifeBuoy className="size-10 text-neutral-300 mx-auto" />
-              <p className="text-sm font-bold text-neutral-700">No service requests matching this queue</p>
+              <p className="text-sm font-bold text-neutral-700">No service requests or tasks matching this queue</p>
               <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                No tickets found. Raise a new service request or click below to seed sample realistic enterprise demo requests.
+                No issues match this queue. Raise a new service request or create an issue in your project.
               </p>
               <button
-                onClick={() => seedDemoMutation.mutate()}
-                disabled={seedDemoMutation.isPending}
+                onClick={() => setIsCreateModalOpen(true)}
                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
               >
-                <Sparkles className="size-3.5" />
-                <span>{seedDemoMutation.isPending ? 'Generating...' : 'Seed Sample ITSM Demo Requests'}</span>
+                <Plus className="size-3.5" />
+                <span>+ Raise Service Request</span>
               </button>
             </div>
           ) : (

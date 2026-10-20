@@ -425,6 +425,7 @@ export const serviceManagementApi = {
   getQueues: (workspaceId) => apiFetch(`/api/service-management/${workspaceId}/queues`),
   getSlas: (workspaceId) => apiFetch(`/api/service-management/${workspaceId}/slas`),
   seedDemo: (workspaceId) => apiFetch(`/api/service-management/${workspaceId}/seed-demo`, { method: 'POST' }),
+  purgeDemo: (workspaceId) => apiFetch(`/api/service-management/${workspaceId}/purge-demo`, { method: 'POST' }),
   getCustomers: (workspaceId) => apiFetch(`/api/service-management/${workspaceId}/customers`),
   createCustomerOrg: (workspaceId, data) => apiFetch(`/api/service-management/${workspaceId}/customers`, { method: 'POST', body: JSON.stringify(data) }),
   deleteCustomerOrg: (workspaceId, id) => apiFetch(`/api/service-management/${workspaceId}/customers/${id}`, { method: 'DELETE' }),
