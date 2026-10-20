@@ -59,7 +59,7 @@ export const initRefreshAnimationInterceptor = () => {
 
             setTimeout(() => {
               icon.classList.remove('animate-refresh-spin');
-            }, 820);
+            }, 1320);
           }
         }
       } catch (err) {
