@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTaskId } from '@/features/tasks/hooks/use-task-id';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetMembers } from '@/features/members/api/use-get-members';
@@ -52,6 +53,7 @@ const STATUS_COLORS = {
 export const TaskIdClient = () => {
   const taskId = useTaskId();
   const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
   const { data: currentUser } = useCurrent();
   const { data: membersData } = useGetMembers({ workspaceId });
   const members = membersData?.documents || [];
@@ -137,6 +139,15 @@ export const TaskIdClient = () => {
           setStoryPointsInput(String(res.data.storyPoints ?? res.data.story_points ?? 1));
         }
       }
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['sprints'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+      queryClient.invalidateQueries({ queryKey: ['team-workload'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       toast.success('Updated successfully');
     } catch (err) {
       toast.error(err.message || 'Failed to update issue');
@@ -212,6 +223,10 @@ export const TaskIdClient = () => {
         status: 'TODO',
       });
       toast.success('Sub-task created');
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
       setSubtaskTitle('');
       fetchTask();
     } catch (err) {
@@ -223,6 +238,9 @@ export const TaskIdClient = () => {
     e.preventDefault();
     try {
       await tasksApi.updateTask(taskId, { loggedHours: Number(logHours) });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       toast.success(`Logged ${logHours} hours`);
       fetchTask();
     } catch (err) {

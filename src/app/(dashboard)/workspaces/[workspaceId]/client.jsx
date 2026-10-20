@@ -52,13 +52,22 @@ const safeFormatDistance = (dateStr) => {
 };
 
 const getStatusBadge = (status) => {
-  switch (status) {
+  const clean = String(status || '').toUpperCase().trim();
+  switch (clean) {
     case 'DONE':
+    case 'COMPLETED':
+    case 'RESOLVED':
       return <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">DONE</span>;
     case 'IN_PROGRESS':
+    case 'IN PROGRESS':
       return <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800">IN PROGRESS</span>;
     case 'IN_REVIEW':
+    case 'IN REVIEW':
       return <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">IN REVIEW</span>;
+    case 'TESTING':
+    case 'TEST':
+    case 'QA':
+      return <span className="rounded bg-cyan-100 px-2 py-0.5 text-[10px] font-bold text-cyan-800">TESTING</span>;
     case 'BACKLOG':
       return <span className="rounded bg-neutral-200 px-2 py-0.5 text-[10px] font-bold text-neutral-700">BACKLOG</span>;
     default:
@@ -135,6 +144,11 @@ export const WorkspaceIdClient = () => {
         return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED';
       };
 
+      const isBacklog = (t) => {
+        const s = String(t?.status || '').toUpperCase().trim();
+        return s === 'BACKLOG';
+      };
+
       const isAssigned = (t) => {
         return Boolean(
           t?.assigneeId ||
@@ -146,7 +160,7 @@ export const WorkspaceIdClient = () => {
       };
 
       const isOverdue = (t) => {
-        if (isCompleted(t)) return false;
+        if (isCompleted(t) || isBacklog(t)) return false;
         const dStr = t?.dueDate || t?.due_date;
         if (!dStr) return false;
         try {
