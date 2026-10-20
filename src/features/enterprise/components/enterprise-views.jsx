@@ -110,48 +110,9 @@ export const ServiceManagementView = () => {
 // ==========================================
 // 5. CMDB Assets & Infrastructure View
 // ==========================================
+import { CmdbView } from '@/features/cmdb/components/cmdb-view';
 export const AssetsView = () => {
-  const workspaceId = useWorkspaceId();
-  const { data } = useQuery({
-    queryKey: ['cmdb-assets', workspaceId],
-    queryFn: () => apiFetch(`/api/assets/${workspaceId}`),
-  });
-
-  const assets = data?.data || [];
-
-  return (
-    <div className="flex flex-col gap-y-5 p-6">
-      <div className="border-b pb-3">
-        <h1 className="text-lg font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-          <Server className="size-5 text-indigo-600" /> CMDB Assets & Infrastructure Topology
-        </h1>
-        <p className="text-[11px] text-neutral-500">
-          Configuration items, servers, databases, and microservices topology.
-        </p>
-      </div>
-
-      <div className="rounded-xl border bg-white p-4 shadow-xs">
-        <h2 className="text-xs font-bold text-neutral-900 mb-3">Registered Configuration Items</h2>
-        {assets.length === 0 ? (
-          <div className="py-6 text-center text-xs text-neutral-500">No CMDB assets registered.</div>
-        ) : (
-          <div className="divide-y text-xs">
-            {assets.map((a) => (
-              <div key={a.id} className="py-2.5 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-neutral-900 text-xs">{a.name}</p>
-                  <p className="text-[11px] text-neutral-500">{a.type} • {a.environment} • {a.location}</p>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                  {a.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return <CmdbView />;
 };
 
 // ==========================================
