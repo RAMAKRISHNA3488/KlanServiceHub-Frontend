@@ -27,7 +27,12 @@ export const ProjectIdClient = () => {
       if (Array.isArray(taskDocs)) {
         const isCompleted = (t) => {
           const s = String(t?.status || '').toUpperCase().trim();
-          return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED';
+          return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED' || s === 'CLOSED';
+        };
+
+        const isBacklog = (t) => {
+          const s = String(t?.status || '').toUpperCase().trim();
+          return s === 'BACKLOG' || s === 'BACK_LOG';
         };
 
         const isAssigned = (t) => {
@@ -41,7 +46,7 @@ export const ProjectIdClient = () => {
         };
 
         const isOverdue = (t) => {
-          if (isCompleted(t)) return false;
+          if (isCompleted(t) || isBacklog(t)) return false;
           const dStr = t?.dueDate || t?.due_date;
           if (!dStr) return false;
           try {

@@ -57,21 +57,32 @@ const getStatusBadge = (status) => {
     case 'DONE':
     case 'COMPLETED':
     case 'RESOLVED':
+    case 'CLOSED':
       return <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">DONE</span>;
     case 'IN_PROGRESS':
     case 'IN PROGRESS':
       return <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800">IN PROGRESS</span>;
+    case 'CODE_REVIEW':
+    case 'CODE REVIEW':
+      return <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">CODE REVIEW</span>;
     case 'IN_REVIEW':
     case 'IN REVIEW':
+    case 'REVIEW':
       return <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">IN REVIEW</span>;
     case 'TESTING':
     case 'TEST':
     case 'QA':
       return <span className="rounded bg-cyan-100 px-2 py-0.5 text-[10px] font-bold text-cyan-800">TESTING</span>;
     case 'BACKLOG':
+    case 'BACK_LOG':
       return <span className="rounded bg-neutral-200 px-2 py-0.5 text-[10px] font-bold text-neutral-700">BACKLOG</span>;
-    default:
+    case 'TODO':
+    case 'TO DO':
+    case 'TO_DO':
+    case 'OPEN':
       return <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">TO DO</span>;
+    default:
+      return <span className="rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-700">{clean.replace(/_/g, ' ') || 'TO DO'}</span>;
   }
 };
 
@@ -141,12 +152,12 @@ export const WorkspaceIdClient = () => {
     if (Array.isArray(taskDocs)) {
       const isCompleted = (t) => {
         const s = String(t?.status || '').toUpperCase().trim();
-        return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED';
+        return s === 'DONE' || s === 'COMPLETED' || s === 'RESOLVED' || s === 'CLOSED';
       };
 
       const isBacklog = (t) => {
         const s = String(t?.status || '').toUpperCase().trim();
-        return s === 'BACKLOG';
+        return s === 'BACKLOG' || s === 'BACK_LOG';
       };
 
       const isAssigned = (t) => {
@@ -439,16 +450,17 @@ export const TaskList = ({ data = [], total = 0 }) => {
   const { open: createTask } = useCreateTaskModal();
   const [showAll, setShowAll] = useState(false);
 
-  // Sort tasks by most recent creation/update time descending
+  // Sort tasks by most recent board modification / creation time descending
   const sortedTasks = useMemo(() => {
     return [...data].sort((a, b) => {
-      const dateA = new Date(
-        a.createdAt || a.$createdAt || a.created_at || a.updatedAt || a.$updatedAt || 0
-      ).getTime();
-      const dateB = new Date(
-        b.createdAt || b.$createdAt || b.created_at || b.updatedAt || b.$updatedAt || 0
-      ).getTime();
-      return dateB - dateA;
+      const getTimestamp = (item) => {
+        const u = item.updatedAt || item.$updatedAt || item.updated_at;
+        const c = item.createdAt || item.$createdAt || item.created_at;
+        const timeU = u ? new Date(String(u).includes(' ') && !String(u).includes('T') ? String(u).replace(' ', 'T') + 'Z' : u).getTime() : 0;
+        const timeC = c ? new Date(String(c).includes(' ') && !String(c).includes('T') ? String(c).replace(' ', 'T') + 'Z' : c).getTime() : 0;
+        return Math.max(isNaN(timeU) ? 0 : timeU, isNaN(timeC) ? 0 : timeC);
+      };
+      return getTimestamp(b) - getTimestamp(a);
     });
   }, [data]);
 
@@ -504,7 +516,14 @@ export const TaskList = ({ data = [], total = 0 }) => {
               <Link href={`/workspaces/${workspaceId}/tasks/${task.$id || task.id}`}>
                 <div className="rounded-xl border border-neutral-200/60 bg-neutral-50/50 p-2.5 transition hover:bg-neutral-100/70 hover:border-neutral-300">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="truncate text-xs font-semibold text-neutral-900">{task.name || 'Untitled Issue'}</p>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {task.key && (
+                        <span className="font-mono text-[9.5px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">
+                          {task.key}
+                        </span>
+                      )}
+                      <p className="truncate text-xs font-semibold text-neutral-900">{task.name || 'Untitled Issue'}</p>
+                    </div>
                     {getStatusBadge(task.status)}
                   </div>
 
