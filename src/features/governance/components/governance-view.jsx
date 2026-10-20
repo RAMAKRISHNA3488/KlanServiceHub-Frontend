@@ -436,10 +436,10 @@ export const GovernanceView = () => {
 
           <button
             onClick={refetchAll}
-            className="flex items-center gap-1 sm:gap-1.5 rounded-lg border border-neutral-300 bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition"
+            className="flex items-center gap-1 sm:gap-1.5 rounded-lg border border-neutral-300 bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition cursor-pointer"
             title="Refresh Governance Telemetry"
           >
-            <RefreshCw className="size-3 sm:size-3.5" />
+            <RefreshCw className={`size-3 sm:size-3.5 ${healthLoading || approvalsLoading || risksLoading ? 'animate-spin text-purple-600' : ''}`} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>

@@ -20,6 +20,7 @@ import { PageLoader } from '@/components/page-loader';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { CookieConsentBanner } from '@/components/cookie-consent-banner';
 import { initPerformanceOptimizer } from '@/lib/performance-optimizer';
+import { initRefreshAnimationInterceptor } from '@/lib/refresh-interceptor';
 
 // SaaS Landing Page & Onboarding
 import { LandingPageView } from '@/features/landing/components/landing-page';
@@ -105,6 +106,7 @@ const HomePage = () => {
 export const App = () => {
   useEffect(() => {
     initPerformanceOptimizer();
+    initRefreshAnimationInterceptor();
   }, []);
 
   return (
