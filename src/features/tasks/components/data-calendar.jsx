@@ -1,62 +1,193 @@
-import { addMonths, format, getDay, parse, startOfWeek, subMonths } from 'date-fns';
-import { enUS } from 'date-fns/locale';
+import {
+  addMonths,
+  subMonths,
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  isToday,
+} from 'date-fns';
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import './data-calendar.css';
 import { EventCard } from './event-card';
-const locales = {
-    'en-US': enUS,
-};
-const localizer = dateFnsLocalizer({
-    format,
-    parse,
-    startOfWeek,
-    getDay,
-    locales,
-});
-const CustomToolbar = ({ date, onNavigate }) => {
-    return (<div className="mb-4 flex w-full items-center justify-center gap-x-2 lg:w-auto lg:justify-start">
-      <Button title="Previous Month" onClick={() => onNavigate('PREV')} variant="secondary" size="icon">
-        <ChevronLeft className="size-4"/>
-      </Button>
 
-      <div className="flex h-8 w-full items-center justify-center rounded-md border border-input px-3 py-2 lg:w-auto">
-        <CalendarIcon className="mr-2 size-4"/>
-        <p className="text-sm">{format(date, 'MMMM yyyy')}</p>
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+export const DataCalendar = ({ data = [] }) => {
+  // Initialize with earliest task due date or today
+  const initialDate = useMemo(() => {
+    if (data.length > 0 && data[0]?.dueDate) {
+      const d = new Date(data[0].dueDate);
+      if (!isNaN(d.getTime())) return d;
+    }
+    return new Date();
+  }, [data]);
+
+  const [currentDate, setCurrentDate] = useState(initialDate);
+
+  // Group tasks by their normalized date key (yyyy-MM-dd)
+  const { tasksByDate, monthTasksCount } = useMemo(() => {
+    const map = new Map();
+    let countInMonth = 0;
+
+    for (const task of data) {
+      const due = task?.dueDate || task?.due_date;
+      if (!due) continue;
+      const parsed = new Date(due);
+      if (isNaN(parsed.getTime())) continue;
+
+      const key = format(parsed, 'yyyy-MM-dd');
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
+      map.get(key).push(task);
+
+      if (isSameMonth(parsed, currentDate)) {
+        countInMonth++;
+      }
+    }
+    return { tasksByDate: map, monthTasksCount: countInMonth };
+  }, [data, currentDate]);
+
+  // Compute all days in the full calendar grid (including leading/trailing days)
+  const calendarDays = useMemo(() => {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(monthStart);
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday
+    const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 }); // Saturday
+
+    return eachDayOfInterval({ start: startDate, end: endDate });
+  }, [currentDate]);
+
+  const handlePrevMonth = () => setCurrentDate((prev) => subMonths(prev, 1));
+  const handleNextMonth = () => setCurrentDate((prev) => addMonths(prev, 1));
+  const handleToday = () => setCurrentDate(new Date());
+
+  return (
+    <div className="flex flex-col h-full w-full rounded-2xl border border-neutral-200 bg-white shadow-xs overflow-hidden">
+      {/* Top Calendar Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-neutral-100 bg-neutral-50/50">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            title="Previous Month"
+            onClick={handlePrevMonth}
+            variant="outline"
+            size="icon"
+            className="size-8 rounded-lg border-neutral-200 bg-white hover:bg-neutral-100"
+          >
+            <ChevronLeft className="size-4 text-neutral-600" />
+          </Button>
+
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white shadow-xs">
+            <CalendarIcon className="size-4 text-blue-600" />
+            <span className="text-sm font-bold text-neutral-800">
+              {format(currentDate, 'MMMM yyyy')}
+            </span>
+          </div>
+
+          <Button
+            type="button"
+            title="Next Month"
+            onClick={handleNextMonth}
+            variant="outline"
+            size="icon"
+            className="size-8 rounded-lg border-neutral-200 bg-white hover:bg-neutral-100"
+          >
+            <ChevronRight className="size-4 text-neutral-600" />
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleToday}
+            variant="ghost"
+            size="sm"
+            className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2.5 h-8 rounded-lg"
+          >
+            Today
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-neutral-100 text-neutral-600 border border-neutral-200/60">
+            <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
+            {monthTasksCount} {monthTasksCount === 1 ? 'task' : 'tasks'} this month
+          </span>
+        </div>
       </div>
 
-      <Button title="Next Month" onClick={() => onNavigate('NEXT')} variant="secondary" size="icon">
-        <ChevronRight className="size-4"/>
-      </Button>
-    </div>);
-};
-export const DataCalendar = ({ data }) => {
-    const [value, setValue] = useState(data.length > 0 ? new Date(data[0].dueDate) : new Date());
-    const events = data.map((task) => ({
-        start: new Date(task.dueDate),
-        end: new Date(task.dueDate),
-        title: task.name,
-        project: task.project,
-        assignee: task.assignee,
-        assignees: task.assignees || (task.assignee ? [task.assignee] : []),
-        status: task.status,
-        id: task.$id,
-    }));
-    const handleNavigate = (action) => {
-        if (action === 'PREV')
-            setValue(subMonths(value, 1));
-        else if (action === 'NEXT')
-            setValue(addMonths(value, 1));
-        else if (action === 'TODAY')
-            setValue(new Date());
-    };
-    return (<Calendar localizer={localizer} date={value} events={events} views={['month']} defaultView="month" toolbar showAllEvents className="h-full" max={new Date(new Date().setFullYear(new Date().getFullYear() + 1))} formats={{
-            weekdayFormat: (date, culture, localizer) => localizer?.format(date, 'EEE', culture) ?? '',
-        }} components={{
-            eventWrapper: ({ event }) => (<EventCard id={event.id} title={event.title} assignee={event.assignee} assignees={event.assignees} project={event.project} status={event.status}/>),
-            toolbar: () => <CustomToolbar date={value} onNavigate={handleNavigate}/>,
-        }}/>);
+      {/* Weekdays Header Row */}
+      <div className="grid grid-cols-7 border-b border-neutral-200 bg-neutral-50 text-center">
+        {WEEKDAYS.map((day) => (
+          <div
+            key={day}
+            className="py-2.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500 border-r last:border-r-0 border-neutral-200"
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* Month Days Grid - Each cell has independent task list scroll */}
+      <div className="grid grid-cols-7 auto-rows-fr bg-neutral-200 gap-[1px] flex-1">
+        {calendarDays.map((day) => {
+          const dateKey = format(day, 'yyyy-MM-dd');
+          const dayTasks = tasksByDate.get(dateKey) || [];
+          const inCurrentMonth = isSameMonth(day, currentDate);
+          const isCurrentDay = isToday(day);
+
+          return (
+            <div
+              key={dateKey}
+              className={`flex flex-col h-[135px] sm:h-[145px] lg:h-[160px] p-1.5 transition-colors ${
+                inCurrentMonth ? 'bg-white hover:bg-neutral-50/60' : 'bg-neutral-50/80 text-neutral-400'
+              }`}
+            >
+              {/* Day Cell Header */}
+              <div className="flex items-center justify-between mb-1 px-1 shrink-0">
+                <span
+                  className={`text-xs font-bold transition-all ${
+                    isCurrentDay
+                      ? 'flex size-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs'
+                      : inCurrentMonth
+                      ? 'text-neutral-700'
+                      : 'text-neutral-400 font-normal'
+                  }`}
+                >
+                  {format(day, 'dd')}
+                </span>
+
+                {dayTasks.length > 0 && (
+                  <span className="text-[10px] font-bold text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded-full border border-neutral-200/60">
+                    {dayTasks.length}
+                  </span>
+                )}
+              </div>
+
+              {/* Day Tasks Container: Only this specific day scrolls independently! */}
+              <div className="flex-1 overflow-y-auto space-y-1 pr-0.5 custom-calendar-scrollbar">
+                {dayTasks.map((task) => (
+                  <EventCard
+                    key={task.$id || task.id}
+                    id={task.$id || task.id}
+                    title={task.name}
+                    assignee={task.assignee}
+                    assignees={task.assignees || (task.assignee ? [task.assignee] : [])}
+                    project={task.project}
+                    status={task.status}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 };

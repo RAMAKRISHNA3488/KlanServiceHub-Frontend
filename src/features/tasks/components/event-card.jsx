@@ -6,9 +6,11 @@ import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 const statusColorMap = {
     [TaskStatus.BACKLOG]: 'border-l-pink-500',
-    [TaskStatus.TODO]: 'border-l-red-500',
-    [TaskStatus.IN_PROGRESS]: 'border-l-yellow-500',
-    [TaskStatus.IN_REVIEW]: 'border-l-blue-500',
+    [TaskStatus.TODO]: 'border-l-blue-500',
+    [TaskStatus.IN_PROGRESS]: 'border-l-amber-500',
+    [TaskStatus.IN_REVIEW]: 'border-l-purple-500',
+    CODE_REVIEW: 'border-l-purple-500',
+    REVIEW: 'border-l-purple-500',
     [TaskStatus.DONE]: 'border-l-emerald-500',
 };
 export const EventCard = ({ title, assignee, assignees, project, status, id }) => {
@@ -21,8 +23,8 @@ export const EventCard = ({ title, assignee, assignees, project, status, id }) =
         e.stopPropagation();
         router.push(`/workspaces/${workspaceId}/tasks/${id}`);
     };
-    return (<div className="px-2">
-      <button onClick={onClick} className={cn('flex cursor-pointer flex-col gap-y-1.5 rounded-md border border-l-4 bg-white p-1.5 text-xs text-primary transition hover:opacity-75', statusColorMap[status])}>
+    return (<div className="w-full">
+      <button onClick={onClick} className={cn('w-full text-left flex cursor-pointer flex-col gap-y-1 rounded-md border border-l-4 bg-white p-1 text-[11px] text-primary transition hover:bg-neutral-50 shadow-2xs', statusColorMap[status] || 'border-l-blue-400')}>
         <p className="font-medium truncate">{title}</p>
 
         <div className="flex items-center gap-x-1" title={memberNames}>
