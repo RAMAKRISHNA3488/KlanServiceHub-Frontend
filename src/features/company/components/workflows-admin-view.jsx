@@ -411,7 +411,7 @@ export const WorkflowsAdminView = () => {
                     { name: 'BACKLOG', category: 'TODO', color: '#94A3B8' },
                     { name: 'TODO', category: 'TODO', color: '#3B82F6' },
                     { name: 'IN_PROGRESS', category: 'IN_PROGRESS', color: '#F59E0B' },
-                    { name: 'CODE_REVIEW', category: 'IN_PROGRESS', color: '#8B5CF6' },
+                    { name: 'IN_REVIEW', category: 'IN_PROGRESS', color: '#8B5CF6' },
                     { name: 'TESTING', category: 'IN_PROGRESS', color: '#06B6D4' },
                     { name: 'DONE', category: 'DONE', color: '#10B981' },
                   ],

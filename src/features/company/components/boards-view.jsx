@@ -1176,7 +1176,7 @@ export const BoardsView = () => {
                   onChange={(e) => setBoardForm({ ...boardForm, type: e.target.value })}
                   className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:border-blue-500 focus:outline-none"
                 >
-                  <option value="KANBAN">Kanban (Continuous Flow: TO DO ➔ IN PROGRESS ➔ CODE REVIEW ➔ DONE)</option>
+                  <option value="KANBAN">Kanban (Continuous Flow: TO DO ➔ IN PROGRESS ➔ IN REVIEW ➔ DONE)</option>
                   <option value="SCRUM">Scrum (Sprint Iterations)</option>
                 </select>
               </div>

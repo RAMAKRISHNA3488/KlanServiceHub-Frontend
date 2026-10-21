@@ -44,6 +44,8 @@ const STATUS_COLORS = {
   TODO: 'bg-blue-50 text-blue-700 border-blue-200',
   IN_PROGRESS: 'bg-amber-50 text-amber-800 border-amber-200',
   IN_REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
+  CODE_REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
+  REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
   TESTING: 'bg-cyan-50 text-cyan-800 border-cyan-200',
   DONE: 'bg-emerald-50 text-emerald-800 border-emerald-200',
 };
@@ -311,28 +313,52 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
           <div className="flex items-center gap-2">
             {/* Status Dropdown */}
-            <select
-              value={task?.status || 'TODO'}
-              onChange={(e) => handleUpdateProperty({ status: e.target.value })}
-              className="rounded-lg px-3 py-1 text-xs font-bold border border-neutral-300 bg-white text-neutral-800 cursor-pointer focus:outline-none"
-            >
-              {workflowStatuses.length > 0 ? (
-                workflowStatuses.map((st) => (
-                  <option key={st.id || st.name} value={st.name}>
-                    {st.name.replace(/_/g, ' ')}
-                  </option>
-                ))
-              ) : (
-                <>
-                  <option value="BACKLOG">BACKLOG</option>
-                  <option value="TODO">TO DO</option>
-                  <option value="IN_PROGRESS">IN PROGRESS</option>
-                  <option value="IN_REVIEW">IN REVIEW</option>
-                  <option value="TESTING">TESTING</option>
-                  <option value="DONE">DONE</option>
-                </>
-              )}
-            </select>
+            {(() => {
+              const currentStatus =
+                task?.status === 'CODE_REVIEW' || task?.status === 'REVIEW'
+                  ? 'IN_REVIEW'
+                  : task?.status || 'TODO';
+
+              const seen = new Set();
+              const uniqueWorkflowStatuses = [];
+              for (const st of (workflowStatuses || [])) {
+                const sName = String(st.name || '').toUpperCase().trim().replace(/[\s-]+/g, '_');
+                const canonicalKey = (sName === 'CODE_REVIEW' || sName === 'IN_REVIEW' || sName === 'REVIEW') ? 'IN_REVIEW' : sName;
+                if (!seen.has(canonicalKey)) {
+                  seen.add(canonicalKey);
+                  uniqueWorkflowStatuses.push({
+                    ...st,
+                    name: canonicalKey,
+                    displayName: canonicalKey === 'IN_REVIEW' ? 'IN REVIEW' : st.name.replace(/_/g, ' ')
+                  });
+                }
+              }
+
+              return (
+                <select
+                  value={currentStatus}
+                  onChange={(e) => handleUpdateProperty({ status: e.target.value })}
+                  className="rounded-lg px-3 py-1 text-xs font-bold border border-neutral-300 bg-white text-neutral-800 cursor-pointer focus:outline-none"
+                >
+                  {uniqueWorkflowStatuses.length > 0 ? (
+                    uniqueWorkflowStatuses.map((st) => (
+                      <option key={st.id || st.name} value={st.name}>
+                        {st.displayName || st.name.replace(/_/g, ' ')}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="BACKLOG">BACKLOG</option>
+                      <option value="TODO">TO DO</option>
+                      <option value="IN_PROGRESS">IN PROGRESS</option>
+                      <option value="IN_REVIEW">IN REVIEW</option>
+                      <option value="TESTING">TESTING</option>
+                      <option value="DONE">DONE</option>
+                    </>
+                  )}
+                </select>
+              );
+            })()}
 
             <button
               onClick={onClose}

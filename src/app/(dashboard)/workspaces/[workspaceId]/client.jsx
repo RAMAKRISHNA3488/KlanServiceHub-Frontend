@@ -64,7 +64,10 @@ export const DynamicStatusBadge = ({ status, workflowStatuses = [] }) => {
 
   if (matched) {
     const color = matched.color || '#3B82F6';
-    const label = (matched.name || clean).replace(/_/g, ' ');
+    let label = (matched.name || clean).replace(/_/g, ' ');
+    if (['CODE_REVIEW', 'IN_REVIEW', 'REVIEW'].includes(cleanUnderscore)) {
+      label = 'IN REVIEW';
+    }
     return (
       <span
         className="rounded px-2 py-0.5 text-[10px] font-bold border transition-colors shrink-0"
@@ -81,12 +84,14 @@ export const DynamicStatusBadge = ({ status, workflowStatuses = [] }) => {
 
   // Graceful fallback for standard known categories
   let bgClass = 'bg-neutral-100 text-neutral-700';
+  let displayText = clean.replace(/_/g, ' ') || 'TO DO';
   if (['DONE', 'COMPLETED', 'RESOLVED', 'CLOSED'].includes(cleanUnderscore)) {
     bgClass = 'bg-emerald-100 text-emerald-800';
   } else if (['IN_PROGRESS', 'INPROGRESS'].includes(cleanUnderscore)) {
     bgClass = 'bg-blue-100 text-blue-800';
   } else if (['CODE_REVIEW', 'IN_REVIEW', 'REVIEW'].includes(cleanUnderscore)) {
     bgClass = 'bg-purple-100 text-purple-800';
+    displayText = 'IN REVIEW';
   } else if (['TESTING', 'TEST', 'QA'].includes(cleanUnderscore)) {
     bgClass = 'bg-cyan-100 text-cyan-800';
   } else if (['BACKLOG', 'BACK_LOG'].includes(cleanUnderscore)) {
@@ -97,7 +102,7 @@ export const DynamicStatusBadge = ({ status, workflowStatuses = [] }) => {
 
   return (
     <span className={`rounded px-2 py-0.5 text-[10px] font-bold shrink-0 ${bgClass}`}>
-      {clean.replace(/_/g, ' ') || 'TO DO'}
+      {displayText}
     </span>
   );
 };

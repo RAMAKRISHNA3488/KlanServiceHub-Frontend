@@ -46,6 +46,8 @@ const STATUS_COLORS = {
   TODO: 'bg-blue-50 text-blue-700 border-blue-200',
   IN_PROGRESS: 'bg-amber-50 text-amber-800 border-amber-200',
   IN_REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
+  CODE_REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
+  REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
   TESTING: 'bg-cyan-50 text-cyan-800 border-cyan-200',
   DONE: 'bg-emerald-50 text-emerald-800 border-emerald-200',
 };
@@ -289,10 +291,15 @@ export const TaskIdClient = () => {
 
         {/* Status Dropdown */}
         <select
-          value={task.status || 'TODO'}
+          value={
+            task.status === 'CODE_REVIEW' || task.status === 'REVIEW'
+              ? 'IN_REVIEW'
+              : task.status || 'TODO'
+          }
           onChange={(e) => handleUpdate({ status: e.target.value })}
           className={`rounded-lg px-3 py-1.5 text-xs font-bold border cursor-pointer focus:outline-none shadow-xs ${
-            STATUS_COLORS[task.status] || STATUS_COLORS.TODO
+            STATUS_COLORS[task.status] ||
+            (task.status === 'CODE_REVIEW' || task.status === 'REVIEW' ? STATUS_COLORS.IN_REVIEW : STATUS_COLORS.TODO)
           }`}
         >
           <option value="BACKLOG">BACKLOG</option>
