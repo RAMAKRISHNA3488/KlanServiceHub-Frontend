@@ -192,8 +192,18 @@ export const BoardsView = () => {
 
   const columns = useMemo(() => {
     if (workflowStatuses && workflowStatuses.length > 0) {
-      return workflowStatuses.map((st) => {
-        const id = st.name;
+      const seenStages = new Set();
+      const unifiedList = [];
+
+      for (const st of workflowStatuses) {
+        let id = st.name;
+        // Unify CODE_REVIEW and IN_REVIEW into single IN_REVIEW stage
+        if (id === 'CODE_REVIEW' || id === 'IN_REVIEW' || id === 'REVIEW') {
+          id = 'IN_REVIEW';
+        }
+        if (seenStages.has(id)) continue;
+        seenStages.add(id);
+
         const cat = (st.category || 'IN_PROGRESS').toUpperCase();
         let Icon = Clock;
         let bg = 'bg-amber-50/70';
@@ -213,17 +223,18 @@ export const BoardsView = () => {
           border = 'border-purple-200';
         }
 
-        return {
+        unifiedList.push({
           id,
-          rawName: st.name,
-          label: st.name.replace(/_/g, ' '),
-          color: st.color || '#3B82F6',
+          rawName: id === 'IN_REVIEW' ? 'IN_REVIEW' : st.name,
+          label: id === 'IN_REVIEW' ? 'IN REVIEW' : st.name.replace(/_/g, ' '),
+          color: id === 'IN_REVIEW' ? '#8B5CF6' : (st.color || '#3B82F6'),
           category: cat,
           icon: Icon,
           bg,
           border,
-        };
-      });
+        });
+      }
+      return unifiedList;
     }
 
     // Default fallback columns if no custom workflow configured
@@ -231,7 +242,7 @@ export const BoardsView = () => {
       { id: 'BACKLOG', label: 'BACKLOG', color: '#94A3B8', category: 'TODO', icon: CircleDot, bg: 'bg-slate-50/70', border: 'border-slate-200' },
       { id: 'TODO', label: 'TO DO', color: '#3B82F6', category: 'TODO', icon: CircleDot, bg: 'bg-blue-50/70', border: 'border-blue-200' },
       { id: 'IN_PROGRESS', label: 'IN PROGRESS', color: '#F59E0B', category: 'IN_PROGRESS', icon: Clock, bg: 'bg-amber-50/70', border: 'border-amber-200' },
-      { id: 'CODE_REVIEW', label: 'CODE REVIEW', color: '#8B5CF6', category: 'IN_PROGRESS', icon: Code2, bg: 'bg-purple-50/70', border: 'border-purple-200' },
+      { id: 'IN_REVIEW', label: 'IN REVIEW', color: '#8B5CF6', category: 'IN_PROGRESS', icon: Code2, bg: 'bg-purple-50/70', border: 'border-purple-200' },
       { id: 'DONE', label: 'DONE', color: '#10B981', category: 'DONE', icon: CheckCircle2, bg: 'bg-emerald-50/70', border: 'border-emerald-200' },
     ];
   }, [workflowStatuses]);
@@ -544,7 +555,12 @@ export const BoardsView = () => {
     if (filters.status && filters.status !== 'ALL') {
       const taskStatus = (task.status || '').toUpperCase().trim();
       const filterStatus = filters.status.toUpperCase().trim();
-      if (taskStatus !== filterStatus) return false;
+
+      const isReviewMatch =
+        (filterStatus === 'IN_REVIEW' || filterStatus === 'CODE_REVIEW' || filterStatus === 'REVIEW') &&
+        (taskStatus === 'IN_REVIEW' || taskStatus === 'CODE_REVIEW' || taskStatus === 'REVIEW');
+
+      if (!isReviewMatch && taskStatus !== filterStatus) return false;
     }
 
     // 7. Priority Filter

@@ -36,12 +36,24 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
 
     const columns = useMemo(() => {
         if (workflowStatuses && workflowStatuses.length > 0) {
-            return workflowStatuses.map((st) => ({
-                id: st.name,
-                label: st.name.replace(/_/g, ' '),
-                color: st.color || '#3B82F6',
-                category: st.category || 'IN_PROGRESS',
-            }));
+            const seen = new Set();
+            const list = [];
+            for (const st of workflowStatuses) {
+                let id = st.name;
+                if (id === 'CODE_REVIEW' || id === 'IN_REVIEW' || id === 'REVIEW') {
+                    id = 'IN_REVIEW';
+                }
+                if (seen.has(id)) continue;
+                seen.add(id);
+
+                list.push({
+                    id,
+                    label: id === 'IN_REVIEW' ? 'In Review' : st.name.replace(/_/g, ' '),
+                    color: id === 'IN_REVIEW' ? '#8B5CF6' : (st.color || '#3B82F6'),
+                    category: st.category || 'IN_PROGRESS',
+                });
+            }
+            return list;
         }
         return DEFAULT_BOARDS;
     }, [workflowStatuses]);

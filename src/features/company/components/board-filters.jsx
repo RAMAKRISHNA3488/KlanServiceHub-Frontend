@@ -73,12 +73,25 @@ export const BoardFilters = ({
     { id: 'DONE', label: 'Done' },
   ];
 
-  const availableStatuses = (safeStatuses && safeStatuses.length > 0)
-    ? safeStatuses.map((s) => ({
-        id: s.id || s.rawName || s.name,
-        label: s.label || s.name || s.id,
-      }))
-    : defaultStatuses;
+  const availableStatuses = React.useMemo(() => {
+    if (safeStatuses && safeStatuses.length > 0) {
+      const seen = new Set();
+      const list = [];
+      for (const s of safeStatuses) {
+        let rawId = s.id || s.rawName || s.name;
+        let label = s.label || s.name || s.id;
+        if (rawId === 'CODE_REVIEW' || rawId === 'IN_REVIEW' || rawId === 'REVIEW') {
+          rawId = 'IN_REVIEW';
+          label = 'In Review';
+        }
+        if (seen.has(rawId)) continue;
+        seen.add(rawId);
+        list.push({ id: rawId, label });
+      }
+      return list;
+    }
+    return defaultStatuses;
+  }, [safeStatuses]);
 
   const priorities = [
     { value: 'CRITICAL', label: 'Critical' },
