@@ -194,13 +194,14 @@ export const KlanserviceHubTopNavbar = () => {
           {/* Primary Quick Create Button */}
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="flex items-center gap-1 rounded-md bg-blue-600 hover:bg-blue-700 px-2 sm:px-3 py-1 text-xs font-bold text-white shadow-xs transition ml-0.5 sm:ml-1"
+            className="flex items-center gap-1.5 rounded-md bg-blue-600 hover:bg-blue-700 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-white shadow-xs transition ml-0.5 sm:ml-1 shrink-0"
+            title="Create issue or task (Shortcut: C)"
           >
             <Plus className="size-3.5 stroke-[3]" />
-            <span className="hidden xs:inline">Create</span>
-            <span className="hidden sm:inline-block font-mono text-[9px] bg-blue-700/80 px-1 rounded text-blue-100 ml-1">
+            <span className="inline font-bold">Create</span>
+            <kbd className="hidden sm:inline-block font-mono text-[10px] bg-blue-700/90 px-1 py-0.2 rounded text-blue-100 ml-0.5">
               C
-            </span>
+            </kbd>
           </button>
         </div>
 

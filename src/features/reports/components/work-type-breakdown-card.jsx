@@ -30,25 +30,37 @@ export const WorkTypeBreakdownCard = ({ workTypeData, loading = false, onDrillDo
       case 'subtask':
       case 'sub-task':
         return <GitCommit className="size-3.5 text-cyan-600" />;
+      case 'improvement':
+        return <TrendingUp className="size-3.5 text-amber-500" />;
       default:
         return <CheckSquare className="size-3.5 text-neutral-500" />;
     }
   };
 
   const defaultTypes = [
-    { type: 'Epic', color: '#9333EA', count: 0, percentage: 0 },
+    { type: 'Sub-task', color: '#06B6D4', count: 0, percentage: 0 },
     { type: 'Task', color: '#3B82F6', count: 0, percentage: 0 },
+    { type: 'Story', color: '#10B981', count: 0, percentage: 0 },
+    { type: 'Epic', color: '#9333EA', count: 0, percentage: 0 },
     { type: 'Bug', color: '#EF4444', count: 0, percentage: 0 },
     { type: 'Feature', color: '#10B981', count: 0, percentage: 0 },
-    { type: 'Story', color: '#10B981', count: 0, percentage: 0 },
-    { type: 'Subtask', color: '#06B6D4', count: 0, percentage: 0 },
   ];
 
-  const typesList = breakdown.length > 0 ? breakdown : defaultTypes;
+  // Prioritize work types with active items so all items are instantly visible
+  const typesList = React.useMemo(() => {
+    const list = breakdown.length > 0 ? [...breakdown] : [...defaultTypes];
+    return list.sort((a, b) => {
+      const countA = a.count || 0;
+      const countB = b.count || 0;
+      if (countB !== countA) return countB - countA;
+      return (a.type || '').localeCompare(b.type || '');
+    });
+  }, [breakdown]);
+
   const isEmpty = total === 0;
 
   return (
-    <div className="rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-xs flex flex-col justify-between min-h-[340px] transition-all hover:shadow-sm">
+    <div className="rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-xs flex flex-col justify-between min-h-[380px] transition-all hover:shadow-sm">
       {/* Card Header matching screenshot 1 */}
       <div>
         <div className="flex items-center justify-between">
@@ -87,9 +99,8 @@ export const WorkTypeBreakdownCard = ({ workTypeData, loading = false, onDrillDo
                 onDrillDown &&
                 onDrillDown({ workType: item.type, title: `${item.type} Work Items` })
               }
-              className={`grid grid-cols-12 items-center py-2 text-xs transition ${
-                !isEmpty ? 'cursor-pointer hover:bg-neutral-50/80 rounded-lg px-1' : ''
-              }`}
+              className={`grid grid-cols-12 items-center py-2 text-xs transition ${!isEmpty ? 'cursor-pointer hover:bg-neutral-50/80 rounded-lg px-1' : ''
+                }`}
             >
               {/* Type column */}
               <div className="col-span-4 flex items-center gap-2">
@@ -121,9 +132,8 @@ export const WorkTypeBreakdownCard = ({ workTypeData, loading = false, onDrillDo
                       </span>
                       {item.trend !== undefined && item.trend !== 0 && (
                         <span
-                          className={`text-[9px] font-bold flex items-center ${
-                            item.trend > 0 ? 'text-emerald-600' : 'text-rose-600'
-                          }`}
+                          className={`text-[9px] font-bold flex items-center ${item.trend > 0 ? 'text-emerald-600' : 'text-rose-600'
+                            }`}
                         >
                           {item.trend > 0 ? '+' : ''}
                           {item.trend}%

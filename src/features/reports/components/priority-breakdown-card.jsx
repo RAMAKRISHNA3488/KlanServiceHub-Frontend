@@ -16,7 +16,7 @@ export const PriorityBreakdownCard = ({ priorityData, loading = false, onDrillDo
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-xs flex flex-col justify-between min-h-[340px] transition-all hover:shadow-sm">
+    <div className="rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-xs flex flex-col justify-between min-h-[380px] transition-all hover:shadow-sm">
       {/* Card Header matching screenshot 1 */}
       <div>
         <div className="flex items-center justify-between">
@@ -38,15 +38,15 @@ export const PriorityBreakdownCard = ({ priorityData, loading = false, onDrillDo
         </p>
       </div>
 
-      {/* Center Chart (matching axis styling in screenshot 1) */}
-      <div className="my-auto py-2">
+      {/* Center Chart with clear X-axis priority labels */}
+      <div className="py-2 my-auto">
         <PriorityAxisChart
           data={breakdown}
           total={total}
           onPriorityClick={(p) =>
             onDrillDown &&
             onDrillDown({
-              priority: p.priority.toUpperCase(),
+              priority: (p.rawPriority || p.priority).toUpperCase(),
               title: `${p.priority} Priority Work Items`,
             })
           }
@@ -54,7 +54,7 @@ export const PriorityBreakdownCard = ({ priorityData, loading = false, onDrillDo
       </div>
 
       {/* Bottom Insights Banner: Highest unresolved & high overdue */}
-      <div className="pt-3 border-t border-neutral-100 grid grid-cols-2 gap-2 text-xs">
+      <div className="mt-2 pt-3 border-t border-neutral-100 grid grid-cols-2 gap-2 text-xs">
         <div
           onClick={() =>
             highestUnresolved > 0 &&

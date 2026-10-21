@@ -142,7 +142,7 @@ export const CookieConsentBanner = () => {
             setIsCustomizeOpen(true);
             setIsOpen(true);
           }}
-          className="fixed bottom-4 left-4 z-40 group flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/85 hover:bg-white text-neutral-900 border border-neutral-200/80 shadow-[0_10px_25px_rgba(0,0,0,0.08),inset_0_1px_0_0_rgba(255,255,255,0.8)] backdrop-blur-xl transition-all duration-200 cursor-pointer text-xs font-semibold hover:scale-105 active:scale-95"
+          className="fixed bottom-4 right-4 z-40 group flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-white/90 hover:bg-white text-neutral-900 border border-neutral-200/90 shadow-[0_10px_25px_rgba(0,0,0,0.08),inset_0_1px_0_0_rgba(255,255,255,0.8)] backdrop-blur-xl transition-all duration-200 cursor-pointer text-xs font-semibold hover:scale-105 active:scale-95"
           title="Manage Consent & Data Processing Preferences"
           aria-label="Manage Cookie and Data Processing Settings"
         >
