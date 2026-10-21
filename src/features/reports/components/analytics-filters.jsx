@@ -27,6 +27,7 @@ export const AnalyticsFilters = ({
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const datePresets = [
+    { label: 'All Time', value: 'all' },
     { label: 'Today', value: 'today' },
     { label: 'Last 7 Days', value: '7d' },
     { label: 'Last 30 Days', value: '30d' },
@@ -48,7 +49,7 @@ export const AnalyticsFilters = ({
     filters.priority ||
     filters.sprintId ||
     filters.epicId ||
-    (filters.dateRange && filters.dateRange !== '30d');
+    (filters.dateRange && filters.dateRange !== 'all');
 
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm space-y-3.5 transition-all">
@@ -58,7 +59,7 @@ export const AnalyticsFilters = ({
         <div className="flex items-center gap-1.5 bg-neutral-100/80 p-1 rounded-xl text-xs font-semibold select-none overflow-x-auto custom-scrollbar">
           <Calendar className="size-3.5 text-neutral-400 ml-1.5 mr-0.5" />
           {datePresets.map((preset) => {
-            const isActive = (filters.dateRange || '30d') === preset.value;
+            const isActive = (filters.dateRange || 'all') === preset.value;
             return (
               <button
                 key={preset.value}

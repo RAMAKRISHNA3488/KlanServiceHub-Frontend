@@ -66,7 +66,7 @@ export const OrganizationAnalyticsPage = () => {
     priority: searchParams.get('priority') || '',
     sprintId: searchParams.get('sprintId') || '',
     epicId: searchParams.get('epicId') || '',
-    dateRange: searchParams.get('dateRange') || '30d',
+    dateRange: searchParams.get('dateRange') || 'all',
     startDate: searchParams.get('startDate') || '',
     endDate: searchParams.get('endDate') || '',
   });
@@ -121,7 +121,7 @@ export const OrganizationAnalyticsPage = () => {
       priority: '',
       sprintId: '',
       epicId: '',
-      dateRange: '30d',
+      dateRange: 'all',
       startDate: '',
       endDate: '',
     };
