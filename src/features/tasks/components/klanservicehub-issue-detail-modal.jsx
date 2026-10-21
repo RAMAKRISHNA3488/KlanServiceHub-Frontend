@@ -152,6 +152,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       queryClient.invalidateQueries({ queryKey: ['team-workload'] });
       queryClient.invalidateQueries({ queryKey: ['dependencies-graph'] });
       queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['capacity'] });
+      queryClient.invalidateQueries({ queryKey: ['workload'] });
+      window.dispatchEvent(new CustomEvent('klanservicehub-task-updated', { detail: { taskId, fields } }));
       if (res?.data) {
         setTask(res.data);
         if (res.data.storyPoints !== undefined || res.data.story_points !== undefined) {

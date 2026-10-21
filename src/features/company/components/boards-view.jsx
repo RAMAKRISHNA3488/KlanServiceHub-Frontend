@@ -334,6 +334,9 @@ export const BoardsView = () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
       queryClient.invalidateQueries({ queryKey: ['team-workload'] });
       queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['capacity'] });
+      queryClient.invalidateQueries({ queryKey: ['workload'] });
+      window.dispatchEvent(new CustomEvent('klanservicehub-task-updated', { detail: { taskId, newStatus } }));
     } catch (err) {
       toast.error(err.message || 'Failed to update task status');
       fetchBoardsAndTasks();
@@ -370,6 +373,9 @@ export const BoardsView = () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
       queryClient.invalidateQueries({ queryKey: ['team-workload'] });
       queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['capacity'] });
+      queryClient.invalidateQueries({ queryKey: ['workload'] });
+      window.dispatchEvent(new CustomEvent('klanservicehub-task-updated', { detail: { taskId, action: 'deleted' } }));
     } catch (err) {
       toast.error(err.message || 'Failed to delete ticket');
       fetchBoardsAndTasks();
@@ -409,6 +415,9 @@ export const BoardsView = () => {
         queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
         queryClient.invalidateQueries({ queryKey: ['team-workload'] });
         queryClient.invalidateQueries({ queryKey: ['reports'] });
+        queryClient.invalidateQueries({ queryKey: ['capacity'] });
+        queryClient.invalidateQueries({ queryKey: ['workload'] });
+        window.dispatchEvent(new CustomEvent('klanservicehub-task-updated', { detail: { task: newTask, action: 'created' } }));
       }
     } catch (err) {
       toast.error(err.message || 'Failed to create task');

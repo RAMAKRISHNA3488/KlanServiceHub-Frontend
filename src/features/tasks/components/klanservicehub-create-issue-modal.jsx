@@ -150,8 +150,11 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
       queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
       queryClient.invalidateQueries({ queryKey: ['team-workload'] });
       queryClient.invalidateQueries({ queryKey: ['dependencies-graph'] });
+      queryClient.invalidateQueries({ queryKey: ['capacity'] });
+      queryClient.invalidateQueries({ queryKey: ['workload'] });
       if (onCreated) onCreated(res.data);
       window.dispatchEvent(new CustomEvent('klanservicehub-issue-created', { detail: res.data }));
+      window.dispatchEvent(new CustomEvent('klanservicehub-task-updated', { detail: { task: res.data, action: 'created' } }));
 
       if (createAnother) {
         setForm((prev) => ({

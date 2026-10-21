@@ -196,6 +196,15 @@ export const OrganizationAnalyticsPage = () => {
     fetchAllAnalytics();
   }, [fetchAllAnalytics]);
 
+  // Synchronize immediately whenever a board ticket or task is moved, updated, created, or deleted
+  useEffect(() => {
+    const handleTaskUpdated = () => {
+      fetchAllAnalytics();
+    };
+    window.addEventListener('klanservicehub-task-updated', handleTaskUpdated);
+    return () => window.removeEventListener('klanservicehub-task-updated', handleTaskUpdated);
+  }, [fetchAllAnalytics]);
+
   // Drill-down handler
   const handleOpenDrillDown = (extraParams = {}) => {
     setDrillDownState({
