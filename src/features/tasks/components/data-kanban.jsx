@@ -78,9 +78,13 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
         } else if (clean === 'CODE_REVIEW' || clean === 'IN_REVIEW' || clean === 'REVIEW') {
             const b = findBoard('CODE_REVIEW', 'IN_REVIEW', 'REVIEW');
             if (b) return b;
+            const inProg = findBoard('IN_PROGRESS', 'INPROGRESS');
+            if (inProg) return inProg;
         } else if (clean === 'TESTING' || clean === 'TEST' || clean === 'QA') {
             const b = findBoard('TESTING', 'TEST', 'QA');
             if (b) return b;
+            const inProg = findBoard('IN_PROGRESS', 'INPROGRESS');
+            if (inProg) return inProg;
         } else if (clean === 'DONE' || clean === 'RESOLVED' || clean === 'CLOSED') {
             const b = findBoard('DONE', 'RESOLVED', 'CLOSED');
             if (b) return b;
@@ -95,18 +99,12 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
             result[b] = [];
         });
 
-        // Deduplicate incoming tasks by ID and issue key
+        // Deduplicate incoming tasks strictly by ID
         const seen = new Set();
         const uniqueItems = (items || []).filter((task) => {
-            const id1 = task?.$id;
-            const id2 = task?.id;
-            const key = task?.key;
-            if (id1 && seen.has(id1)) return false;
-            if (id2 && seen.has(id2)) return false;
-            if (key && seen.has(`key_${key}`)) return false;
-            if (id1) seen.add(id1);
-            if (id2) seen.add(id2);
-            if (key) seen.add(`key_${key}`);
+            const id = task?.$id || task?.id;
+            if (id && seen.has(id)) return false;
+            if (id) seen.add(id);
             return true;
         });
 

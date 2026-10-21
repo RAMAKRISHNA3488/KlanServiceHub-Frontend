@@ -461,15 +461,9 @@ export const BoardsView = () => {
   const uniqueTasks = useMemo(() => {
     const seen = new Set();
     return tasks.filter((t) => {
-      const id1 = t?.$id;
-      const id2 = t?.id;
-      const key = t?.key;
-      if (id1 && seen.has(id1)) return false;
-      if (id2 && seen.has(id2)) return false;
-      if (key && seen.has(`key_${key}`)) return false;
-      if (id1) seen.add(id1);
-      if (id2) seen.add(id2);
-      if (key) seen.add(`key_${key}`);
+      const id = t?.$id || t?.id;
+      if (id && seen.has(id)) return false;
+      if (id) seen.add(id);
       return true;
     });
   }, [tasks]);
@@ -532,8 +526,9 @@ export const BoardsView = () => {
 
     // 5. Work Type Filter
     if (filters.workType && filters.workType !== 'ALL') {
-      const taskType = (task.issueType || task.issue_type || 'Task').toUpperCase();
-      if (taskType !== filters.workType.toUpperCase()) return false;
+      const taskType = (task.issueType || task.issue_type || 'Task').toUpperCase().replace(/[^A-Z]/g, '');
+      const filterType = filters.workType.toUpperCase().replace(/[^A-Z]/g, '');
+      if (taskType !== filterType) return false;
     }
 
     // 6. Status Filter
@@ -619,9 +614,13 @@ export const BoardsView = () => {
     } else if (cleanStatus === 'CODE_REVIEW' || cleanStatus === 'IN_REVIEW' || cleanStatus === 'REVIEW') {
       const col = findColumnByAliases('CODE_REVIEW', 'IN_REVIEW', 'REVIEW');
       if (col) return col.id;
+      const inProgCol = findColumnByAliases('IN_PROGRESS', 'INPROGRESS');
+      if (inProgCol) return inProgCol.id;
     } else if (cleanStatus === 'TESTING' || cleanStatus === 'TEST' || cleanStatus === 'QA') {
       const col = findColumnByAliases('TESTING', 'TEST', 'QA');
       if (col) return col.id;
+      const inProgCol = findColumnByAliases('IN_PROGRESS', 'INPROGRESS');
+      if (inProgCol) return inProgCol.id;
     } else if (cleanStatus === 'DONE' || cleanStatus === 'RESOLVED' || cleanStatus === 'CLOSED') {
       const col = findColumnByAliases('DONE', 'RESOLVED', 'CLOSED');
       if (col) return col.id;
@@ -662,15 +661,12 @@ export const BoardsView = () => {
       map[col.id] = [];
     });
 
-    // Deduplicate tasks by id and issue key to strictly ensure one task per column
+    // Deduplicate tasks strictly by unique ID
     const seen = new Set();
     const uniqueTasks = (filteredTasks || []).filter((task) => {
       const tId = task?.$id || task?.id;
-      const key = task?.key;
       if (tId && seen.has(tId)) return false;
-      if (key && seen.has(`key_${key}`)) return false;
       if (tId) seen.add(tId);
-      if (key) seen.add(`key_${key}`);
       return true;
     });
 
@@ -716,6 +712,9 @@ export const BoardsView = () => {
             </h1>
             <span className="rounded bg-blue-50 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-blue-700 shrink-0">
               {activeProjectObj ? 'PROJECT BOARD' : (activeBoard?.type || 'KANBAN')}
+            </span>
+            <span className="rounded-full bg-neutral-100 border border-neutral-200/90 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-neutral-700 shrink-0">
+              {filteredTasks.length} {filteredTasks.length === 1 ? 'ticket' : 'tickets'}
             </span>
           </div>
           <p className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 line-clamp-1 sm:line-clamp-none">

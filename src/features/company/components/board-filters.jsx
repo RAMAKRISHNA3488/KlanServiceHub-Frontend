@@ -57,7 +57,7 @@ export const BoardFilters = ({
   ];
 
   // Derive work types from available issueTypes or fallback list
-  const defaultWorkTypes = ['Epic', 'Feature', 'Story', 'Task', 'Bug', 'Subtask'];
+  const defaultWorkTypes = ['Epic', 'Feature', 'Story', 'Task', 'Bug', 'Sub-task', 'Subtask', 'Improvement'];
   const availableWorkTypes = Array.from(
     new Set([
       ...defaultWorkTypes,
