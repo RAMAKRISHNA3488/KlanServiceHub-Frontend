@@ -310,6 +310,7 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
 
       {selectedDetailTaskId && (
         <KlanserviceHubIssueDetailModal
+          key={selectedDetailTaskId}
           taskId={selectedDetailTaskId}
           open={!!selectedDetailTaskId}
           onClose={() => setSelectedDetailTaskId(null)}

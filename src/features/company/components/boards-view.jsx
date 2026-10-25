@@ -1304,6 +1304,7 @@ export const BoardsView = () => {
       {/* Issue Detail Modal (Open on Double Click) */}
       {selectedDetailTaskId && (
         <KlanserviceHubIssueDetailModal
+          key={selectedDetailTaskId}
           taskId={selectedDetailTaskId}
           open={!!selectedDetailTaskId}
           onClose={() => setSelectedDetailTaskId(null)}

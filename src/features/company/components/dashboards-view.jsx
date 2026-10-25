@@ -1325,6 +1325,7 @@ export const DashboardsView = () => {
       {/* Task Issue Detail Modal */}
       {selectedTaskId && (
         <KlanserviceHubIssueDetailModal
+          key={selectedTaskId}
           taskId={selectedTaskId}
           open={!!selectedTaskId}
           onClose={() => setSelectedTaskId(null)}

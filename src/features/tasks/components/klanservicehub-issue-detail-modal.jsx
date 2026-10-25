@@ -96,14 +96,14 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     }
   }, [task?.storyPoints, task?.story_points]);
 
-  const fetchTaskDetails = async () => {
-    if (!taskId) return;
+  const fetchTaskDetails = async (targetId = taskId) => {
+    if (!targetId) return;
     try {
       setLoading(true);
-      const res = await tasksApi.getTask(taskId);
-      if (res?.data) {
+      const res = await tasksApi.getTask(targetId);
+      if (res?.data && (res.data.$id === targetId || res.data.id === targetId)) {
         setTask(res.data);
-        setComments(res.data.comments || []);
+        setComments(Array.isArray(res.data.comments) ? res.data.comments : []);
       }
     } catch (e) {
       toast.error('Failed to load issue details');
@@ -114,7 +114,16 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
   useEffect(() => {
     if (open && taskId) {
-      fetchTaskDetails();
+      // Immediately reset previous ticket state so data never bleeds or overlaps
+      setTask(null);
+      setComments([]);
+      setNewComment('');
+      setEditingCommentId(null);
+      setEditingContent('');
+      setSubtaskTitle('');
+      setLoading(true);
+
+      fetchTaskDetails(taskId);
       if (workspaceId) {
         sprintsApi.getSprints(workspaceId).then((res) => {
           if (res?.data?.sprints) setSprints(res.data.sprints);
@@ -128,6 +137,13 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           if (wfRes?.data?.[0]?.statuses) setWorkflowStatuses(wfRes.data[0].statuses);
         });
       }
+    } else {
+      setTask(null);
+      setComments([]);
+      setNewComment('');
+      setEditingCommentId(null);
+      setEditingContent('');
+      setSubtaskTitle('');
     }
   }, [open, taskId, workspaceId]);
 

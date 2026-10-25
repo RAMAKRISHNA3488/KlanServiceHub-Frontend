@@ -90,13 +90,14 @@ export const TaskIdClient = () => {
     currentUser?.role === 'ADMIN' ||
     task?.workspace?.user_id === currentUser?.$id;
 
-  const fetchTask = async () => {
+  const fetchTask = async (targetId = taskId) => {
+    if (!targetId) return;
     try {
       setLoading(true);
-      const res = await tasksApi.getTask(taskId);
-      if (res?.data) {
+      const res = await tasksApi.getTask(targetId);
+      if (res?.data && (res.data.$id === targetId || res.data.id === targetId)) {
         setTask(res.data);
-        setComments(res.data.comments || []);
+        setComments(Array.isArray(res.data.comments) ? res.data.comments : []);
         setStoryPointsInput(String(res.data.storyPoints ?? res.data.story_points ?? 1));
       }
     } catch (e) {
@@ -108,7 +109,15 @@ export const TaskIdClient = () => {
 
   useEffect(() => {
     if (taskId) {
-      fetchTask();
+      setTask(null);
+      setComments([]);
+      setNewComment('');
+      setEditingCommentId(null);
+      setEditingContent('');
+      setSubtaskTitle('');
+      setLoading(true);
+
+      fetchTask(taskId);
       if (workspaceId) {
         sprintsApi
           .getSprints(workspaceId)
