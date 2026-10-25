@@ -70,9 +70,9 @@ export const DataCalendar = ({ data = [] }) => {
   const handleToday = () => setCurrentDate(new Date());
 
   return (
-    <div className="flex flex-col h-full w-full rounded-2xl border border-neutral-200 bg-white shadow-xs overflow-hidden">
+    <div className="flex flex-col h-full w-full rounded-2xl border border-neutral-200 bg-white shadow-xs">
       {/* Top Calendar Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-neutral-100 bg-neutral-50/50">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-neutral-100 bg-neutral-50/50 shrink-0">
         <div className="flex items-center gap-2">
           <Button
             type="button"
@@ -122,71 +122,76 @@ export const DataCalendar = ({ data = [] }) => {
         </div>
       </div>
 
-      {/* Weekdays Header Row */}
-      <div className="grid grid-cols-7 border-b border-neutral-200 bg-neutral-50 text-center">
-        {WEEKDAYS.map((day) => (
-          <div
-            key={day}
-            className="py-2.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500 border-r last:border-r-0 border-neutral-200"
-          >
-            {day}
+      {/* Scrollable Calendar Body with horizontal and vertical overflow support */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto custom-scrollbar">
+        <div className="min-w-[760px] flex flex-col h-full">
+          {/* Weekdays Header Row - Sticky at top of calendar scroll */}
+          <div className="grid grid-cols-7 border-b border-neutral-200 bg-neutral-50 text-center sticky top-0 z-10 shadow-2xs">
+            {WEEKDAYS.map((day) => (
+              <div
+                key={day}
+                className="py-2.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500 border-r last:border-r-0 border-neutral-200"
+              >
+                {day}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Month Days Grid - Each cell has independent task list scroll */}
-      <div className="grid grid-cols-7 auto-rows-fr bg-neutral-200 gap-[1px] flex-1">
-        {calendarDays.map((day) => {
-          const dateKey = format(day, 'yyyy-MM-dd');
-          const dayTasks = tasksByDate.get(dateKey) || [];
-          const inCurrentMonth = isSameMonth(day, currentDate);
-          const isCurrentDay = isToday(day);
+          {/* Month Days Grid */}
+          <div className="grid grid-cols-7 auto-rows-fr bg-neutral-200 gap-[1px] flex-1">
+            {calendarDays.map((day) => {
+              const dateKey = format(day, 'yyyy-MM-dd');
+              const dayTasks = tasksByDate.get(dateKey) || [];
+              const inCurrentMonth = isSameMonth(day, currentDate);
+              const isCurrentDay = isToday(day);
 
-          return (
-            <div
-              key={dateKey}
-              className={`flex flex-col h-[135px] sm:h-[145px] lg:h-[160px] p-1.5 transition-colors ${
-                inCurrentMonth ? 'bg-white hover:bg-neutral-50/60' : 'bg-neutral-50/80 text-neutral-400'
-              }`}
-            >
-              {/* Day Cell Header */}
-              <div className="flex items-center justify-between mb-1 px-1 shrink-0">
-                <span
-                  className={`text-xs font-bold transition-all ${
-                    isCurrentDay
-                      ? 'flex size-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs'
-                      : inCurrentMonth
-                      ? 'text-neutral-700'
-                      : 'text-neutral-400 font-normal'
+              return (
+                <div
+                  key={dateKey}
+                  className={`flex flex-col min-h-[140px] sm:min-h-[155px] p-1.5 transition-colors ${
+                    inCurrentMonth ? 'bg-white hover:bg-neutral-50/60' : 'bg-neutral-50/80 text-neutral-400'
                   }`}
                 >
-                  {format(day, 'dd')}
-                </span>
+                  {/* Day Cell Header */}
+                  <div className="flex items-center justify-between mb-1 px-1 shrink-0">
+                    <span
+                      className={`text-xs font-bold transition-all ${
+                        isCurrentDay
+                          ? 'flex size-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs'
+                          : inCurrentMonth
+                          ? 'text-neutral-700'
+                          : 'text-neutral-400 font-normal'
+                      }`}
+                    >
+                      {format(day, 'dd')}
+                    </span>
 
-                {dayTasks.length > 0 && (
-                  <span className="text-[10px] font-bold text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded-full border border-neutral-200/60">
-                    {dayTasks.length}
-                  </span>
-                )}
-              </div>
+                    {dayTasks.length > 0 && (
+                      <span className="text-[10px] font-bold text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded-full border border-neutral-200/60">
+                        {dayTasks.length}
+                      </span>
+                    )}
+                  </div>
 
-              {/* Day Tasks Container: Only this specific day scrolls independently! */}
-              <div className="flex-1 overflow-y-auto space-y-1 pr-0.5 custom-calendar-scrollbar">
-                {dayTasks.map((task) => (
-                  <EventCard
-                    key={task.$id || task.id}
-                    id={task.$id || task.id}
-                    title={task.name}
-                    assignee={task.assignee}
-                    assignees={task.assignees || (task.assignee ? [task.assignee] : [])}
-                    project={task.project}
-                    status={task.status}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
+                  {/* Day Tasks Container: Scrollable for each day independently */}
+                  <div className="flex-1 overflow-y-auto space-y-1 pr-0.5 custom-calendar-scrollbar max-h-[115px]">
+                    {dayTasks.map((task) => (
+                      <EventCard
+                        key={task.$id || task.id}
+                        id={task.$id || task.id}
+                        title={task.name}
+                        assignee={task.assignee}
+                        assignees={task.assignees || (task.assignee ? [task.assignee] : [])}
+                        project={task.project}
+                        status={task.status}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

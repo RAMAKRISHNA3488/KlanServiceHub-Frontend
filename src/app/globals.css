@@ -110,16 +110,27 @@ body {
   display: none;
 }
 
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(163, 163, 163, 0.6) transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  height: 5px;
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply rounded-sm bg-neutral-300 shadow-sm;
+  background: rgba(163, 163, 163, 0.6);
+  border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-neutral-400;
+  background: rgba(115, 115, 115, 0.9);
 }
 
 @keyframes refresh-spin {

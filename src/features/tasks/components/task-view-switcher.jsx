@@ -332,15 +332,15 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
         {isLoadingTasks ? (<div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border">
             <Loader2 className="size-5 animate-spin text-muted-foreground"/>
           </div>) : (<>
-            <TabsContent value="table" className="mt-0">
+            <TabsContent value="table" className="mt-0 w-full min-w-0">
               <DataTable columns={columns} data={tasks?.documents ?? []}/>
             </TabsContent>
 
-            <TabsContent value="kanban" className="mt-0">
+            <TabsContent value="kanban" className="mt-0 w-full min-w-0">
               <DataKanban data={filteredKanbanTasks} onChange={onKanbanChange} isAdmin={isAdmin}/>
             </TabsContent>
 
-            <TabsContent value="calendar" className="mt-0 h-full pb-4">
+            <TabsContent value="calendar" className="mt-0 w-full min-w-0 h-[calc(100vh-240px)] min-h-[550px] pb-2">
               <DataCalendar data={tasks?.documents ?? []}/>
             </TabsContent>
           </>)}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
@@ -69,6 +69,17 @@ export const BoardsView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
   const [draggedOverCol, setDraggedOverCol] = useState(null);
+
+  const boardRef = useRef(null);
+  const handleBoardWheel = useCallback((e) => {
+    if (boardRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX) && !e.shiftKey) {
+      const isInsideColumnScroll = e.target.closest('.board-column-scroll');
+      if (!isInsideColumnScroll) {
+        e.preventDefault();
+        boardRef.current.scrollLeft += e.deltaY;
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (queryProjectId && queryProjectId !== filters.projectId) {
@@ -870,7 +881,11 @@ export const BoardsView = () => {
       />
 
       {/* Interactive Kanban Board Columns */}
-      <div className="flex overflow-x-auto gap-3 sm:gap-4 items-start pb-6 custom-scrollbar snap-x snap-mandatory">
+      <div
+        ref={boardRef}
+        onWheel={handleBoardWheel}
+        className="flex overflow-x-auto gap-3 sm:gap-4 items-start pb-6 custom-scrollbar w-full"
+      >
         {columns.map((col, colIndex) => {
           const columnTasks = getTasksForColumn(col.id);
           const Icon = col.icon;
@@ -973,7 +988,7 @@ export const BoardsView = () => {
               )}
 
               {/* Tasks List in Column */}
-              <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 overflow-y-auto max-h-[calc(100vh-280px)] pr-0.5">
+              <div className="board-column-scroll flex flex-col gap-2.5 sm:gap-3 flex-1 overflow-y-auto max-h-[calc(100vh-270px)] pr-1 custom-scrollbar">
                 {columnTasks.length === 0 ? (
                   <div className="flex flex-1 items-center justify-center py-8 sm:py-10 text-center text-[11px] sm:text-xs text-neutral-400">
                     No issues in {col.label}

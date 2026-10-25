@@ -2,6 +2,7 @@
 .custom-calendar-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+  overscroll-behavior: contain;
 }
 
 .custom-calendar-scrollbar::-webkit-scrollbar {

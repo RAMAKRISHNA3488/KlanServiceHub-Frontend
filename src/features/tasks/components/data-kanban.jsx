@@ -1,5 +1,5 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { TaskStatus } from '@/features/tasks/types';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
@@ -255,14 +255,30 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
         }
     }, [tasks, onChange, columns, isAdmin, boardIds]);
 
+    const boardRef = useRef(null);
+
+    const handleBoardWheel = useCallback((e) => {
+      if (boardRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX) && !e.shiftKey) {
+        const isInsideScrollableColumn = e.target.closest('.column-task-scroll');
+        if (!isInsideScrollableColumn) {
+          e.preventDefault();
+          boardRef.current.scrollLeft += e.deltaY;
+        }
+      }
+    }, []);
+
     return (
       <>
         <DragDropContext onDragEnd={onDragEnd}>
-        <div className="custom-scrollbar flex overflow-x-auto pb-4 gap-3">
+        <div
+          ref={boardRef}
+          onWheel={handleBoardWheel}
+          className="custom-scrollbar flex overflow-x-auto pb-4 gap-3 w-full"
+        >
           {columns.map((col) => (
             <div
               key={col.id}
-              className="min-w-[240px] flex-1 rounded-xl bg-neutral-100/90 border border-neutral-200/80 p-2 shadow-2xs"
+              className="min-w-[270px] max-w-[320px] flex-1 rounded-xl bg-neutral-100/90 border border-neutral-200/80 p-2.5 shadow-2xs flex flex-col shrink-0"
             >
               <KanbanColumnHeader
                 board={col.id}
@@ -277,7 +293,7 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className="min-h-[350px] py-1.5 space-y-2"
+                    className="column-task-scroll flex-1 min-h-[350px] max-h-[calc(100vh-270px)] overflow-y-auto py-1.5 space-y-2 pr-1 custom-scrollbar"
                   >
                     {(tasks[col.id] || []).map((task, index) => {
                       const taskId = String(task?.$id || task?.id || `task-${col.id}-${index}`);
