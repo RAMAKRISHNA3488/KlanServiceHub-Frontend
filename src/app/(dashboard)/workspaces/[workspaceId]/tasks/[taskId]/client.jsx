@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTaskId } from '@/features/tasks/hooks/use-task-id';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
@@ -83,6 +84,7 @@ const formatCommentDate = (dateVal) => {
 };
 
 export const TaskIdClient = () => {
+  const router = useRouter();
   const taskId = useTaskId();
   const workspaceId = useWorkspaceId();
   const queryClient = useQueryClient();
@@ -317,7 +319,7 @@ export const TaskIdClient = () => {
     <div className="space-y-6 max-w-6xl mx-auto pb-16">
       {/* Breadcrumbs Navigation */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500">
+        <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500 flex-wrap">
           <Link
             href={`/workspaces/${workspaceId}/tasks`}
             className="flex items-center gap-1 hover:text-blue-600 transition"
@@ -327,6 +329,18 @@ export const TaskIdClient = () => {
           </Link>
           <span>/</span>
           <span className="text-neutral-800">{task.project?.name || 'Project'}</span>
+          {(task.parentTask || task.parentTaskId) && (
+            <>
+              <span>/</span>
+              <Link
+                href={`/workspaces/${workspaceId}/tasks/${task.parentTask?.id || task.parentTaskId}`}
+                className="font-mono text-blue-600 hover:underline flex items-center gap-1"
+                title={task.parentTask?.name ? `Parent: ${task.parentTask.name}` : 'Parent ticket'}
+              >
+                {task.parentTask?.key || 'PARENT'}
+              </Link>
+            </>
+          )}
           <span>/</span>
           <span className="font-mono text-neutral-900 font-bold">{task.key || 'TASK'}</span>
         </div>
@@ -612,19 +626,51 @@ export const TaskIdClient = () => {
 
                 <div className="divide-y divide-neutral-100 text-xs">
                   {(task.subtasks || []).length === 0 ? (
-                    <p className="text-xs text-neutral-400 italic py-2">No sub-tasks yet.</p>
+                    <p className="text-xs text-neutral-400 italic py-3">No sub-tasks yet.</p>
                   ) : (
-                    (task.subtasks || []).map((sub) => (
-                      <div key={sub.id || sub.$id} className="py-2.5 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <CheckSquare className="size-3.5 text-blue-600" />
-                          <span className="font-semibold text-neutral-800">{sub.name}</span>
+                    (task.subtasks || []).map((sub) => {
+                      const isDone = sub.status === 'DONE';
+                      return (
+                        <div
+                          key={sub.id || sub.$id}
+                          onClick={() => router.push(`/workspaces/${workspaceId}/tasks/${sub.id || sub.$id}`)}
+                          className="py-2.5 px-3 -mx-3 rounded-xl flex items-center justify-between hover:bg-neutral-100/80 cursor-pointer group transition select-none"
+                          title="Click to open sub-task"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0 pr-3">
+                            <CheckSquare
+                              className={`size-4 shrink-0 transition ${
+                                isDone ? 'text-emerald-600' : 'text-blue-600 group-hover:scale-110'
+                              }`}
+                            />
+                            <span
+                              className={`font-semibold transition truncate ${
+                                isDone
+                                  ? 'text-neutral-500 line-through decoration-neutral-400'
+                                  : 'text-neutral-800 group-hover:text-blue-600'
+                              }`}
+                            >
+                              {sub.name}
+                            </span>
+                            {sub.key && (
+                              <span className="text-[10px] font-mono font-bold text-neutral-400 bg-neutral-100 group-hover:bg-blue-100 group-hover:text-blue-700 px-1.5 py-0.5 rounded shrink-0 transition">
+                                {sub.key}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span
+                              className={`rounded px-2 py-0.5 text-[10px] font-bold border transition ${
+                                STATUS_COLORS[sub.status] || 'bg-neutral-100 text-neutral-600 border-neutral-200'
+                              }`}
+                            >
+                              {sub.status}
+                            </span>
+                            <ChevronRight className="size-3.5 text-neutral-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition" />
+                          </div>
                         </div>
-                        <span className="rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-600">
-                          {sub.status}
-                        </span>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
@@ -662,6 +708,28 @@ export const TaskIdClient = () => {
           <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">
             Issue Details
           </h3>
+
+          {/* Parent Ticket card if this is a subtask */}
+          {(task.parentTask || task.parentTaskId) && (
+            <div className="rounded-xl border border-blue-200/80 bg-blue-50/60 p-3.5 space-y-2 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Parent Ticket</span>
+                <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-100/80 px-1.5 py-0.5 rounded">
+                  {task.parentTask?.key || 'PARENT'}
+                </span>
+              </div>
+              <p className="text-xs font-semibold text-neutral-800 line-clamp-1">
+                {task.parentTask?.name || 'Parent Ticket'}
+              </p>
+              <Link
+                href={`/workspaces/${workspaceId}/tasks/${task.parentTask?.id || task.parentTaskId}`}
+                className="w-full mt-1 flex items-center justify-center gap-1.5 rounded-lg bg-white border border-blue-200 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100/70 transition shadow-2xs"
+              >
+                <ArrowLeft className="size-3" />
+                Open Parent Ticket
+              </Link>
+            </div>
+          )}
 
           {/* Assignee */}
           <div>

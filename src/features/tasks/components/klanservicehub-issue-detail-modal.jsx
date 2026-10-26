@@ -25,6 +25,8 @@ import {
   CheckCircle2,
   Plus,
   ArrowRight,
+  ArrowLeft,
+  ChevronRight,
   Sparkles,
   Pencil,
   Check,
@@ -87,6 +89,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const { data: membersData } = useGetMembers({ workspaceId });
   const members = membersData?.documents || [];
 
+  const [activeTaskId, setActiveTaskId] = useState(taskId);
+  const [historyStack, setHistoryStack] = useState([]); // [{ id, key, name }]
+  const currentId = activeTaskId || taskId;
+
   const [task, setTask] = useState(null);
   const [sprints, setSprints] = useState([]);
   const [workspaceIssueTypes, setWorkspaceIssueTypes] = useState([]);
@@ -126,7 +132,13 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     }
   }, [task?.storyPoints, task?.story_points]);
 
-  const fetchTaskDetails = async (targetId = taskId) => {
+  // Sync activeTaskId whenever taskId or modal open state changes
+  useEffect(() => {
+    setActiveTaskId(taskId);
+    setHistoryStack([]);
+  }, [taskId, open]);
+
+  const fetchTaskDetails = async (targetId = currentId) => {
     if (!targetId) return;
     try {
       setLoading(true);
@@ -143,7 +155,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   };
 
   useEffect(() => {
-    if (open && taskId) {
+    if (open && currentId) {
       // Immediately reset previous ticket state so data never bleeds or overlaps
       setTask(null);
       setComments([]);
@@ -153,7 +165,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       setSubtaskTitle('');
       setLoading(true);
 
-      fetchTaskDetails(taskId);
+      fetchTaskDetails(currentId);
       if (workspaceId) {
         sprintsApi.getSprints(workspaceId).then((res) => {
           if (res?.data?.sprints) setSprints(res.data.sprints);
@@ -175,9 +187,44 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       setEditingContent('');
       setSubtaskTitle('');
     }
-  }, [open, taskId, workspaceId]);
+  }, [open, currentId, workspaceId]);
 
-  if (!open || !taskId) return null;
+  if (!open || !currentId) return null;
+
+  const handleOpenSubtask = (sub) => {
+    const subId = sub.id || sub.$id;
+    if (!subId) return;
+    setHistoryStack((prev) => [
+      ...prev,
+      {
+        id: currentId,
+        key: task?.key || (task?.project?.key ? `${task.project.key}-1` : 'TASK'),
+        name: task?.name || 'Parent Task',
+      },
+    ]);
+    setActiveTaskId(subId);
+    setActiveTab('COMMENTS');
+  };
+
+  const handleBackToParent = (parentItem) => {
+    if (parentItem?.id) {
+      const idx = historyStack.findIndex((h) => h.id === parentItem.id);
+      if (idx !== -1) {
+        setHistoryStack((prev) => prev.slice(0, idx));
+      } else {
+        setHistoryStack([]);
+      }
+      setActiveTaskId(parentItem.id);
+      return;
+    }
+    if (historyStack.length > 0) {
+      const prev = historyStack[historyStack.length - 1];
+      setHistoryStack((h) => h.slice(0, -1));
+      setActiveTaskId(prev.id);
+    } else if (task?.parentTask?.id || task?.parent_task_id || task?.parentTaskId) {
+      setActiveTaskId(task.parentTask?.id || task.parent_task_id || task.parentTaskId);
+    }
+  };
 
   const handleUpdateProperty = async (fields) => {
     try {
@@ -188,9 +235,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         story_points: fields.storyPoints !== undefined ? fields.storyPoints : (prev?.story_points ?? prev?.storyPoints),
       }));
 
-      const res = await tasksApi.updateTask(taskId, fields);
+      const res = await tasksApi.updateTask(currentId, fields);
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['task', currentId] });
+      if (currentId !== taskId) {
+        queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      }
       queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['boards-view-data'] });
@@ -202,7 +252,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       queryClient.invalidateQueries({ queryKey: ['reports'] });
       queryClient.invalidateQueries({ queryKey: ['capacity'] });
       queryClient.invalidateQueries({ queryKey: ['workload'] });
-      window.dispatchEvent(new CustomEvent('klanservicehub-task-updated', { detail: { taskId, fields } }));
+      window.dispatchEvent(new CustomEvent('klanservicehub-task-updated', { detail: { taskId: currentId, fields } }));
       if (res?.data) {
         setTask(res.data);
         if (res.data.storyPoints !== undefined || res.data.story_points !== undefined) {
@@ -215,7 +265,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       toast.success('Issue updated');
     } catch (err) {
       toast.error(err.message || 'Failed to update issue');
-      fetchTaskDetails();
+      fetchTaskDetails(currentId);
     }
   };
 
@@ -224,13 +274,13 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     if (!newComment.trim()) return;
     try {
       setAddingComment(true);
-      const res = await tasksApi.addComment(taskId, newComment.trim());
+      const res = await tasksApi.addComment(currentId, newComment.trim());
       if (res?.data) {
         setComments((prev) => [...prev, res.data]);
       }
       toast.success('Comment posted');
       setNewComment('');
-      fetchTaskDetails();
+      fetchTaskDetails(currentId);
     } catch (err) {
       toast.error(err.message || 'Failed to post comment');
     } finally {
@@ -249,7 +299,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       return;
     }
     try {
-      await tasksApi.updateComment(taskId, commentId, editingContent.trim());
+      await tasksApi.updateComment(currentId, commentId, editingContent.trim());
       setComments((prev) =>
         prev.map((c) =>
           c.id === commentId ? { ...c, content: editingContent.trim(), updated_at: new Date().toISOString() } : c
@@ -272,7 +322,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     });
     if (!ok) return;
     try {
-      await tasksApi.deleteComment(taskId, commentId);
+      await tasksApi.deleteComment(currentId, commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       toast.success('Comment deleted');
     } catch (err) {
@@ -286,20 +336,20 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     try {
       await tasksApi.createTask({
         workspaceId,
-        projectId: task.project.$id,
+        projectId: task?.project?.$id || task?.project_id,
         name: subtaskTitle.trim(),
         issueType: 'Sub-task',
-        parentTaskId: taskId,
+        parentTaskId: currentId,
         status: 'TODO',
       });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['task', currentId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['boards-view-data'] });
       toast.success('Sub-task added');
       setSubtaskTitle('');
-      fetchTaskDetails();
+      fetchTaskDetails(currentId);
     } catch (err) {
       toast.error(err.message || 'Failed to add subtask');
     }
@@ -308,15 +358,15 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const handleLogWork = async (e) => {
     e.preventDefault();
     try {
-      await tasksApi.updateTask(taskId, { loggedHours: Number(logHoursInput) });
+      await tasksApi.updateTask(currentId, { loggedHours: Number(logHoursInput) });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['task', currentId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['project-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['boards-view-data'] });
       queryClient.invalidateQueries({ queryKey: ['reports'] });
       toast.success(`Logged ${logHoursInput} hours`);
-      fetchTaskDetails();
+      fetchTaskDetails(currentId);
     } catch (err) {
       toast.error(err.message || 'Failed to log work');
     }
@@ -342,14 +392,56 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
       <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden">
         {/* Top Header & Breadcrumbs */}
-        <div className="flex items-center justify-between px-6 py-3.5 border-b border-neutral-200 bg-neutral-50/70 select-none">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-neutral-200 bg-neutral-50/70 select-none">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* If we have navigated into a subtask, show Back button */}
+            {(historyStack.length > 0 || task?.parentTask || task?.parent_task_id) && (
+              <button
+                type="button"
+                onClick={() => handleBackToParent()}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 transition mr-1 shadow-2xs cursor-pointer"
+                title="Go back to parent ticket"
+              >
+                <ArrowLeft className="size-3.5" />
+                <span>Back</span>
+              </button>
+            )}
+
+            {/* Parent breadcrumb trail if in history */}
+            {historyStack.map((hist) => (
+              <React.Fragment key={hist.id}>
+                <button
+                  type="button"
+                  onClick={() => handleBackToParent(hist)}
+                  className="font-mono text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                  title={`Back to ${hist.name}`}
+                >
+                  {hist.key}
+                </button>
+                <span className="text-neutral-300">/</span>
+              </React.Fragment>
+            ))}
+
+            {historyStack.length === 0 && task?.parentTask && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveTaskId(task.parentTask.id || task.parentTask.$id)}
+                  className="font-mono text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                  title={`Parent: ${task.parentTask.name}`}
+                >
+                  {task.parentTask.key || 'PARENT'}
+                </button>
+                <span className="text-neutral-300">/</span>
+              </>
+            )}
+
             <TypeIcon className="size-4 shrink-0" style={{ color: matchedColor }} />
             <span className="font-mono text-xs font-bold text-neutral-500 hover:underline cursor-pointer">
               {task?.key || (task?.project?.key ? `${task.project.key}-1` : 'TASK-1')}
             </span>
             <span className="text-neutral-300">/</span>
-            <span className="text-xs font-bold text-neutral-700">{task?.project?.name || 'Project'}</span>
+            <span className="text-xs font-bold text-neutral-700 truncate max-w-[200px]">{task?.project?.name || 'Project'}</span>
             {matchedType && (
               <span
                 className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold text-white shadow-2xs ml-1"
@@ -673,17 +765,53 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   </form>
 
                   <div className="divide-y divide-neutral-100 text-xs">
-                    {(task?.subtasks || []).map((sub) => (
-                      <div key={sub.id} className="py-2.5 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <CheckSquare className="size-3.5 text-blue-600" />
-                          <span className="font-semibold text-neutral-800">{sub.name}</span>
-                        </div>
-                        <span className="rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-600">
-                          {sub.status}
-                        </span>
-                      </div>
-                    ))}
+                    {(task?.subtasks || []).length === 0 ? (
+                      <p className="text-xs text-neutral-400 italic py-3">No sub-tasks yet. Use the form above to add one.</p>
+                    ) : (
+                      (task?.subtasks || []).map((sub) => {
+                        const isDone = sub.status === 'DONE';
+                        return (
+                          <div
+                            key={sub.id || sub.$id}
+                            onClick={() => handleOpenSubtask(sub)}
+                            className="py-2.5 px-3 -mx-3 rounded-xl flex items-center justify-between hover:bg-neutral-100/80 cursor-pointer group transition select-none"
+                            title="Click to open sub-task in this ticket"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0 pr-3">
+                              <CheckSquare
+                                className={`size-4 shrink-0 transition ${
+                                  isDone ? 'text-emerald-600' : 'text-blue-600 group-hover:scale-110'
+                                }`}
+                              />
+                              <span
+                                className={`font-semibold transition truncate ${
+                                  isDone
+                                    ? 'text-neutral-500 line-through decoration-neutral-400'
+                                    : 'text-neutral-800 group-hover:text-blue-600'
+                                }`}
+                              >
+                                {sub.name}
+                              </span>
+                              {sub.key && (
+                                <span className="text-[10px] font-mono font-bold text-neutral-400 bg-neutral-100 group-hover:bg-blue-100 group-hover:text-blue-700 px-1.5 py-0.5 rounded shrink-0 transition">
+                                  {sub.key}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span
+                                className={`rounded px-2 py-0.5 text-[10px] font-bold border transition ${
+                                  STATUS_COLORS[sub.status] || 'bg-neutral-100 text-neutral-600 border-neutral-200'
+                                }`}
+                              >
+                                {sub.status}
+                              </span>
+                              <ChevronRight className="size-3.5 text-neutral-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition" />
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               )}
@@ -718,6 +846,29 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           {/* Right Properties Column (KlanserviceHub Style Box) */}
           <div className="lg:col-span-4 p-6 bg-neutral-50/50 space-y-5 text-xs">
             <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">Details</h3>
+
+            {/* Parent Ticket card if this is a subtask */}
+            {(task?.parentTask || (historyStack.length > 0 && historyStack[historyStack.length - 1])) && (
+              <div className="rounded-xl border border-blue-200/80 bg-blue-50/60 p-3 space-y-1.5 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Parent Ticket</span>
+                  <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-100/80 px-1.5 py-0.5 rounded">
+                    {task?.parentTask?.key || historyStack[historyStack.length - 1]?.key}
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-neutral-800 line-clamp-1">
+                  {task?.parentTask?.name || historyStack[historyStack.length - 1]?.name}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleBackToParent(task?.parentTask ? { id: task.parentTask.id } : null)}
+                  className="w-full mt-1 flex items-center justify-center gap-1.5 rounded-lg bg-white border border-blue-200 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100/70 transition shadow-2xs cursor-pointer"
+                >
+                  <ArrowLeft className="size-3" />
+                  Open Parent Ticket
+                </button>
+              </div>
+            )}
 
             {/* Assignees (Multi-assignee support) */}
             <div>
