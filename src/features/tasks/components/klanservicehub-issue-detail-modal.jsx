@@ -418,8 +418,8 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-y-auto divide-y lg:divide-y-0 lg:divide-x divide-neutral-200">
           {/* Left Main Details Column */}
           <div className="lg:col-span-8 p-6 space-y-6">
-            {/* Issue Title Input */}
-            <div>
+            {/* Issue Title Input & Timestamp Metadata */}
+            <div className="space-y-1">
               <input
                 type="text"
                 value={task?.name || ''}
@@ -428,6 +428,31 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 className="w-full text-lg font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none py-1 transition"
                 placeholder="Issue summary..."
               />
+              <div className="flex items-center gap-3 text-[11px] text-neutral-400 font-medium">
+                <span
+                  className="flex items-center gap-1"
+                  title={
+                    task?.created_at || task?.$createdAt
+                      ? new Date(task.created_at || task.$createdAt).toLocaleString()
+                      : ''
+                  }
+                >
+                  <Calendar className="size-3 text-neutral-400" />
+                  Created: {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
+                </span>
+                {(task?.updated_at || task?.$updatedAt) && (
+                  <>
+                    <span>•</span>
+                    <span
+                      className="flex items-center gap-1"
+                      title={new Date(task.updated_at || task.$updatedAt).toLocaleString()}
+                    >
+                      <Clock className="size-3 text-neutral-400" />
+                      Updated: {formatCommentDate(task.updated_at || task.$updatedAt)}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Description */}
@@ -863,6 +888,57 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Dates & Timestamps */}
+            <div className="pt-3 border-t border-neutral-200/80 space-y-2 text-[11px]">
+              <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
+                Dates & Timestamps
+              </label>
+              <div className="flex items-center justify-between text-neutral-600 bg-white p-2 rounded-lg border border-neutral-200 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
+                  <Calendar className="size-3 text-neutral-400" /> Created
+                </span>
+                <span
+                  className="font-semibold text-neutral-800"
+                  title={
+                    task?.created_at || task?.$createdAt
+                      ? new Date(task.created_at || task.$createdAt).toLocaleString()
+                      : ''
+                  }
+                >
+                  {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-neutral-600 bg-white p-2 rounded-lg border border-neutral-200 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
+                  <Clock className="size-3 text-neutral-400" /> Updated
+                </span>
+                <span
+                  className="font-semibold text-neutral-800"
+                  title={
+                    task?.updated_at || task?.$updatedAt
+                      ? new Date(task.updated_at || task.$updatedAt).toLocaleString()
+                      : ''
+                  }
+                >
+                  {formatCommentDate(task?.updated_at || task?.$updatedAt) || 'Recently'}
+                </span>
+              </div>
+              {task?.dueDate && (
+                <div className="flex items-center justify-between text-neutral-600 bg-white p-2 rounded-lg border border-neutral-200 shadow-2xs">
+                  <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
+                    <Clock className="size-3 text-neutral-400" /> Due Date
+                  </span>
+                  <span className="font-semibold text-neutral-800">
+                    {new Date(task.dueDate).toLocaleDateString([], {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

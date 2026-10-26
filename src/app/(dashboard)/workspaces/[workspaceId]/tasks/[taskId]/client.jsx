@@ -353,15 +353,42 @@ export const TaskIdClient = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side: Summary, Description, Comments, Subtasks */}
         <div className="lg:col-span-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-6">
-          <div className="flex items-center gap-2">
-            <TypeIcon className="size-5 shrink-0" style={{ color: typeConfig.color }} />
-            <input
-              type="text"
-              value={task.name || ''}
-              onChange={(e) => setTask({ ...task, name: e.target.value })}
-              onBlur={(e) => handleUpdate({ name: e.target.value })}
-              className="text-xl font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none w-full py-1 transition"
-            />
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <TypeIcon className="size-5 shrink-0" style={{ color: typeConfig.color }} />
+              <input
+                type="text"
+                value={task.name || ''}
+                onChange={(e) => setTask({ ...task, name: e.target.value })}
+                onBlur={(e) => handleUpdate({ name: e.target.value })}
+                className="text-xl font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none w-full py-1 transition"
+              />
+            </div>
+            <div className="flex items-center gap-3 text-xs text-neutral-400 font-medium pl-7">
+              <span
+                className="flex items-center gap-1"
+                title={
+                  task?.created_at || task?.$createdAt
+                    ? new Date(task.created_at || task.$createdAt).toLocaleString()
+                    : ''
+                }
+              >
+                <Calendar className="size-3.5 text-neutral-400" />
+                Created: {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
+              </span>
+              {(task?.updated_at || task?.$updatedAt) && (
+                <>
+                  <span>•</span>
+                  <span
+                    className="flex items-center gap-1"
+                    title={new Date(task.updated_at || task.$updatedAt).toLocaleString()}
+                  >
+                    <Clock className="size-3.5 text-neutral-400" />
+                    Updated: {formatCommentDate(task.updated_at || task.$updatedAt)}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Description */}
@@ -731,6 +758,57 @@ export const TaskIdClient = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Dates & Timestamps */}
+          <div className="pt-3 border-t border-neutral-200 space-y-2 text-xs">
+            <h4 className="font-bold text-[10px] uppercase tracking-wider text-neutral-400">
+              Dates & Timestamps
+            </h4>
+            <div className="flex items-center justify-between text-neutral-600 bg-neutral-50 p-2.5 rounded-lg border border-neutral-100">
+              <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
+                <Calendar className="size-3.5 text-neutral-400" /> Created
+              </span>
+              <span
+                className="font-semibold text-neutral-800"
+                title={
+                  task?.created_at || task?.$createdAt
+                    ? new Date(task.created_at || task.$createdAt).toLocaleString()
+                    : ''
+                }
+              >
+                {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-neutral-600 bg-neutral-50 p-2.5 rounded-lg border border-neutral-100">
+              <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
+                <Clock className="size-3.5 text-neutral-400" /> Updated
+              </span>
+              <span
+                className="font-semibold text-neutral-800"
+                title={
+                  task?.updated_at || task?.$updatedAt
+                    ? new Date(task.updated_at || task.$updatedAt).toLocaleString()
+                    : ''
+                }
+              >
+                {formatCommentDate(task?.updated_at || task?.$updatedAt) || 'Recently'}
+              </span>
+            </div>
+            {task?.dueDate && (
+              <div className="flex items-center justify-between text-neutral-600 bg-neutral-50 p-2.5 rounded-lg border border-neutral-100">
+                <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
+                  <Clock className="size-3.5 text-neutral-400" /> Due Date
+                </span>
+                <span className="font-semibold text-neutral-800">
+                  {new Date(task.dueDate).toLocaleDateString([], {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

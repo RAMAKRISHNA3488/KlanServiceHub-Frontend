@@ -1111,7 +1111,7 @@ export const BoardsView = () => {
                           {task.name}
                         </p>
 
-                        {/* Footer: Assignee & Action Controls */}
+                        {/* Footer: Assignee, Date/Time & Action Controls */}
                         <div className="flex items-center justify-between pt-1 border-t border-neutral-100 text-[10px] sm:text-[11px]">
                           <div className="flex items-center gap-1 sm:gap-1.5 text-neutral-500">
                             <div className="size-4 sm:size-5 rounded-full bg-neutral-100 flex items-center justify-center font-bold text-[8.5px] sm:text-[9px] text-neutral-600 uppercase border">
@@ -1121,6 +1121,30 @@ export const BoardsView = () => {
                               {task.assignee?.name || 'Unassigned'}
                             </span>
                           </div>
+
+                          {/* Ticket Date & Time Badge */}
+                          {(task.created_at || task.$createdAt || task.dueDate) && (
+                            <div
+                              className="flex items-center gap-1 text-[8.5px] sm:text-[9px] text-neutral-400 font-medium"
+                              title={
+                                task.dueDate
+                                  ? `Due: ${new Date(task.dueDate).toLocaleDateString()}`
+                                  : `Created: ${new Date(task.created_at || task.$createdAt).toLocaleString()}`
+                              }
+                            >
+                              <Clock className="size-2.5 sm:size-3 text-neutral-400 shrink-0" />
+                              <span>
+                                {task.dueDate
+                                  ? new Date(task.dueDate).toLocaleDateString([], { month: 'short', day: 'numeric' })
+                                  : task.created_at || task.$createdAt
+                                  ? new Date(task.created_at || task.$createdAt).toLocaleDateString([], {
+                                      month: 'short',
+                                      day: 'numeric',
+                                    })
+                                  : ''}
+                              </span>
+                            </div>
+                          )}
 
                           {/* Quick Workflow Transition Arrows */}
                           <div className="flex items-center gap-1">

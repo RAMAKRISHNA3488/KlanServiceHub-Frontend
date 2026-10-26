@@ -62,7 +62,16 @@ export const KanbanCard = ({ task, onDoubleClick }) => {
           </span>
         </div>
 
-        <TaskDate value={task.dueDate} className="text-[10px] sm:text-xs shrink-0"/>
+        {task.dueDate ? (
+          <TaskDate value={task.dueDate} className="text-[10px] sm:text-xs shrink-0"/>
+        ) : (task.created_at || task.$createdAt) ? (
+          <span
+            className="text-[10px] text-neutral-400 shrink-0 font-medium"
+            title={`Created: ${new Date(task.created_at || task.$createdAt).toLocaleString()}`}
+          >
+            {new Date(task.created_at || task.$createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+          </span>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-x-1.5">
