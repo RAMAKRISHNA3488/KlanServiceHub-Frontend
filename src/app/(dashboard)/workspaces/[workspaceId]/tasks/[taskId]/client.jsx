@@ -52,30 +52,34 @@ const STATUS_COLORS = {
   DONE: 'bg-emerald-50 text-emerald-800 border-emerald-200',
 };
 
+const parseDateSafe = (dateVal) => {
+  if (!dateVal) return null;
+  if (dateVal instanceof Date) return isNaN(dateVal.getTime()) ? null : dateVal;
+  let str = String(dateVal).trim();
+  if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/.test(str)) {
+    str = str.replace(' ', 'T') + (str.endsWith('Z') ? '' : 'Z');
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d;
+  const d2 = new Date(dateVal);
+  return isNaN(d2.getTime()) ? null : d2;
+};
+
 const formatCommentDate = (dateVal) => {
-  if (!dateVal) return '';
-  const d = new Date(dateVal);
-  if (isNaN(d.getTime())) return '';
+  const d = parseDateSafe(dateVal);
+  if (!d) return '';
 
-  const now = new Date();
-  const isToday = d.toDateString() === now.toDateString();
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const isYesterday = d.toDateString() === yesterday.toDateString();
-
-  const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  if (isToday) {
-    return `Today at ${timeStr}`;
-  }
-  if (isYesterday) {
-    return `Yesterday at ${timeStr}`;
-  }
-  const dateStr = d.toLocaleDateString([], {
+  const dateStr = d.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+    year: 'numeric',
   });
-  return `${dateStr}, ${timeStr}`;
+  const timeStr = d.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  return `${dateStr} at ${timeStr}`;
 };
 
 export const TaskIdClient = () => {

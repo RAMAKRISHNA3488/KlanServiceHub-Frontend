@@ -448,7 +448,11 @@ export const RoadmapTaskModal = ({
                             {(() => {
                               const rawDate = c.created_at || c.createdAt || c.$createdAt;
                               if (!rawDate) return '';
-                              const d = new Date(rawDate);
+                              let str = String(rawDate).trim();
+                              if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/.test(str)) {
+                                str = str.replace(' ', 'T') + (str.endsWith('Z') ? '' : 'Z');
+                              }
+                              const d = new Date(str);
                               return isNaN(d.getTime()) ? '' : format(d, 'MMM d, yyyy · h:mm a');
                             })()}
                           </span>
