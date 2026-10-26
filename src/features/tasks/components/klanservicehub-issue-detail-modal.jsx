@@ -50,6 +50,32 @@ const STATUS_COLORS = {
   DONE: 'bg-emerald-50 text-emerald-800 border-emerald-200',
 };
 
+const formatCommentDate = (dateVal) => {
+  if (!dateVal) return '';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return '';
+
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+
+  const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (isToday) {
+    return `Today at ${timeStr}`;
+  }
+  if (isYesterday) {
+    return `Yesterday at ${timeStr}`;
+  }
+  const dateStr = d.toLocaleDateString([], {
+    month: 'short',
+    day: 'numeric',
+    year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+  });
+  return `${dateStr}, ${timeStr}`;
+};
+
 export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdated }) => {
   const workspaceId = useWorkspaceId();
   const queryClient = useQueryClient();
@@ -194,7 +220,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     if (!newComment.trim()) return;
     try {
       setAddingComment(true);
-      await tasksApi.addComment(taskId, newComment.trim());
+      const res = await tasksApi.addComment(taskId, newComment.trim());
+      if (res?.data) {
+        setComments((prev) => [...prev, res.data]);
+      }
       toast.success('Comment posted');
       setNewComment('');
       fetchTaskDetails();
@@ -487,29 +516,45 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                             key={c.id}
                             className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3 border border-neutral-100 hover:border-neutral-200 transition"
                           >
-                            <div className="size-7 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
-                              {c.user_name?.substring(0, 2).toUpperCase() ||
-                                c.userName?.substring(0, 2).toUpperCase() ||
-                                'U'}
-                            </div>
+                            {c.user_avatar ? (
+                              <img
+                                src={c.user_avatar}
+                                alt={c.user_name || 'Member'}
+                                className="size-7 rounded-full object-cover shrink-0"
+                              />
+                            ) : (
+                              <div className="size-7 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                                {c.user_name?.substring(0, 2).toUpperCase() ||
+                                  c.userName?.substring(0, 2).toUpperCase() ||
+                                  'U'}
+                              </div>
+                            )}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <span className="font-bold text-xs text-neutral-900">
                                     {c.user_name || c.userName || 'Member'}
                                   </span>
-                                  <span className="text-[10px] text-neutral-400">
-                                    {c.created_at
-                                      ? new Date(c.created_at).toLocaleTimeString([], {
-                                          hour: '2-digit',
-                                          minute: '2-digit',
-                                        })
-                                      : ''}
-                                    {c.updated_at && c.updated_at !== c.created_at && (
-                                      <span className="italic ml-1 text-neutral-400">
-                                        (edited)
-                                      </span>
-                                    )}
+                                  <span
+                                    className="text-[10px] text-neutral-400"
+                                    title={
+                                      c.created_at || c.createdAt || c.$createdAt
+                                        ? new Date(
+                                            c.created_at || c.createdAt || c.$createdAt
+                                          ).toLocaleString()
+                                        : ''
+                                    }
+                                  >
+                                    {formatCommentDate(c.created_at || c.createdAt || c.$createdAt)}
+                                    {c.updated_at &&
+                                      c.updated_at !== (c.created_at || c.createdAt || c.$createdAt) && (
+                                        <span
+                                          className="italic ml-1 text-neutral-400"
+                                          title={`Edited: ${new Date(c.updated_at).toLocaleString()}`}
+                                        >
+                                          (edited)
+                                        </span>
+                                      )}
                                   </span>
                                 </div>
 

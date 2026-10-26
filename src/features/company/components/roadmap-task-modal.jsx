@@ -438,8 +438,19 @@ export const RoadmapTaskModal = ({
                       >
                         <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
                           <span>{c.userName || c.user_name || 'Member'}</span>
-                          <span>
-                            {c.createdAt ? format(new Date(c.createdAt), 'MMM d, h:mm a') : ''}
+                          <span
+                            title={
+                              c.created_at || c.createdAt || c.$createdAt
+                                ? new Date(c.created_at || c.createdAt || c.$createdAt).toLocaleString()
+                                : ''
+                            }
+                          >
+                            {(() => {
+                              const rawDate = c.created_at || c.createdAt || c.$createdAt;
+                              if (!rawDate) return '';
+                              const d = new Date(rawDate);
+                              return isNaN(d.getTime()) ? '' : format(d, 'MMM d, yyyy · h:mm a');
+                            })()}
                           </span>
                         </div>
                         <p className="text-neutral-700">{c.content || c.text}</p>
