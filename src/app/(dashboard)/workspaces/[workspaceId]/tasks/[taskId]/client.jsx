@@ -31,6 +31,8 @@ import {
   Trash2,
   Check,
   X,
+  Image as ImageIcon,
+  ZoomIn,
 } from 'lucide-react';
 
 const TYPE_ICONS = {
@@ -97,6 +99,8 @@ export const TaskIdClient = () => {
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [commentImages, setCommentImages] = useState([]);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState('');
   const [subtaskTitle, setSubtaskTitle] = useState('');
@@ -198,16 +202,78 @@ export const TaskIdClient = () => {
     }
   };
 
+  const handleCommentImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    files.forEach((file) => {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Only image files are allowed');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        setCommentImages((prev) => [
+          ...prev,
+          {
+            id: String(Date.now()) + Math.random().toString(36).substring(2, 7),
+            name: file.name,
+            size: file.size,
+            fileType: file.type,
+            dataUrl: loadEvt.target.result,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const handleCommentPaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (loadEvt) => {
+            setCommentImages((prev) => [
+              ...prev,
+              {
+                id: String(Date.now()) + Math.random().toString(36).substring(2, 7),
+                name: `screenshot-${Date.now()}.png`,
+                size: file.size,
+                fileType: file.type,
+                dataUrl: loadEvt.target.result,
+              },
+            ]);
+            toast.info('Image attached to comment from clipboard');
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+  };
+
+  const handleRemoveCommentImage = (imgId) => {
+    setCommentImages((prev) => prev.filter((img) => img.id !== imgId));
+  };
+
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() && commentImages.length === 0) return;
     try {
-      const res = await tasksApi.addComment(taskId, newComment.trim());
+      const res = await tasksApi.addComment(taskId, newComment.trim(), commentImages);
       if (res?.data) {
         setComments((prev) => [...prev, res.data]);
       }
       toast.success('Comment posted');
       setNewComment('');
+      setCommentImages([]);
       fetchTask();
     } catch (err) {
       toast.error(err.message || 'Failed to add comment');
@@ -465,20 +531,58 @@ export const TaskIdClient = () => {
             {/* Tab: Comments */}
             {activeTab === 'COMMENTS' && (
               <div className="space-y-4">
-                <form onSubmit={handleAddComment} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment... (Type here to reply)"
-                    className="flex-1 rounded-xl border border-neutral-300 px-4 py-2 text-xs focus:border-blue-600 focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 transition"
-                  >
-                    Save
-                  </button>
+                <form onSubmit={handleAddComment} className="space-y-2">
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      onPaste={handleCommentPaste}
+                      placeholder="Add a comment... (Type update or paste screenshot)"
+                      className="flex-1 rounded-xl border border-neutral-300 px-4 py-2 text-xs focus:border-blue-600 focus:outline-none"
+                    />
+                    <label
+                      title="Attach images"
+                      className="cursor-pointer p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 transition flex items-center justify-center shrink-0"
+                    >
+                      <ImageIcon className="size-4" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleCommentImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={!newComment.trim() && commentImages.length === 0}
+                      className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition shrink-0"
+                    >
+                      Save
+                    </button>
+                  </div>
+
+                  {/* Pre-post image previews */}
+                  {commentImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-xl border border-neutral-200">
+                      {commentImages.map((img) => (
+                        <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0">
+                          <img src={img.dataUrl} alt={img.name} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCommentImage(img.id)}
+                            className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </div>
+                      ))}
+                      <span className="text-[10px] text-neutral-400 self-center pl-1 italic">
+                        {commentImages.length} image{commentImages.length > 1 ? 's' : ''} attached (expires 6 days after ticket is completed)
+                      </span>
+                    </div>
+                  )}
                 </form>
 
                 <div className="space-y-3 pt-2">
@@ -592,9 +696,52 @@ export const TaskIdClient = () => {
                                 </div>
                               </div>
                             ) : (
-                              <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap">
-                                {c.content}
-                              </p>
+                              <div>
+                                {c.content && (
+                                  <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap">
+                                    {c.content}
+                                  </p>
+                                )}
+
+                                {/* Comment Images */}
+                                {c.images && Array.isArray(c.images) && c.images.length > 0 && (
+                                  <div className="mt-2 space-y-1.5">
+                                    <div className="flex flex-wrap gap-2">
+                                      {c.images.map((img, imgIdx) => {
+                                        const imgSrc = img.dataUrl || img.url || img.fileUrl;
+                                        return (
+                                          <div
+                                            key={img.id || imgIdx}
+                                            onClick={() => setLightboxSrc(imgSrc)}
+                                            className="group/img relative rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 size-20 cursor-pointer shadow-2xs hover:shadow transition"
+                                          >
+                                            <img
+                                              src={imgSrc}
+                                              alt={img.name || 'Comment image'}
+                                              className="w-full h-full object-cover group-hover/img:scale-105 transition"
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/25 flex items-center justify-center transition">
+                                              <ZoomIn className="size-4 text-white opacity-0 group-hover/img:opacity-100 drop-shadow" />
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                    {/* Expiration badge */}
+                                    <div className="flex items-center gap-1.5 text-[10px] text-amber-700 font-medium bg-amber-50/80 border border-amber-200/60 rounded-md px-2 py-0.5 w-fit">
+                                      <Clock className="size-3" />
+                                      <span>{c.imagesStatus || (task?.status === 'DONE' ? 'Expires 6 days after ticket done' : 'Active (expires 6 days after ticket is completed)')}</span>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {c.imagesExpired && (
+                                  <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-neutral-400 italic bg-neutral-100 px-2 py-0.5 rounded-md w-fit">
+                                    <Clock className="size-3 text-neutral-400" />
+                                    <span>Image attachments expired 6 days after ticket completion.</span>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -885,6 +1032,28 @@ export const TaskIdClient = () => {
         </div>
       </div>
       <DeleteCommentDialog />
+
+      {/* Lightbox for Comment Images */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={lightboxSrc}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain"
+            />
+            <button
+              onClick={() => setLightboxSrc(null)}
+              className="absolute top-2 right-2 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition cursor-pointer"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

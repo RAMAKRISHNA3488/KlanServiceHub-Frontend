@@ -207,10 +207,26 @@ export const tasksApi = {
   deleteTask: (taskId) => apiFetch(`/api/tasks/${taskId}`, { method: 'DELETE' }),
   bulkUpdate: (tasks) => apiFetch('/api/tasks/bulk-update', { method: 'POST', body: JSON.stringify({ tasks }) }),
   getComments: (taskId) => apiFetch(`/api/tasks/${taskId}/comments`),
-  addComment: (taskId, content) => apiFetch(`/api/tasks/${taskId}/comments`, { method: 'POST', body: JSON.stringify({ content }) }),
+  addComment: (taskId, content, images = []) => {
+    const body = typeof content === 'object' ? content : { content, images };
+    return apiFetch(`/api/tasks/${taskId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
   updateComment: (taskId, commentId, content) => apiFetch(`/api/tasks/${taskId}/comments/${commentId}`, { method: 'PATCH', body: JSON.stringify({ content }) }),
   deleteComment: (taskId, commentId) => apiFetch(`/api/tasks/${taskId}/comments/${commentId}`, { method: 'DELETE' }),
+  // Image Attachments — stored as base64 in D1, expire automatically after 6 days
+  getAttachments: (taskId) => apiFetch(`/api/tasks/${taskId}/attachments`),
+  uploadImage: (taskId, { fileName, imageData, fileType = 'image/jpeg', fileSize = 0 }) =>
+    apiFetch(`/api/tasks/${taskId}/attachments`, {
+      method: 'POST',
+      body: JSON.stringify({ fileName, imageData, fileType, fileSize }),
+    }),
+  deleteAttachment: (taskId, attachmentId) =>
+    apiFetch(`/api/tasks/${taskId}/attachments/${attachmentId}`, { method: 'DELETE' }),
 };
+
 
 export const dashboardsApi = {
   getDashboardData: (workspaceId, params = {}) => {

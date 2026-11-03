@@ -24,6 +24,7 @@ import {
   Hash,
   Layers,
   ArrowRight,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -102,6 +103,7 @@ export const RoadmapTaskModal = ({
   // Comments state
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [commentImages, setCommentImages] = useState([]);
   const [addingComment, setAddingComment] = useState(false);
 
   // Load task details when opened
@@ -224,15 +226,50 @@ export const RoadmapTaskModal = ({
     }
   };
 
+  const handleCommentImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    files.forEach((file) => {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Only image files are allowed');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        setCommentImages((prev) => [
+          ...prev,
+          {
+            id: String(Date.now()) + Math.random().toString(36).substring(2, 7),
+            name: file.name,
+            size: file.size,
+            fileType: file.type,
+            dataUrl: loadEvt.target.result,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const handleRemoveCommentImage = (imgId) => {
+    setCommentImages((prev) => prev.filter((img) => img.id !== imgId));
+  };
+
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() && commentImages.length === 0) return;
     const id = taskId || currentTask?.$id || currentTask?.id;
     try {
       setAddingComment(true);
-      await tasksApi.addComment(id, newComment.trim());
+      await tasksApi.addComment(id, newComment.trim(), commentImages);
       toast.success('Comment posted');
       setNewComment('');
+      setCommentImages([]);
       fetchDetails();
     } catch (err) {
       toast.error(err.message || 'Failed to add comment');
@@ -407,25 +444,60 @@ export const RoadmapTaskModal = ({
                 </div>
 
                 {/* Comment Input */}
-                <form onSubmit={handleAddComment} className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Write a quick comment..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className="flex-1 rounded-xl border border-neutral-200 bg-neutral-50/60 px-3.5 py-2 text-xs text-neutral-800 placeholder-neutral-400 focus:bg-white focus:border-blue-600 focus:outline-hidden transition"
-                  />
-                  <button
-                    type="submit"
-                    disabled={addingComment || !newComment.trim()}
-                    className="flex items-center gap-1 rounded-xl bg-neutral-900 px-3 py-2 text-xs font-bold text-white hover:bg-black disabled:opacity-50 transition"
-                  >
-                    {addingComment ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : (
-                      <Send className="size-3.5" />
-                    )}
-                  </button>
+                <form onSubmit={handleAddComment} className="space-y-2">
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      placeholder="Write a quick comment..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      className="flex-1 rounded-xl border border-neutral-200 bg-neutral-50/60 px-3.5 py-2 text-xs text-neutral-800 placeholder-neutral-400 focus:bg-white focus:border-blue-600 focus:outline-hidden transition"
+                    />
+                    <label
+                      title="Attach image"
+                      className="cursor-pointer p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 transition flex items-center justify-center shrink-0"
+                    >
+                      <ImageIcon className="size-4" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleCommentImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={addingComment || (!newComment.trim() && commentImages.length === 0)}
+                      className="flex items-center gap-1 rounded-xl bg-neutral-900 px-3 py-2 text-xs font-bold text-white hover:bg-black disabled:opacity-50 transition shrink-0"
+                    >
+                      {addingComment ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <Send className="size-3.5" />
+                      )}
+                    </button>
+                  </div>
+
+                  {commentImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-xl border border-neutral-200">
+                      {commentImages.map((img) => (
+                        <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-14 shrink-0">
+                          <img src={img.dataUrl} alt={img.name} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCommentImage(img.id)}
+                            className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </div>
+                      ))}
+                      <span className="text-[10px] text-neutral-400 self-center pl-1 italic">
+                        {commentImages.length} image{commentImages.length > 1 ? 's' : ''} (expires 6 days after ticket done)
+                      </span>
+                    </div>
+                  )}
                 </form>
 
                 {/* Comments List */}
@@ -434,7 +506,7 @@ export const RoadmapTaskModal = ({
                     {comments.map((c, idx) => (
                       <div
                         key={c.id || idx}
-                        className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 text-xs space-y-1"
+                        className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 text-xs space-y-1.5"
                       >
                         <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
                           <span>{c.userName || c.user_name || 'Member'}</span>
@@ -457,7 +529,31 @@ export const RoadmapTaskModal = ({
                             })()}
                           </span>
                         </div>
-                        <p className="text-neutral-700">{c.content || c.text}</p>
+                        {c.content && <p className="text-neutral-700">{c.content}</p>}
+
+                        {/* Images */}
+                        {c.images && Array.isArray(c.images) && c.images.length > 0 && (
+                          <div className="space-y-1 pt-1">
+                            <div className="flex flex-wrap gap-1.5">
+                              {c.images.map((img, i) => (
+                                <div key={img.id || i} className="rounded-lg overflow-hidden border border-neutral-200 size-16 shrink-0 bg-neutral-100">
+                                  <img src={img.dataUrl || img.url} alt={img.name || 'Comment image'} className="w-full h-full object-cover" />
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex items-center gap-1 text-[9px] text-amber-600 font-medium">
+                              <Clock className="size-2.5" />
+                              <span>{c.imagesStatus || 'Expires 6 days after ticket done'}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {c.imagesExpired && (
+                          <div className="flex items-center gap-1 text-[9px] text-neutral-400 italic">
+                            <Clock className="size-2.5" />
+                            <span>Image attachments expired 6 days after ticket completion.</span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

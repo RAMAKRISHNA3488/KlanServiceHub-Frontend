@@ -30,6 +30,10 @@ import {
   Sparkles,
   Pencil,
   Check,
+  Image,
+  Upload,
+  Timer,
+  ZoomIn,
 } from 'lucide-react';
 
 const TYPE_ICONS = {
@@ -99,6 +103,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const [workflowStatuses, setWorkflowStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
+  const [attachments, setAttachments] = useState([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
 
   const [DeleteCommentDialog, confirmDeleteComment] = useConfirm(
     'Delete Comment',
@@ -106,6 +114,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     'destructive'
   );
   const [newComment, setNewComment] = useState('');
+  const [commentImages, setCommentImages] = useState([]);
   const [addingComment, setAddingComment] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState('');
@@ -154,18 +163,29 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     }
   };
 
+  const fetchAttachments = async (targetId = currentId) => {
+    if (!targetId) return;
+    try {
+      const res = await tasksApi.getAttachments(targetId);
+      if (res?.data) setAttachments(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {}
+  };
+
   useEffect(() => {
     if (open && currentId) {
       // Immediately reset previous ticket state so data never bleeds or overlaps
       setTask(null);
       setComments([]);
+      setAttachments([]);
       setNewComment('');
+      setCommentImages([]);
       setEditingCommentId(null);
       setEditingContent('');
       setSubtaskTitle('');
       setLoading(true);
 
       fetchTaskDetails(currentId);
+      fetchAttachments(currentId);
       if (workspaceId) {
         sprintsApi.getSprints(workspaceId).then((res) => {
           if (res?.data?.sprints) setSprints(res.data.sprints);
@@ -182,7 +202,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     } else {
       setTask(null);
       setComments([]);
+      setAttachments([]);
       setNewComment('');
+      setCommentImages([]);
       setEditingCommentId(null);
       setEditingContent('');
       setSubtaskTitle('');
@@ -269,17 +291,79 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     }
   };
 
+  const handleCommentImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    files.forEach((file) => {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Only image files are allowed');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        setCommentImages((prev) => [
+          ...prev,
+          {
+            id: String(Date.now()) + Math.random().toString(36).substring(2, 7),
+            name: file.name,
+            size: file.size,
+            fileType: file.type,
+            dataUrl: loadEvt.target.result,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const handleCommentPaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (loadEvt) => {
+            setCommentImages((prev) => [
+              ...prev,
+              {
+                id: String(Date.now()) + Math.random().toString(36).substring(2, 7),
+                name: `screenshot-${Date.now()}.png`,
+                size: file.size,
+                fileType: file.type,
+                dataUrl: loadEvt.target.result,
+              },
+            ]);
+            toast.info('Image attached to comment from clipboard');
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+  };
+
+  const handleRemoveCommentImage = (imgId) => {
+    setCommentImages((prev) => prev.filter((img) => img.id !== imgId));
+  };
+
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() && commentImages.length === 0) return;
     try {
       setAddingComment(true);
-      const res = await tasksApi.addComment(currentId, newComment.trim());
+      const res = await tasksApi.addComment(currentId, newComment.trim(), commentImages);
       if (res?.data) {
         setComments((prev) => [...prev, res.data]);
       }
       toast.success('Comment posted');
       setNewComment('');
+      setCommentImages([]);
       fetchTaskDetails(currentId);
     } catch (err) {
       toast.error(err.message || 'Failed to post comment');
@@ -566,7 +650,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Activity & Comments Tabs */}
             <div className="space-y-4 pt-2">
-              <div className="flex items-center gap-4 border-b border-neutral-200 pb-2">
+              <div className="flex items-center gap-4 border-b border-neutral-200 pb-2 flex-wrap">
                 <button
                   onClick={() => setActiveTab('COMMENTS')}
                   className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
@@ -600,26 +684,74 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   <Clock className="size-3.5" />
                   Time Tracking ({task?.logged_hours || 0}h logged)
                 </button>
+                <button
+                  onClick={() => { setActiveTab('ATTACHMENTS'); fetchAttachments(currentId); }}
+                  className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                    activeTab === 'ATTACHMENTS'
+                      ? 'border-violet-600 text-violet-600'
+                      : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                  }`}
+                >
+                  <Image className="size-3.5" />
+                  Images ({attachments.length})
+                </button>
               </div>
 
               {/* Tab: Comments */}
               {activeTab === 'COMMENTS' && (
                 <div className="space-y-4">
-                  <form onSubmit={handleAddComment} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Add a comment... (Type your update here)"
-                      className="flex-1 rounded-xl border border-neutral-300 px-3.5 py-2 text-xs focus:border-blue-600 focus:outline-none"
-                    />
-                    <button
-                      type="submit"
-                      disabled={addingComment || !newComment.trim()}
-                      className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition"
-                    >
-                      Save
-                    </button>
+                  <form onSubmit={handleAddComment} className="space-y-2">
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onPaste={handleCommentPaste}
+                        placeholder="Add a comment... (Type update or paste screenshot)"
+                        className="flex-1 rounded-xl border border-neutral-300 px-3.5 py-2 text-xs focus:border-blue-600 focus:outline-none"
+                      />
+                      <label
+                        title="Attach images"
+                        className="cursor-pointer p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 transition flex items-center justify-center shrink-0"
+                      >
+                        <Image className="size-4" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleCommentImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="submit"
+                        disabled={addingComment || (!newComment.trim() && commentImages.length === 0)}
+                        className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition shrink-0"
+                      >
+                        {addingComment ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+
+                    {/* Pre-post image previews */}
+                    {commentImages.length > 0 && (
+                      <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-xl border border-neutral-200">
+                        {commentImages.map((img) => (
+                          <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0">
+                            <img src={img.dataUrl} alt={img.name} className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCommentImage(img.id)}
+                              className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition"
+                            >
+                              <X className="size-3" />
+                            </button>
+                          </div>
+                        ))}
+                        <span className="text-[10px] text-neutral-400 self-center pl-1 italic">
+                          {commentImages.length} image{commentImages.length > 1 ? 's' : ''} attached (will expire 6 days after ticket is completed)
+                        </span>
+                      </div>
+                    )}
                   </form>
 
                   <div className="space-y-3 pt-2">
@@ -732,9 +864,52 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                   </div>
                                 </div>
                               ) : (
-                                <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap">
-                                  {c.content}
-                                </p>
+                                <div>
+                                  {c.content && (
+                                    <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap">
+                                      {c.content}
+                                    </p>
+                                  )}
+
+                                  {/* Comment Images */}
+                                  {c.images && Array.isArray(c.images) && c.images.length > 0 && (
+                                    <div className="mt-2 space-y-1.5">
+                                      <div className="flex flex-wrap gap-2">
+                                        {c.images.map((img, imgIdx) => {
+                                          const imgSrc = img.dataUrl || img.url || img.fileUrl;
+                                          return (
+                                            <div
+                                              key={img.id || imgIdx}
+                                              onClick={() => setLightboxSrc(imgSrc)}
+                                              className="group/img relative rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 size-20 cursor-pointer shadow-2xs hover:shadow transition"
+                                            >
+                                              <img
+                                                src={imgSrc}
+                                                alt={img.name || 'Comment image'}
+                                                className="w-full h-full object-cover group-hover/img:scale-105 transition"
+                                              />
+                                              <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/25 flex items-center justify-center transition">
+                                                <ZoomIn className="size-4 text-white opacity-0 group-hover/img:opacity-100 drop-shadow" />
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                      {/* Expiration badge */}
+                                      <div className="flex items-center gap-1.5 text-[10px] text-amber-700 font-medium bg-amber-50/80 border border-amber-200/60 rounded-md px-2 py-0.5 w-fit">
+                                        <Clock className="size-3" />
+                                        <span>{c.imagesStatus || (task?.status === 'DONE' ? 'Expires 6 days after ticket done' : 'Active (expires 6 days after ticket is completed)')}</span>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {c.imagesExpired && (
+                                    <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-neutral-400 italic bg-neutral-100 px-2 py-0.5 rounded-md w-fit">
+                                      <Clock className="size-3 text-neutral-400" />
+                                      <span>Image attachments expired 6 days after ticket completion.</span>
+                                    </div>
+                                  )}
+                                </div>
                               )}
                             </div>
                           </div>
@@ -838,6 +1013,230 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                       Log Work
                     </button>
                   </form>
+                </div>
+              )}
+
+              {/* Tab: Image Attachments */}
+              {activeTab === 'ATTACHMENTS' && (
+                <div className="space-y-4">
+                  {/* Drag & Drop Upload Zone */}
+                  <div
+                    className={`relative rounded-xl border-2 border-dashed p-6 text-center transition-all cursor-pointer ${
+                      isDragOver
+                        ? 'border-violet-500 bg-violet-50/60 scale-[1.01]'
+                        : 'border-neutral-300 hover:border-violet-400 hover:bg-violet-50/30'
+                    }`}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      setIsDragOver(false);
+                      const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'));
+                      if (files.length === 0) { toast.error('Please drop image files only (PNG, JPG, GIF, WebP)'); return; }
+                      setUploadingImage(true);
+                      for (const file of files) {
+                        try {
+                          const reader = new FileReader();
+                          const imageData = await new Promise((resolve, reject) => {
+                            reader.onload = (ev) => resolve(ev.target.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(file);
+                          });
+                          await tasksApi.uploadImage(currentId, {
+                            fileName: file.name,
+                            imageData,
+                            fileType: file.type,
+                            fileSize: file.size,
+                          });
+                          toast.success(`Uploaded: ${file.name}`);
+                        } catch (err) {
+                          toast.error(`Failed to upload ${file.name}`);
+                        }
+                      }
+                      setUploadingImage(false);
+                      fetchAttachments(currentId);
+                    }}
+                    onClick={() => document.getElementById(`attach-file-input-${currentId}`)?.click()}
+                  >
+                    <input
+                      id={`attach-file-input-${currentId}`}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files || []);
+                        if (files.length === 0) return;
+                        setUploadingImage(true);
+                        for (const file of files) {
+                          try {
+                            const reader = new FileReader();
+                            const imageData = await new Promise((resolve, reject) => {
+                              reader.onload = (ev) => resolve(ev.target.result);
+                              reader.onerror = reject;
+                              reader.readAsDataURL(file);
+                            });
+                            await tasksApi.uploadImage(currentId, {
+                              fileName: file.name,
+                              imageData,
+                              fileType: file.type,
+                              fileSize: file.size,
+                            });
+                            toast.success(`Uploaded: ${file.name}`);
+                          } catch (err) {
+                            toast.error(`Failed to upload ${file.name}`);
+                          }
+                        }
+                        setUploadingImage(false);
+                        fetchAttachments(currentId);
+                        e.target.value = '';
+                      }}
+                    />
+                    {uploadingImage ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="size-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+                        <p className="text-xs font-semibold text-violet-600">Uploading images...</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex justify-center mb-3">
+                          <div className={`size-12 rounded-2xl flex items-center justify-center transition-all ${
+                            isDragOver ? 'bg-violet-100 scale-110' : 'bg-neutral-100'
+                          }`}>
+                            <Upload className={`size-5 transition-colors ${isDragOver ? 'text-violet-600' : 'text-neutral-400'}`} />
+                          </div>
+                        </div>
+                        <p className="text-xs font-bold text-neutral-700">
+                          {isDragOver ? 'Drop images here' : 'Drag & drop images, or click to browse'}
+                        </p>
+                        <p className="text-[11px] text-neutral-400 mt-1">PNG, JPG, GIF, WebP · Auto-expires in 6 days</p>
+                        <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-4 py-1.5 text-[11px] font-bold text-white shadow-xs">
+                          <Plus className="size-3" />
+                          Add Images
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Expiry Note Banner */}
+                  {attachments.length > 0 && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-700">
+                      <Timer className="size-3.5 text-amber-500 shrink-0" />
+                      Images automatically expire and are deleted 6 days after upload.
+                    </div>
+                  )}
+
+                  {/* Image Gallery Grid */}
+                  {attachments.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Image className="size-10 text-neutral-300 mx-auto mb-2" />
+                      <p className="text-xs text-neutral-400 italic">No images attached yet.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {attachments.map((att) => {
+                        const imgSrc = att.imageData || att.image_data || att.fileUrl || att.file_url;
+                        const expiresAt = att.expiresAt || att.expires_at;
+                        const expiryDate = expiresAt ? new Date(expiresAt) : null;
+                        const msLeft = expiryDate ? expiryDate.getTime() - Date.now() : null;
+                        const daysLeft = msLeft !== null ? Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24))) : null;
+                        const isExpiringSoon = daysLeft !== null && daysLeft <= 2;
+
+                        return (
+                          <div
+                            key={att.id}
+                            className="group relative rounded-xl overflow-hidden border border-neutral-200 shadow-xs hover:shadow-md transition-all bg-neutral-100 aspect-square"
+                          >
+                            {imgSrc ? (
+                              <img
+                                src={imgSrc}
+                                alt={att.fileName || att.file_name || 'Attachment'}
+                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                onClick={() => setLightboxSrc(imgSrc)}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Image className="size-8 text-neutral-300" />
+                              </div>
+                            )}
+
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                              {imgSrc && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setLightboxSrc(imgSrc); }}
+                                  className="p-1.5 rounded-lg bg-white/90 text-neutral-700 hover:bg-white shadow transition"
+                                  title="Preview"
+                                >
+                                  <ZoomIn className="size-3.5" />
+                                </button>
+                              )}
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    await tasksApi.deleteAttachment(currentId, att.id);
+                                    setAttachments((prev) => prev.filter((a) => a.id !== att.id));
+                                    toast.success('Image removed');
+                                  } catch (err) {
+                                    toast.error('Failed to remove image');
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg bg-red-600/90 text-white hover:bg-red-700 shadow transition"
+                                title="Delete"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </div>
+
+                            {/* Expiry Badge */}
+                            {daysLeft !== null && (
+                              <div className={`absolute top-1.5 right-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold shadow-sm ${
+                                isExpiringSoon
+                                  ? 'bg-red-500 text-white'
+                                  : 'bg-black/50 text-white'
+                              }`}>
+                                <Timer className="size-2.5" />
+                                {daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}
+                              </div>
+                            )}
+
+                            {/* Filename label */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 translate-y-full group-hover:translate-y-0 transition-transform">
+                              <p className="text-[10px] font-semibold text-white truncate">
+                                {att.fileName || att.file_name || 'image'}
+                              </p>
+                              <p className="text-[9px] text-white/70">
+                                {att.uploaderName || att.uploader_name || 'Member'}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Lightbox */}
+              {lightboxSrc && (
+                <div
+                  className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                  onClick={() => setLightboxSrc(null)}
+                >
+                  <div className="relative max-w-4xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+                    <img
+                      src={lightboxSrc}
+                      alt="Preview"
+                      className="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain"
+                    />
+                    <button
+                      onClick={() => setLightboxSrc(null)}
+                      className="absolute top-2 right-2 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
