@@ -532,35 +532,38 @@ export const TaskIdClient = () => {
             {activeTab === 'COMMENTS' && (
               <div className="space-y-4">
                 <form onSubmit={handleAddComment} className="space-y-2">
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="text"
+                  <div className="relative rounded-xl border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs">
+                    <textarea
+                      rows={2}
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       onPaste={handleCommentPaste}
-                      placeholder="Add a comment... (Type update or paste screenshot)"
-                      className="flex-1 rounded-xl border border-neutral-300 px-4 py-2 text-xs focus:border-blue-600 focus:outline-none"
+                      placeholder="Add a comment... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
+                      className="w-full bg-transparent p-3 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
                     />
-                    <label
-                      title="Attach images"
-                      className="cursor-pointer p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 transition flex items-center justify-center shrink-0"
-                    >
-                      <ImageIcon className="size-4" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleCommentImageUpload}
-                        className="hidden"
-                      />
-                    </label>
-                    <button
-                      type="submit"
-                      disabled={!newComment.trim() && commentImages.length === 0}
-                      className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition shrink-0"
-                    >
-                      Save
-                    </button>
+                    <div className="flex items-center justify-between border-t border-neutral-100 px-3 py-2 bg-neutral-50/70 rounded-b-xl">
+                      <label
+                        title="Attach images"
+                        className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
+                      >
+                        <ImageIcon className="size-3.5 text-blue-600" />
+                        <span>Attach Image</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleCommentImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="submit"
+                        disabled={!newComment.trim() && commentImages.length === 0}
+                        className="rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition"
+                      >
+                        Save Comment
+                      </button>
+                    </div>
                   </div>
 
                   {/* Pre-post image previews */}

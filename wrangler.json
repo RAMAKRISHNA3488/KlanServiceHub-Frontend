@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "klanservicehub-frontend",
+  "account_id": "811c2809c4e8408beb800eb2ef2d6bbe",
   "main": "src/worker.js",
   "compatibility_date": "2024-10-01",
   "assets": {
