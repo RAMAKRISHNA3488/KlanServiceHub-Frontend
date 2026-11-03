@@ -707,6 +707,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         onPaste={handleCommentPaste}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const files = Array.from(e.dataTransfer?.files || []);
+                          if (files.length) handleCommentImageUpload({ target: { files, value: '' } });
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
                         placeholder="Add a comment... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
                         className="w-full bg-transparent p-3 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
                       />
