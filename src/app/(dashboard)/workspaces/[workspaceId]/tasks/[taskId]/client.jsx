@@ -33,7 +33,11 @@ import {
   X,
   Image as ImageIcon,
   ZoomIn,
+  Heart,
+  Star,
+  Share2,
 } from 'lucide-react';
+import { TaskShareModal } from '@/features/tasks/components/task-share-modal';
 
 const TYPE_ICONS = {
   Story: { icon: Bookmark, color: '#36B37E' },
@@ -107,6 +111,74 @@ export const TaskIdClient = () => {
   const [logHours, setLogHours] = useState(1);
   const [activeTab, setActiveTab] = useState('COMMENTS');
   const [storyPointsInput, setStoryPointsInput] = useState('1');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isFavoriting, setIsFavoriting] = useState(false);
+
+  const handleToggleLike = async () => {
+    if (!taskId || isLiking) return;
+    setIsLiking(true);
+    const prevLiked = !!task?.hasLiked;
+    const prevCount = task?.likesCount || 0;
+    setTask((prev) => ({
+      ...prev,
+      hasLiked: !prevLiked,
+      likesCount: prevLiked ? Math.max(0, prevCount - 1) : prevCount + 1,
+    }));
+
+    try {
+      const res = await tasksApi.toggleLike(taskId);
+      if (res?.success) {
+        setTask((prev) => ({
+          ...prev,
+          hasLiked: res.liked,
+          likesCount: res.likesCount,
+        }));
+        queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      }
+    } catch (e) {
+      setTask((prev) => ({
+        ...prev,
+        hasLiked: prevLiked,
+        likesCount: prevCount,
+      }));
+      toast.error('Failed to update like');
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!taskId || isFavoriting) return;
+    setIsFavoriting(true);
+    const prevFav = !!task?.isFavorite;
+    setTask((prev) => ({
+      ...prev,
+      isFavorite: !prevFav,
+    }));
+
+    try {
+      const res = await tasksApi.toggleFavorite(taskId);
+      if (res?.success) {
+        setTask((prev) => ({
+          ...prev,
+          isFavorite: res.isFavorite,
+        }));
+        queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        toast.success(res.isFavorite ? 'Saved to your favorites' : 'Removed from favorites');
+      }
+    } catch (e) {
+      setTask((prev) => ({
+        ...prev,
+        isFavorite: prevFav,
+      }));
+      toast.error('Failed to update favorite status');
+    } finally {
+      setIsFavoriting(false);
+    }
+  };
 
   const [DeleteCommentDialog, confirmDeleteComment] = useConfirm(
     'Delete Comment',
@@ -411,26 +483,71 @@ export const TaskIdClient = () => {
           <span className="font-mono text-neutral-900 font-bold">{task.key || 'TASK'}</span>
         </div>
 
-        {/* Status Dropdown */}
-        <select
-          value={
-            task.status === 'CODE_REVIEW' || task.status === 'REVIEW'
-              ? 'IN_REVIEW'
-              : task.status || 'TODO'
-          }
-          onChange={(e) => handleUpdate({ status: e.target.value })}
-          className={`rounded-lg px-3 py-1.5 text-xs font-bold border cursor-pointer focus:outline-none shadow-xs ${
-            STATUS_COLORS[task.status] ||
-            (task.status === 'CODE_REVIEW' || task.status === 'REVIEW' ? STATUS_COLORS.IN_REVIEW : STATUS_COLORS.TODO)
-          }`}
-        >
-          <option value="BACKLOG">BACKLOG</option>
-          <option value="TODO">TO DO</option>
-          <option value="IN_PROGRESS">IN PROGRESS</option>
-          <option value="IN_REVIEW">IN REVIEW</option>
-          <option value="TESTING">TESTING</option>
-          <option value="DONE">DONE</option>
-        </select>
+        <div className="flex items-center gap-2">
+          {/* Quick Actions: Like, Favorite, Share */}
+          <div className="flex items-center gap-1 bg-neutral-100/80 p-0.5 rounded-xl border border-neutral-200/80 shadow-2xs">
+            <button
+              type="button"
+              onClick={handleToggleLike}
+              disabled={isLiking}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                task?.hasLiked
+                  ? 'bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs font-bold'
+                  : 'text-neutral-600 hover:text-rose-600 hover:bg-white'
+              }`}
+              title={task?.hasLiked ? 'Unlike this issue' : 'Like this issue'}
+            >
+              <Heart className={`size-3.5 ${task?.hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+              <span>{task?.likesCount || 0}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleToggleFavorite}
+              disabled={isFavoriting}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                task?.isFavorite
+                  ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs font-bold'
+                  : 'text-neutral-600 hover:text-amber-600 hover:bg-white'
+              }`}
+              title={task?.isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+            >
+              <Star className={`size-3.5 ${task?.isFavorite ? 'fill-amber-400 text-amber-500' : ''}`} />
+              <span>{task?.isFavorite ? 'Saved' : 'Save'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-white transition"
+              title="Share this ticket"
+            >
+              <Share2 className="size-3.5" />
+              <span>Share</span>
+            </button>
+          </div>
+
+          {/* Status Dropdown */}
+          <select
+            value={
+              task.status === 'CODE_REVIEW' || task.status === 'REVIEW'
+                ? 'IN_REVIEW'
+                : task.status || 'TODO'
+            }
+            onChange={(e) => handleUpdate({ status: e.target.value })}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold border cursor-pointer focus:outline-none shadow-xs ${
+              STATUS_COLORS[task.status] ||
+              (task.status === 'CODE_REVIEW' || task.status === 'REVIEW' ? STATUS_COLORS.IN_REVIEW : STATUS_COLORS.TODO)
+            }`}
+          >
+            <option value="BACKLOG">BACKLOG</option>
+            <option value="TODO">TO DO</option>
+            <option value="IN_PROGRESS">IN PROGRESS</option>
+            <option value="IN_REVIEW">IN REVIEW</option>
+            <option value="TESTING">TESTING</option>
+            <option value="DONE">DONE</option>
+          </select>
+        </div>
       </div>
 
       {/* Main Grid: Details + KlanserviceHub Properties Panel */}
@@ -1062,6 +1179,15 @@ export const TaskIdClient = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {task && (
+        <TaskShareModal
+          open={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          task={task}
+          workspaceId={workspaceId}
+        />
       )}
     </div>
   );

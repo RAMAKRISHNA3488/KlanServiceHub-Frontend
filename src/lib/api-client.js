@@ -225,6 +225,10 @@ export const tasksApi = {
     }),
   deleteAttachment: (taskId, attachmentId) =>
     apiFetch(`/api/tasks/${taskId}/attachments/${attachmentId}`, { method: 'DELETE' }),
+  toggleLike: (taskId) =>
+    apiFetch(`/api/tasks/${taskId}/toggle-like`, { method: 'POST' }),
+  toggleFavorite: (taskId) =>
+    apiFetch(`/api/tasks/${taskId}/toggle-favorite`, { method: 'POST' }),
 };
 
 

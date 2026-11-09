@@ -34,7 +34,11 @@ import {
   Upload,
   Timer,
   ZoomIn,
+  Heart,
+  Star,
+  Share2,
 } from 'lucide-react';
+import { TaskShareModal } from './task-share-modal';
 
 const TYPE_ICONS = {
   Story: { icon: Bookmark, color: '#36B37E' },
@@ -134,6 +138,72 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const [subtaskTitle, setSubtaskTitle] = useState('');
   const [logHoursInput, setLogHoursInput] = useState(1);
   const [storyPointsInput, setStoryPointsInput] = useState('1');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isFavoriting, setIsFavoriting] = useState(false);
+
+  const handleToggleLike = async () => {
+    if (!currentId || isLiking) return;
+    setIsLiking(true);
+    const prevLiked = !!task?.hasLiked;
+    const prevCount = task?.likesCount || 0;
+    setTask((prev) => ({
+      ...prev,
+      hasLiked: !prevLiked,
+      likesCount: prevLiked ? Math.max(0, prevCount - 1) : prevCount + 1,
+    }));
+
+    try {
+      const res = await tasksApi.toggleLike(currentId);
+      if (res?.success) {
+        setTask((prev) => ({
+          ...prev,
+          hasLiked: res.liked,
+          likesCount: res.likesCount,
+        }));
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      }
+    } catch (e) {
+      setTask((prev) => ({
+        ...prev,
+        hasLiked: prevLiked,
+        likesCount: prevCount,
+      }));
+      toast.error('Failed to update like');
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!currentId || isFavoriting) return;
+    setIsFavoriting(true);
+    const prevFav = !!task?.isFavorite;
+    setTask((prev) => ({
+      ...prev,
+      isFavorite: !prevFav,
+    }));
+
+    try {
+      const res = await tasksApi.toggleFavorite(currentId);
+      if (res?.success) {
+        setTask((prev) => ({
+          ...prev,
+          isFavorite: res.isFavorite,
+        }));
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        toast.success(res.isFavorite ? 'Saved to your favorites' : 'Removed from favorites');
+      }
+    } catch (e) {
+      setTask((prev) => ({
+        ...prev,
+        isFavorite: prevFav,
+      }));
+      toast.error('Failed to update favorite status');
+    } finally {
+      setIsFavoriting(false);
+    }
+  };
 
   useEffect(() => {
     if (task) {
@@ -537,6 +607,49 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Quick Actions: Like, Favorite, Share */}
+            <div className="flex items-center gap-1 bg-neutral-100/80 p-0.5 rounded-xl border border-neutral-200/80 shadow-2xs">
+              <button
+                type="button"
+                onClick={handleToggleLike}
+                disabled={isLiking}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                  task?.hasLiked
+                    ? 'bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs font-bold'
+                    : 'text-neutral-600 hover:text-rose-600 hover:bg-white'
+                }`}
+                title={task?.hasLiked ? 'Unlike this issue' : 'Like this issue'}
+              >
+                <Heart className={`size-3.5 ${task?.hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+                <span>{task?.likesCount || 0}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                disabled={isFavoriting}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                  task?.isFavorite
+                    ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs font-bold'
+                    : 'text-neutral-600 hover:text-amber-600 hover:bg-white'
+                }`}
+                title={task?.isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+              >
+                <Star className={`size-3.5 ${task?.isFavorite ? 'fill-amber-400 text-amber-500' : ''}`} />
+                <span>{task?.isFavorite ? 'Saved' : 'Save'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-white transition"
+                title="Share this ticket"
+              >
+                <Share2 className="size-3.5" />
+                <span>Share</span>
+              </button>
+            </div>
+
             {/* Status Dropdown */}
             {(() => {
               const currentStatus =
@@ -1506,6 +1619,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           </div>
         </div>
       </div>
+      <TaskShareModal
+        open={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        task={task}
+        workspaceId={workspaceId}
+      />
       <DeleteCommentDialog />
     </div>
   );

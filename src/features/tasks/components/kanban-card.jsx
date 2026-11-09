@@ -1,4 +1,4 @@
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Star, Heart } from 'lucide-react';
 import { DottedSeparator } from '@/components/dotted-separator';
 import { MemberAvatar } from '@/features/members/components/member-avatar';
 import { ProjectAvatar } from '@/features/projects/components/project-avatar';
@@ -30,11 +30,16 @@ export const KanbanCard = ({ task, onDoubleClick }) => {
                 {task.key}
               </span>
             )}
+            {task.isFavorite && (
+              <span title="Favorited issue" className="inline-flex items-center text-amber-500">
+                <Star className="size-3 fill-amber-400" />
+              </span>
+            )}
           </div>
           <p className="line-clamp-2 text-[11px] sm:text-xs font-semibold text-neutral-900 break-words">{task.name}</p>
         </div>
 
-        <TaskActions id={task.$id} projectId={task.projectId}>
+        <TaskActions id={task.$id || task.id} projectId={task.projectId || task.project?.$id || task.project?.id} isFavorite={task.isFavorite}>
           <MoreHorizontal className="size-4 sm:size-[18px] shrink-0 cursor-pointer stroke-1 text-neutral-700 transition hover:opacity-75"/>
         </TaskActions>
       </div>
@@ -62,16 +67,28 @@ export const KanbanCard = ({ task, onDoubleClick }) => {
           </span>
         </div>
 
-        {task.dueDate ? (
-          <TaskDate value={task.dueDate} className="text-[10px] sm:text-xs shrink-0"/>
-        ) : (task.created_at || task.$createdAt) ? (
-          <span
-            className="text-[10px] text-neutral-400 shrink-0 font-medium"
-            title={`Created: ${new Date(task.created_at || task.$createdAt).toLocaleString()}`}
-          >
-            {new Date(task.created_at || task.$createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-          </span>
-        ) : null}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {task.likesCount > 0 && (
+            <span
+              className="flex items-center gap-0.5 text-[9px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-full border border-rose-200/60"
+              title={`${task.likesCount} like${task.likesCount === 1 ? '' : 's'}`}
+            >
+              <Heart className="size-2.5 fill-rose-500" />
+              <span>{task.likesCount}</span>
+            </span>
+          )}
+
+          {task.dueDate ? (
+            <TaskDate value={task.dueDate} className="text-[10px] sm:text-xs shrink-0"/>
+          ) : (task.created_at || task.$createdAt) ? (
+            <span
+              className="text-[10px] text-neutral-400 shrink-0 font-medium"
+              title={`Created: ${new Date(task.created_at || task.$createdAt).toLocaleString()}`}
+            >
+              {new Date(task.created_at || task.$createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+            </span>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex items-center gap-x-1.5">
