@@ -9,11 +9,11 @@ import { KanbanColumnHeader } from './kanban-column-header';
 import { KlanserviceHubIssueDetailModal } from './klanservicehub-issue-detail-modal';
 
 const DEFAULT_BOARDS = [
-  { id: TaskStatus.BACKLOG, label: 'Backlog', color: '#94A3B8', category: 'TODO' },
-  { id: TaskStatus.TODO, label: 'To Do', color: '#3B82F6', category: 'TODO' },
-  { id: TaskStatus.IN_PROGRESS, label: 'In Progress', color: '#F59E0B', category: 'IN_PROGRESS' },
-  { id: TaskStatus.IN_REVIEW, label: 'In Review', color: '#8B5CF6', category: 'IN_PROGRESS' },
-  { id: TaskStatus.DONE, label: 'Done', color: '#10B981', category: 'DONE' },
+  { id: TaskStatus.BACKLOG, label: 'Backlog', color: '#94A3B8', category: 'TODO', maxTasks: 5, overloadColor: '#EF4444' },
+  { id: TaskStatus.TODO, label: 'To Do', color: '#3B82F6', category: 'TODO', maxTasks: 5, overloadColor: '#EF4444' },
+  { id: TaskStatus.IN_PROGRESS, label: 'In Progress', color: '#F59E0B', category: 'IN_PROGRESS', maxTasks: 5, overloadColor: '#EF4444' },
+  { id: TaskStatus.IN_REVIEW, label: 'In Review', color: '#8B5CF6', category: 'IN_PROGRESS', maxTasks: 5, overloadColor: '#EF4444' },
+  { id: TaskStatus.DONE, label: 'Done', color: '#10B981', category: 'DONE', maxTasks: 0, overloadColor: '#EF4444' },
 ];
 
 export const DataKanban = ({ data, onChange, isAdmin }) => {
@@ -46,11 +46,16 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
                 if (seen.has(id)) continue;
                 seen.add(id);
 
+                const cat = st.category || 'IN_PROGRESS';
+                const isDoneStatus = cat === 'DONE' || id === 'DONE';
+
                 list.push({
                     id,
                     label: id === 'IN_REVIEW' ? 'In Review' : st.name.replace(/_/g, ' '),
                     color: id === 'IN_REVIEW' ? '#8B5CF6' : (st.color || '#3B82F6'),
-                    category: st.category || 'IN_PROGRESS',
+                    category: cat,
+                    maxTasks: isDoneStatus ? 0 : (st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)),
+                    overloadColor: st.overloadColor || st.overload_color || '#EF4444',
                 });
             }
             return list;
@@ -275,18 +280,44 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
           onWheel={handleBoardWheel}
           className="custom-scrollbar flex overflow-x-auto pb-4 gap-3 w-full"
         >
-          {columns.map((col) => (
-            <div
-              key={col.id}
-              className="min-w-[270px] max-w-[320px] flex-1 rounded-xl bg-neutral-100/90 border border-neutral-200/80 p-2.5 shadow-2xs flex flex-col shrink-0"
-            >
-              <KanbanColumnHeader
-                board={col.id}
-                label={col.label}
-                color={col.color}
-                category={col.category}
-                taskCount={tasks[col.id]?.length || 0}
-              />
+          {columns.map((col) => {
+            const isDone = col.category === 'DONE' || col.id === TaskStatus.DONE || col.id === 'DONE';
+            const limit = Number(col.maxTasks) > 0 ? Number(col.maxTasks) : 5;
+            const taskCount = tasks[col.id]?.length || 0;
+            const isOverload = !isDone && taskCount > limit;
+            const overloadColor = col.overloadColor || '#EF4444';
+
+            return (
+              <div
+                key={col.id}
+                className="min-w-[270px] max-w-[320px] flex-1 rounded-xl bg-neutral-100/90 border border-neutral-200/80 p-2.5 shadow-2xs flex flex-col shrink-0 overflow-hidden relative"
+              >
+                {/* Top Stage WIP / Overload Telemetry Line */}
+                <div
+                  className={`h-1.5 -mx-2.5 -mt-2.5 mb-2 rounded-t-xl transition-all duration-300 ${
+                    isDone
+                      ? 'bg-neutral-300/60'
+                      : (isOverload ? 'shadow-2xs animate-pulse' : 'bg-emerald-500 shadow-2xs')
+                  }`}
+                  style={(!isDone && isOverload) ? { backgroundColor: overloadColor } : undefined}
+                  title={
+                    isDone
+                      ? 'Done stage (exempt from capacity limits)'
+                      : (isOverload
+                          ? `Stage Overloaded: ${taskCount} tickets (Capacity limit: ${limit})`
+                          : `Healthy Capacity: ${taskCount} / ${limit} tickets (<= ${limit} Green)`)
+                  }
+                />
+
+                <KanbanColumnHeader
+                  board={col.id}
+                  label={col.label}
+                  color={col.color}
+                  category={col.category}
+                  taskCount={taskCount}
+                  maxTasks={limit}
+                  overloadColor={overloadColor}
+                />
 
               <Droppable droppableId={col.id}>
                 {(provided) => (
@@ -320,7 +351,8 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
                 )}
               </Droppable>
             </div>
-          ))}
+            );
+          })}
         </div>
       </DragDropContext>
 

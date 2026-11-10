@@ -55,6 +55,15 @@ const COLOR_PRESETS = [
   { label: 'Red', color: '#EF4444' },
 ];
 
+const OVERLOAD_COLOR_PRESETS = [
+  { label: 'Red / Crimson', color: '#EF4444' },
+  { label: 'Rose', color: '#F43F5E' },
+  { label: 'Amber', color: '#F59E0B' },
+  { label: 'Orange', color: '#EA580C' },
+  { label: 'Violet', color: '#8B5CF6' },
+  { label: 'Pink', color: '#EC4899' },
+];
+
 export const WorkflowsAdminView = () => {
   const navigate = useNavigate();
   const workspaceId = useWorkspaceId();
@@ -71,10 +80,10 @@ export const WorkflowsAdminView = () => {
 
   // Add Status Modal
   const [addStatusModal, setAddStatusModal] = useState(false);
-  const [newStatus, setNewStatus] = useState({ name: '', category: 'IN_PROGRESS', color: '#3B82F6' });
+  const [newStatus, setNewStatus] = useState({ name: '', category: 'IN_PROGRESS', color: '#3B82F6', maxTasks: 5, overloadColor: '#EF4444' });
 
   // Edit Status Modal
-  const [editingStatus, setEditingStatus] = useState(null); // { id, name, category, color }
+  const [editingStatus, setEditingStatus] = useState(null); // { id, name, category, color, maxTasks, overloadColor }
 
   // Delete Status Confirmation Modal
   const [deleteConfirmStatus, setDeleteConfirmStatus] = useState(null); // { workflowId, statusId, name }
@@ -174,10 +183,14 @@ export const WorkflowsAdminView = () => {
     e.preventDefault();
     if (!defaultWorkflow) return;
     try {
-      await workflowsAdminApi.addStatus(workspaceId, defaultWorkflow.id, newStatus);
+      await workflowsAdminApi.addStatus(workspaceId, defaultWorkflow.id, {
+        ...newStatus,
+        maxTasks: newStatus.category === 'DONE' ? 0 : Number(newStatus.maxTasks ?? 5),
+        overloadColor: newStatus.overloadColor || '#EF4444',
+      });
       toast.success(`Status "${newStatus.name.toUpperCase().replace(/\s+/g, '_')}" added to workflow!`);
       setAddStatusModal(false);
-      setNewStatus({ name: '', category: 'IN_PROGRESS', color: '#3B82F6' });
+      setNewStatus({ name: '', category: 'IN_PROGRESS', color: '#3B82F6', maxTasks: 5, overloadColor: '#EF4444' });
       fetchData();
     } catch (err) {
       toast.error(err.message || 'Failed to add status');
@@ -190,6 +203,8 @@ export const WorkflowsAdminView = () => {
       name: st.name || '',
       category: st.category || 'IN_PROGRESS',
       color: st.color || '#3B82F6',
+      maxTasks: st.category === 'DONE' ? 0 : (st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)),
+      overloadColor: st.overloadColor || st.overload_color || '#EF4444',
     });
   };
 
@@ -201,6 +216,8 @@ export const WorkflowsAdminView = () => {
         name: editingStatus.name,
         category: editingStatus.category,
         color: editingStatus.color,
+        maxTasks: editingStatus.category === 'DONE' ? 0 : Number(editingStatus.maxTasks ?? 5),
+        overloadColor: editingStatus.overloadColor || '#EF4444',
       });
       toast.success(`Status "${editingStatus.name}" updated!`);
       setEditingStatus(null);
@@ -550,6 +567,23 @@ export const WorkflowsAdminView = () => {
                       </p>
                     </div>
 
+                    {/* Stage WIP Capacity & Overload Indicator */}
+                    <div className="flex items-center justify-between text-[10px] text-neutral-500 py-1.5 border-t border-neutral-100">
+                      <span className="font-medium">Overload Limit:</span>
+                      {st.category === 'DONE' ? (
+                        <span className="font-semibold text-neutral-400">Exempt (Done)</span>
+                      ) : (
+                        <div className="flex items-center gap-1.5 font-bold text-neutral-700">
+                          <span>{st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)} max</span>
+                          <span
+                            className="size-2 rounded-full border border-black/10 shrink-0"
+                            style={{ backgroundColor: st.overloadColor || st.overload_color || '#EF4444' }}
+                            title={`Custom Overload Color: ${st.overloadColor || st.overload_color || '#EF4444'}`}
+                          />
+                        </div>
+                      )}
+                    </div>
+
                     {/* Bottom Row: Category on left, reorder arrows on right */}
                     <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-100">
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
@@ -811,6 +845,105 @@ export const WorkflowsAdminView = () => {
                 />
               </div>
 
+              {/* Stage Overload Capacity (WIP Limit) */}
+              <div className="pt-2 border-t border-neutral-100">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-neutral-700">Stage Capacity / WIP Limit (Tickets)</label>
+                  {editingStatus.category === 'DONE' ? (
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                      Exempt (Done Stage)
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-neutral-400 font-mono">Default: 5</span>
+                  )}
+                </div>
+                {editingStatus.category === 'DONE' ? (
+                  <div className="p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-200 text-[11px] text-emerald-800">
+                    Done / Completed stages are automatically exempt from overload limits. Completed tickets will never trigger bottleneck alerts.
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={editingStatus.maxTasks ?? 5}
+                      onChange={(e) => setEditingStatus({ ...editingStatus, maxTasks: parseInt(e.target.value) || 1 })}
+                      className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                      placeholder="5"
+                    />
+                    <p className="text-[10.5px] text-neutral-500 mt-1">
+                      When tickets in this column exceed this number, the column top line changes to the custom overload color. Below this limit, it displays green.
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Custom Overload Alert Color */}
+              {editingStatus.category !== 'DONE' && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-neutral-700">
+                    Custom Overload Alert Color (When &gt; {editingStatus.maxTasks ?? 5} tickets)
+                  </label>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {OVERLOAD_COLOR_PRESETS.map((p) => (
+                      <button
+                        key={p.color}
+                        type="button"
+                        onClick={() => setEditingStatus({ ...editingStatus, overloadColor: p.color })}
+                        className={`size-6 rounded-full border transition-all ${
+                          (editingStatus.overloadColor || '#EF4444') === p.color ? 'ring-2 ring-blue-600 ring-offset-2 scale-110' : 'hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: p.color }}
+                        title={p.label}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={editingStatus.overloadColor || '#EF4444'}
+                      onChange={(e) => setEditingStatus({ ...editingStatus, overloadColor: e.target.value })}
+                      className="h-9 w-14 rounded-lg border border-neutral-300 p-1 cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={editingStatus.overloadColor || '#EF4444'}
+                      onChange={(e) => setEditingStatus({ ...editingStatus, overloadColor: e.target.value })}
+                      className="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-xs font-mono uppercase focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Live Visual Telemetry Preview */}
+                  <div className="p-3 rounded-xl border border-neutral-200 bg-neutral-50 space-y-2">
+                    <div className="text-[10.5px] font-bold text-neutral-500 uppercase tracking-wider">
+                      Kanban Board Top Line Preview
+                    </div>
+                    <div className="space-y-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-neutral-600 font-semibold">
+                          <span>Healthy Flow (&le; {editingStatus.maxTasks ?? 5} tickets):</span>
+                          <span className="text-emerald-700 font-bold">Green Line</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-emerald-500 w-full shadow-2xs" />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-neutral-600 font-semibold">
+                          <span>Stage Overloaded (&gt; {editingStatus.maxTasks ?? 5} tickets):</span>
+                          <span className="font-bold" style={{ color: editingStatus.overloadColor || '#EF4444' }}>
+                            Custom Overload Color
+                          </span>
+                        </div>
+                        <div
+                          className="h-1.5 rounded-full w-full shadow-2xs"
+                          style={{ backgroundColor: editingStatus.overloadColor || '#EF4444' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
                 <button
                   type="button"
@@ -891,6 +1024,105 @@ export const WorkflowsAdminView = () => {
                   className="h-9 w-full rounded-lg border border-neutral-300 p-1 cursor-pointer"
                 />
               </div>
+
+              {/* Stage Overload Capacity (WIP Limit) */}
+              <div className="pt-2 border-t border-neutral-100">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-neutral-700">Stage Capacity / WIP Limit (Tickets)</label>
+                  {newStatus.category === 'DONE' ? (
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                      Exempt (Done Stage)
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-neutral-400 font-mono">Default: 5</span>
+                  )}
+                </div>
+                {newStatus.category === 'DONE' ? (
+                  <div className="p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-200 text-[11px] text-emerald-800">
+                    Done / Completed stages are automatically exempt from overload limits. Completed tickets will never trigger bottleneck alerts.
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={newStatus.maxTasks ?? 5}
+                      onChange={(e) => setNewStatus({ ...newStatus, maxTasks: parseInt(e.target.value) || 1 })}
+                      className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                      placeholder="5"
+                    />
+                    <p className="text-[10.5px] text-neutral-500 mt-1">
+                      When tickets in this column exceed this number, the column top line changes to the custom overload color. Below this limit, it displays green.
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Custom Overload Alert Color */}
+              {newStatus.category !== 'DONE' && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-neutral-700">
+                    Custom Overload Alert Color (When &gt; {newStatus.maxTasks ?? 5} tickets)
+                  </label>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {OVERLOAD_COLOR_PRESETS.map((p) => (
+                      <button
+                        key={p.color}
+                        type="button"
+                        onClick={() => setNewStatus({ ...newStatus, overloadColor: p.color })}
+                        className={`size-6 rounded-full border transition-all ${
+                          (newStatus.overloadColor || '#EF4444') === p.color ? 'ring-2 ring-blue-600 ring-offset-2 scale-110' : 'hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: p.color }}
+                        title={p.label}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={newStatus.overloadColor || '#EF4444'}
+                      onChange={(e) => setNewStatus({ ...newStatus, overloadColor: e.target.value })}
+                      className="h-9 w-14 rounded-lg border border-neutral-300 p-1 cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={newStatus.overloadColor || '#EF4444'}
+                      onChange={(e) => setNewStatus({ ...newStatus, overloadColor: e.target.value })}
+                      className="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-xs font-mono uppercase focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Live Visual Telemetry Preview */}
+                  <div className="p-3 rounded-xl border border-neutral-200 bg-neutral-50 space-y-2">
+                    <div className="text-[10.5px] font-bold text-neutral-500 uppercase tracking-wider">
+                      Kanban Board Top Line Preview
+                    </div>
+                    <div className="space-y-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-neutral-600 font-semibold">
+                          <span>Healthy Flow (&le; {newStatus.maxTasks ?? 5} tickets):</span>
+                          <span className="text-emerald-700 font-bold">Green Line</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-emerald-500 w-full shadow-2xs" />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-neutral-600 font-semibold">
+                          <span>Stage Overloaded (&gt; {newStatus.maxTasks ?? 5} tickets):</span>
+                          <span className="font-bold" style={{ color: newStatus.overloadColor || '#EF4444' }}>
+                            Custom Overload Color
+                          </span>
+                        </div>
+                        <div
+                          className="h-1.5 rounded-full w-full shadow-2xs"
+                          style={{ backgroundColor: newStatus.overloadColor || '#EF4444' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
                 <button

@@ -235,3 +235,4 @@ export const TaskShareModal = ({ open, onClose, task, workspaceId }) => {
     </div>
   );
 };
+

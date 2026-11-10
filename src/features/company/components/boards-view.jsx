@@ -234,6 +234,7 @@ export const BoardsView = () => {
           border = 'border-purple-200';
         }
 
+        const isDoneStatus = cat === 'DONE' || id === 'DONE';
         unifiedList.push({
           id,
           rawName: id === 'IN_REVIEW' ? 'IN_REVIEW' : st.name,
@@ -243,6 +244,8 @@ export const BoardsView = () => {
           icon: Icon,
           bg,
           border,
+          maxTasks: isDoneStatus ? 0 : (st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)),
+          overloadColor: st.overloadColor || st.overload_color || '#EF4444',
         });
       }
       return unifiedList;
@@ -250,11 +253,11 @@ export const BoardsView = () => {
 
     // Default fallback columns if no custom workflow configured
     return [
-      { id: 'BACKLOG', label: 'BACKLOG', color: '#94A3B8', category: 'TODO', icon: CircleDot, bg: 'bg-slate-50/70', border: 'border-slate-200' },
-      { id: 'TODO', label: 'TO DO', color: '#3B82F6', category: 'TODO', icon: CircleDot, bg: 'bg-blue-50/70', border: 'border-blue-200' },
-      { id: 'IN_PROGRESS', label: 'IN PROGRESS', color: '#F59E0B', category: 'IN_PROGRESS', icon: Clock, bg: 'bg-amber-50/70', border: 'border-amber-200' },
-      { id: 'IN_REVIEW', label: 'IN REVIEW', color: '#8B5CF6', category: 'IN_PROGRESS', icon: Code2, bg: 'bg-purple-50/70', border: 'border-purple-200' },
-      { id: 'DONE', label: 'DONE', color: '#10B981', category: 'DONE', icon: CheckCircle2, bg: 'bg-emerald-50/70', border: 'border-emerald-200' },
+      { id: 'BACKLOG', label: 'BACKLOG', color: '#94A3B8', category: 'TODO', icon: CircleDot, bg: 'bg-slate-50/70', border: 'border-slate-200', maxTasks: 5, overloadColor: '#EF4444' },
+      { id: 'TODO', label: 'TO DO', color: '#3B82F6', category: 'TODO', icon: CircleDot, bg: 'bg-blue-50/70', border: 'border-blue-200', maxTasks: 5, overloadColor: '#EF4444' },
+      { id: 'IN_PROGRESS', label: 'IN PROGRESS', color: '#F59E0B', category: 'IN_PROGRESS', icon: Clock, bg: 'bg-amber-50/70', border: 'border-amber-200', maxTasks: 5, overloadColor: '#EF4444' },
+      { id: 'IN_REVIEW', label: 'IN REVIEW', color: '#8B5CF6', category: 'IN_PROGRESS', icon: Code2, bg: 'bg-purple-50/70', border: 'border-purple-200', maxTasks: 5, overloadColor: '#EF4444' },
+      { id: 'DONE', label: 'DONE', color: '#10B981', category: 'DONE', icon: CheckCircle2, bg: 'bg-emerald-50/70', border: 'border-emerald-200', maxTasks: 0, overloadColor: '#EF4444' },
     ];
   }, [workflowStatuses]);
 
@@ -889,8 +892,11 @@ export const BoardsView = () => {
         {columns.map((col, colIndex) => {
           const columnTasks = getTasksForColumn(col.id);
           const Icon = col.icon;
-
           const isOver = draggedOverCol === col.id;
+          const isDone = col.category === 'DONE' || col.id === 'DONE';
+          const limit = Number(col.maxTasks) > 0 ? Number(col.maxTasks) : 5;
+          const isOverload = !isDone && columnTasks.length > limit;
+          const overloadColor = col.overloadColor || '#EF4444';
 
           return (
             <div
@@ -913,23 +919,62 @@ export const BoardsView = () => {
                   handleMoveStatus(droppedTaskId, col.id);
                 }
               }}
-              className={`flex flex-col rounded-xl sm:rounded-2xl border transition-all snap-center ${
+              className={`flex flex-col rounded-xl sm:rounded-2xl border transition-all snap-center overflow-hidden ${
                 isOver
                   ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-400/40 shadow-md'
                   : `${col.border} ${col.bg}`
               } p-2.5 sm:p-3 min-w-[82vw] sm:min-w-[280px] flex-1 min-h-[480px] sm:min-h-[550px] shadow-xs shrink-0`}
             >
+              {/* Top Stage WIP / Overload Telemetry Line */}
+              <div
+                className={`h-1.5 w-full -mx-2.5 sm:-mx-3 -mt-2.5 sm:-mt-3 mb-2 rounded-t-xl sm:rounded-t-2xl transition-all duration-300 ${
+                  isDone
+                    ? 'bg-neutral-300/60'
+                    : (isOverload ? 'shadow-2xs animate-pulse' : 'bg-emerald-500 shadow-2xs')
+                }`}
+                style={(!isDone && isOverload) ? { backgroundColor: overloadColor } : undefined}
+                title={
+                  isDone
+                    ? 'Done stage (exempt from capacity limits)'
+                    : (isOverload
+                        ? `Stage Overloaded: ${columnTasks.length} tickets (Capacity limit: ${limit})`
+                        : `Healthy Capacity: ${columnTasks.length} / ${limit} tickets (<= ${limit} Green)`)
+                }
+              />
+
               {/* Column Header */}
               <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-neutral-200/80 mb-2.5 sm:mb-3">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Icon className="size-3.5 sm:size-4" style={{ color: col.color }} />
-                  <span className="text-[11px] sm:text-xs font-bold text-neutral-800 tracking-wide uppercase">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <Icon className="size-3.5 sm:size-4 shrink-0" style={{ color: col.color }} />
+                  <span className="text-[11px] sm:text-xs font-bold text-neutral-800 tracking-wide uppercase truncate">
                     {col.label}
                   </span>
                 </div>
-                <span className="flex items-center justify-center size-4.5 sm:size-5 rounded-full bg-white text-[10px] sm:text-[11px] font-bold text-neutral-600 shadow-xs">
-                  {columnTasks.length}
-                </span>
+                {isDone ? (
+                  <span
+                    className="flex items-center justify-center size-4.5 sm:size-5 rounded-full bg-white text-[10px] sm:text-[11px] font-bold text-neutral-600 shadow-xs"
+                    title="Done tickets (exempt from capacity limits)"
+                  >
+                    {columnTasks.length}
+                  </span>
+                ) : isOverload ? (
+                  <span
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold text-white shadow-xs animate-pulse cursor-help"
+                    style={{ backgroundColor: overloadColor }}
+                    title={`Stage Overloaded: ${columnTasks.length} tickets (Capacity limit: ${limit})`}
+                  >
+                    <span>⚠️</span>
+                    <span>{columnTasks.length}/{limit}</span>
+                  </span>
+                ) : (
+                  <span
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-white text-[10px] sm:text-[11px] font-bold text-emerald-700 border border-emerald-300/80 shadow-xs cursor-help"
+                    title={`Healthy Capacity: ${columnTasks.length} / ${limit} tickets`}
+                  >
+                    <span className="size-1.5 rounded-full bg-emerald-500 inline-block shrink-0" />
+                    <span>{columnTasks.length}/{limit}</span>
+                  </span>
+                )}
               </div>
 
               {/* Add Issue Quick Button */}

@@ -12,9 +12,11 @@ const statusIconMap = {
     [TaskStatus.DONE]: <CircleCheck className="size-[18px] text-emerald-400"/>,
 };
 
-export const KanbanColumnHeader = ({ board, label, color, category, taskCount }) => {
+export const KanbanColumnHeader = ({ board, label, color, category, taskCount, maxTasks = 5, overloadColor = '#EF4444' }) => {
     const { open } = useCreateTaskModal();
     const isDone = category === 'DONE' || board === TaskStatus.DONE || board === 'DONE';
+    const limit = Number(maxTasks) > 0 ? Number(maxTasks) : 5;
+    const isOverload = !isDone && (taskCount || 0) > limit;
     const displayLabel = label || snakeCaseToTitleCase(board);
 
     return (
@@ -29,17 +31,36 @@ export const KanbanColumnHeader = ({ board, label, color, category, taskCount })
             <span className="shrink-0">{statusIconMap[board] || <CircleDot className="size-3.5 text-blue-400" />}</span>
           )}
           
-          <h2 className="text-xs font-semibold text-neutral-800 truncate max-w-[120px]" title={displayLabel}>
+          <h2 className="text-xs font-semibold text-neutral-800 truncate max-w-[110px]" title={displayLabel}>
             {displayLabel}
           </h2>
 
-          <div className="flex size-4.5 min-w-4.5 px-1 items-center justify-center rounded bg-neutral-200/80 text-[10px] font-bold text-neutral-600">
-            {taskCount || 0}
-          </div>
+          {isDone ? (
+            <div className="flex size-4.5 min-w-4.5 px-1 items-center justify-center rounded bg-neutral-200/80 text-[10px] font-bold text-neutral-600" title="Completed tasks (exempt from capacity limit)">
+              {taskCount || 0}
+            </div>
+          ) : isOverload ? (
+            <div
+              className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9.5px] font-bold text-white shadow-2xs animate-pulse cursor-help"
+              style={{ backgroundColor: overloadColor }}
+              title={`Stage Overloaded: ${taskCount || 0} tickets (limit: ${limit})`}
+            >
+              <span>⚠️</span>
+              <span>{taskCount || 0}/{limit}</span>
+            </div>
+          ) : (
+            <div
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-300/80 text-[9.5px] font-bold text-emerald-700 cursor-help"
+              title={`Healthy Capacity: ${taskCount || 0} / ${limit} tickets`}
+            >
+              <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <span>{taskCount || 0}/{limit}</span>
+            </div>
+          )}
 
           {isDone && (
             <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-emerald-100 text-emerald-800 tracking-tight shrink-0 uppercase">
-              Admin
+              Done
             </span>
           )}
         </div>
