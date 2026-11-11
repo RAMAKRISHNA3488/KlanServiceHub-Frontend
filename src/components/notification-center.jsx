@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, CheckCheck, RefreshCw, Settings, Sparkles } from 'lucide-react';
+import { Bell, BellOff, CheckCheck, RefreshCw, Settings } from 'lucide-react';
 import { notificationsApi } from '@/lib/api-client';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 
@@ -114,7 +114,7 @@ export const NotificationCenter = () => {
             <div className="max-h-[380px] overflow-y-auto divide-y divide-neutral-100">
               {notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center text-neutral-400">
-                  <Sparkles className="size-8 text-neutral-300 mb-2" />
+                  <BellOff className="size-8 text-neutral-300 mb-2" />
                   <p className="text-sm font-medium text-neutral-600">All caught up!</p>
                   <p className="text-xs text-neutral-400 mt-1">No notifications at this moment.</p>
                 </div>

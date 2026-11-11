@@ -11,7 +11,6 @@ import {
   ArrowRight,
   CheckCircle2,
   RefreshCw,
-  Sparkles,
   ShieldCheck,
   Building,
   KeyRound,
@@ -936,7 +935,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
           }}
           className="flex items-center justify-center gap-2 rounded-xl border border-neutral-300 bg-white py-2.5 text-xs font-bold text-neutral-700 hover:bg-neutral-50 shadow-xs transition"
         >
-          <Sparkles className="size-4 text-blue-600" />
+          <ShieldCheck className="size-4 text-blue-600" />
           Demo Owner
         </button>
 

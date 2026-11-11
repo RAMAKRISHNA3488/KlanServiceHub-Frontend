@@ -7,7 +7,6 @@ import {
   GitCommit,
   PlusCircle,
   MessageSquare,
-  Sparkles,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 

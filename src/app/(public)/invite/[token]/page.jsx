@@ -12,7 +12,6 @@ import {
   ArrowRight,
   Shield,
   RefreshCw,
-  Sparkles,
   AlertTriangle,
 } from 'lucide-react';
 

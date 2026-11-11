@@ -4,7 +4,7 @@ import {
   Rocket, Clock, ShieldAlert, Activity, RefreshCw, Plus, 
   GitCommit, GitBranch, ArrowUpRight, RotateCcw, Search, 
   Filter, CheckCircle2, XCircle, AlertTriangle, PlayCircle, 
-  Zap, Info, ExternalLink, ChevronRight, X, Sparkles, TrendingUp
+  Zap, Info, ExternalLink, ChevronRight, X, TrendingUp
 } from 'lucide-react';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { apiFetch } from '@/lib/api-client';

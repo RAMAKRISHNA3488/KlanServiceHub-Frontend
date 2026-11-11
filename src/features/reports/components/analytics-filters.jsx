@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   Clock,
   RotateCcw,
-  Sparkles,
+  Timer,
   ChevronDown,
   X,
 } from 'lucide-react';
@@ -266,7 +266,7 @@ export const AnalyticsFilters = ({
           {/* Sprint */}
           <div className="space-y-1">
             <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1">
-              <Sparkles className="size-3" />
+              <Timer className="size-3" />
               Sprint
             </label>
             <select

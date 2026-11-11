@@ -7,7 +7,6 @@ import {
   Clock,
   ShieldAlert,
   ChevronRight,
-  Sparkles,
   ArrowRight,
   PieChart as PieChartIcon,
   List,

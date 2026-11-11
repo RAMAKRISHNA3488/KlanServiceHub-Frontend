@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import {
   Building2,
   Globe,
-  Sparkles,
   ArrowRight,
   ArrowLeft,
   CheckCircle2,
@@ -254,7 +253,7 @@ export const OnboardingWizard = () => {
         {step === 0 && (
           <div className="space-y-6 text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-3.5 py-1 text-xs font-bold text-blue-400">
-              <Sparkles className="size-3.5" />
+              <Zap className="size-3.5" />
               <span>Getting Started</span>
             </div>
 

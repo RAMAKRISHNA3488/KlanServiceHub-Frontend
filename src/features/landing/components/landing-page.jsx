@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { LandingFooter } from '@/components/landing-footer';
 import {
-  Sparkles,
+  TrendingUp,
   Zap,
   Kanban,
   Calendar,
@@ -322,7 +322,7 @@ export const LandingPageView = () => {
       <section className="pt-20 pb-16 px-6 max-w-6xl mx-auto text-center space-y-6 relative">
         <div className="flex flex-wrap items-center justify-center gap-2.5">
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-700 shadow-xs">
-            <Sparkles className="size-3.5" />
+            <Zap className="size-3.5" />
             <span>New: Klanvision Enterprise Organization & Roles Architecture</span>
           </div>
         </div>
@@ -757,7 +757,7 @@ export const LandingPageView = () => {
           {/* Plan 2 - Business Standard (Highlighted) */}
           <div className="p-8 rounded-2xl bg-blue-50/40 border-2 border-blue-600 relative flex flex-col justify-between space-y-6 shadow-xl shadow-blue-500/10">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-600 text-white font-bold text-[10px] uppercase tracking-wider shadow-sm flex items-center gap-1">
-              <Sparkles className="size-3" />
+              <Star className="size-3" />
               <span>Most Popular</span>
             </div>
             <div className="space-y-4">
@@ -1003,7 +1003,7 @@ export const LandingPageView = () => {
           {/* Quick Keyword Suggestion Pills */}
           <div className="flex items-center gap-1.5 flex-wrap justify-center sm:justify-start pt-0.5 text-xs">
             <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-1">
-              <Sparkles className="size-3 text-purple-600" />
+              <TrendingUp className="size-3 text-purple-600" />
               <span>Popular:</span>
             </span>
             {['Architecture', 'RBAC', 'Cloudflare D1', 'OTP & SSO', 'Audit Trail', 'ITSM & SLA'].map((tag) => {
@@ -1102,7 +1102,7 @@ export const LandingPageView = () => {
           </span>
           {advancedFaqMode && (
             <span className="inline-flex items-center gap-1 text-blue-600 font-semibold text-[11px]">
-              <Sparkles className="size-3" /> Showing deep architecture specifications
+              <Code2 className="size-3" /> Showing deep architecture specifications
             </span>
           )}
         </div>

@@ -15,7 +15,6 @@ import {
   Edit2,
   RefreshCw,
   X,
-  Sparkles,
 } from 'lucide-react';
 
 export const ReleasesView = () => {

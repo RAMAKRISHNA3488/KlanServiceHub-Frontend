@@ -13,7 +13,6 @@ import {
   MoreVertical,
   CheckSquare,
   Clock,
-  Sparkles,
   RefreshCw,
   X,
   Pencil,

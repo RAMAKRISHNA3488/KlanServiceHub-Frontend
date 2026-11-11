@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
   Zap,
   Clock,
   Layers,

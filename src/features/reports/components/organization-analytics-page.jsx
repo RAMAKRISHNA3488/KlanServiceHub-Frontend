@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   RefreshCw,
-  Sparkles,
   Download,
   Filter,
   Layers,

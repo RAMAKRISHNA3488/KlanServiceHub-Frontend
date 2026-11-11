@@ -7,7 +7,6 @@ import {
   X,
   CheckCircle2,
   RefreshCw,
-  Sparkles,
   BarChart3,
   Layers,
   Users,
@@ -1204,7 +1203,7 @@ export const ExportReportModal = ({
         {/* Footer Actions */}
         <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
           <div className="text-[10px] text-neutral-400 font-medium flex items-center gap-1">
-            <Sparkles className="size-3 text-purple-600" />
+            <CheckCircle2 className="size-3 text-emerald-600" />
             <span>Ready to generate formatted report with charts</span>
           </div>
 

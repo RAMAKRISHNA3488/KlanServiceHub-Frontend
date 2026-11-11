@@ -6,7 +6,6 @@ import {
   SlidersHorizontal,
   X,
   Cpu,
-  Sparkles,
   Shield,
   CheckCircle2,
   Copy,
@@ -181,7 +180,7 @@ export const CookieConsentBanner = () => {
                         Consent for Data Processing
                       </h2>
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 shadow-xs">
-                        <Sparkles className="size-2.5 text-blue-600" /> Up to 3x Faster Edge Cache
+                        <Zap className="size-2.5 text-blue-600" /> Up to 3x Faster Edge Cache
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 shadow-xs">
                         <CheckCircle2 className="size-2.5 text-emerald-600" /> GDPR & DPDP Ready

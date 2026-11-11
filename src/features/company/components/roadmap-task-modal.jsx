@@ -16,7 +16,6 @@ import {
   User,
   Calendar,
   Clock,
-  Sparkles,
   MessageSquare,
   Send,
   Loader2,
@@ -683,7 +682,7 @@ export const RoadmapTaskModal = ({
             /* ================= EDIT MODE ================= */
             <form onSubmit={handleSaveUpdate} className="space-y-5">
               <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 flex items-center gap-2.5 text-xs text-blue-800">
-                <Sparkles className="size-4 text-blue-600 shrink-0" />
+                <Edit3 className="size-4 text-blue-600 shrink-0" />
                 <span>
                   Make your changes below and click <strong>Update Task</strong> to save updates to
                   the roadmap.

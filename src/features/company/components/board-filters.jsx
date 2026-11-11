@@ -7,7 +7,7 @@ import {
   Briefcase,
   Flag,
   CheckCircle2,
-  Sparkles,
+  Timer,
   RotateCcw,
   ChevronDown,
   Search,
@@ -363,7 +363,7 @@ export const BoardFilters = ({
           {/* 7. SPRINT */}
           <div className="space-y-0.5 sm:space-y-1">
             <label className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1">
-              <Sparkles className="size-2.5 sm:size-3 text-neutral-400" />
+              <Timer className="size-2.5 sm:size-3 text-neutral-400" />
               <span>SPRINT</span>
             </label>
             <select

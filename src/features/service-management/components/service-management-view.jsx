@@ -21,7 +21,6 @@ import {
   Filter,
   Plus,
   RefreshCw,
-  Sparkles,
   Download,
   ExternalLink,
   Trash2,

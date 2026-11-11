@@ -12,7 +12,6 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
-  Sparkles,
   RefreshCw,
   CheckSquare,
   Clock,
@@ -559,8 +558,8 @@ export const RoadmapView = () => {
             {/* Empty State */}
             {filteredTasks.length === 0 ? (
               <div className="py-20 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="size-12 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shadow-xs">
-                  <Sparkles className="size-6" />
+                <div className="size-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-xs">
+                  <Calendar className="size-6" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-neutral-900">No roadmap items found</h3>

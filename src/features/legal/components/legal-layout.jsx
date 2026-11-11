@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Sparkles, Shield, ArrowLeft, FileText, Lock, CheckCircle2, Globe, Check, ArrowRight } from 'lucide-react';
+import { Shield, ArrowLeft, FileText, Lock, CheckCircle2, Globe, Check, ArrowRight } from 'lucide-react';
 import { LandingFooter } from '@/components/landing-footer';
 
 export const LegalLayout = ({ title, subtitle, lastUpdated, children, activeTab }) => {

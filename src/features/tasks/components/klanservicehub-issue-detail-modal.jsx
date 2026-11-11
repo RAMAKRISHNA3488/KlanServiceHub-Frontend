@@ -27,7 +27,6 @@ import {
   ArrowRight,
   ArrowLeft,
   ChevronRight,
-  Sparkles,
   Pencil,
   Check,
   Image,

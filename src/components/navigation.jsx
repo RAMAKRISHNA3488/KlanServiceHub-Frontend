@@ -24,7 +24,7 @@ import {
   Database,
   ChevronDown,
   ChevronRight,
-  Sparkles,
+  Rocket,
   Tag,
   ListTodo,
   Columns3,
@@ -51,7 +51,7 @@ const crossProjectRoutes = [
   { label: 'Governance & Risks', href: '/governance', icon: ShieldAlert },
   { label: 'Service Desk (KSM)', href: '/service-desk', icon: LifeBuoy },
   { label: 'CMDB Assets', href: '/assets', icon: Database },
-  { label: 'Deployments & DORA', href: '/deployments', icon: Sparkles },
+  { label: 'Deployments & DORA', href: '/deployments', icon: Rocket },
   { label: 'Portfolio & Goals', href: '/portfolios', icon: Kanban },
 ];
 

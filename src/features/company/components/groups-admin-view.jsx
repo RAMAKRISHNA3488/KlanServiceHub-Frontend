@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   Globe,
   UserCheck,
-  Sparkles,
   Code2,
   Headphones,
   Compass,
@@ -498,7 +497,7 @@ export const GroupsAdminView = () => {
             <p className="text-[10px] text-blue-600 font-semibold mt-0.5">Auto-granted to new joiners</p>
           </div>
           <div className="size-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-            <Sparkles className="size-5" />
+            <UserCheck className="size-5" />
           </div>
         </div>
 

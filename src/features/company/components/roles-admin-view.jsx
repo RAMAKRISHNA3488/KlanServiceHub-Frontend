@@ -26,7 +26,6 @@ import {
   Zap,
   ChevronRight,
   ExternalLink,
-  Sparkles
 } from 'lucide-react';
 
 const PRESET_TEMPLATES = [

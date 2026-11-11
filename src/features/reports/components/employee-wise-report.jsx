@@ -15,7 +15,6 @@ import {
   ShieldAlert,
   Layers,
   Briefcase,
-  Sparkles,
   LayoutGrid,
   List,
   Percent,
@@ -2386,7 +2385,7 @@ export const EmployeeWiseReport = ({
           <div className="space-y-4">
             <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 text-xs text-blue-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="size-4 text-blue-600 shrink-0" />
+                <Users className="size-4 text-blue-600 shrink-0" />
                 <span>
                   <strong>Capacity Matrix:</strong> Compares active work volume against assigned weekly capacity hours to spot burn-out risks early.
                 </span>

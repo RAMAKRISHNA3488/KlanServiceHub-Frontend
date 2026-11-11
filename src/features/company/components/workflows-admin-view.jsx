@@ -25,7 +25,7 @@ import {
   X,
   Kanban,
   Columns3,
-  Sparkles,
+  Globe,
   Pencil,
   Edit2,
   Check,
@@ -478,7 +478,7 @@ export const WorkflowsAdminView = () => {
       {/* Global Sync Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200/80 text-xs text-blue-950">
         <div className="flex items-center gap-2.5">
-          <Sparkles className="size-4 text-blue-600 shrink-0" />
+          <Globe className="size-4 text-blue-600 shrink-0" />
           <span>
             <strong>Global Reflection Active:</strong> Status stages and issue types configured here immediately reflect across all project Engineering Kanban Boards, task cards, and issue creation dialogs.
           </span>
@@ -530,7 +530,7 @@ export const WorkflowsAdminView = () => {
             }}
             className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 transition"
           >
-            <Sparkles className="size-4" />
+            <GitBranch className="size-4" />
             Initialize Workflow
           </button>
         </div>
@@ -904,7 +904,7 @@ export const WorkflowsAdminView = () => {
                 }}
                 className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-indigo-700 transition"
               >
-                <Sparkles className="size-4" />
+                <Bookmark className="size-4" />
                 Initialize Issue Types
               </button>
             </div>

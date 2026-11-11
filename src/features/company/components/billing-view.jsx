@@ -24,7 +24,6 @@ import {
   SlidersHorizontal,
   Building2,
   Shield,
-  Sparkles,
   ArrowRight,
   TrendingUp,
   Receipt,

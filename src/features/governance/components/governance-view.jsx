@@ -16,7 +16,6 @@ import {
   User,
   ArrowRight,
   TrendingUp,
-  Sparkles,
   ChevronDown,
   Trash2,
   Activity,

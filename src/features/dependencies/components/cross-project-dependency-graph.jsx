@@ -25,7 +25,7 @@ import {
   Download,
   Info,
   X,
-  Sparkles,
+  Database,
   List,
   LayoutGrid,
   Network,
@@ -437,7 +437,7 @@ export const CrossProjectDependencyGraph = () => {
                 disabled={seedDemoMutation.isPending}
                 className="h-9 px-3 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
               >
-                <Sparkles className="size-3.5 text-purple-600" />
+                <Database className="size-3.5 text-purple-600" />
                 <span>{seedDemoMutation.isPending ? 'Generating...' : 'Seed Sample Demo Links'}</span>
               </button>
             )}
@@ -921,7 +921,7 @@ export const CrossProjectDependencyGraph = () => {
                   disabled={seedDemoMutation.isPending}
                   className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg flex items-center gap-2 cursor-pointer"
                 >
-                  <Sparkles className="size-4" />
+                  <Database className="size-4" />
                   <span>{seedDemoMutation.isPending ? 'Generating...' : 'Seed Sample Dependency Links'}</span>
                 </button>
               )}
@@ -1107,7 +1107,7 @@ export const CrossProjectDependencyGraph = () => {
                 disabled={seedDemoMutation.isPending}
                 className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-bold transition inline-flex items-center gap-1 cursor-pointer"
               >
-                <Sparkles className="size-3.5" />
+                <Database className="size-3.5" />
                 <span>Seed Sample Links</span>
               </button>
             </div>

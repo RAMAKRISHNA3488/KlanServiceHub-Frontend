@@ -3,7 +3,7 @@ import {
   Zap,
   CheckSquare,
   Bug,
-  Sparkles,
+  Star,
   Bookmark,
   GitCommit,
   TrendingUp,
@@ -24,7 +24,7 @@ export const WorkTypeBreakdownCard = ({ workTypeData, loading = false, onDrillDo
       case 'bug':
         return <Bug className="size-3.5 text-rose-600" />;
       case 'feature':
-        return <Sparkles className="size-3.5 text-emerald-600" />;
+        return <Star className="size-3.5 text-emerald-600" />;
       case 'story':
         return <Bookmark className="size-3.5 text-emerald-600" />;
       case 'subtask':

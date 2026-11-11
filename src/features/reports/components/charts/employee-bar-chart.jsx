@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+uimport React, { useState, useMemo, useRef } from 'react';
 import {
   BarChart3,
   TrendingUp,
@@ -12,7 +12,6 @@ import {
   Zap,
   Target,
   Clock,
-  Sparkles,
   ChevronRight,
   Download,
   Maximize2,
@@ -229,11 +228,10 @@ export const EmployeeBarChart = ({
   return (
     <div
       ref={chartContainerRef}
-      className={`relative rounded-2xl transition-all duration-200 ${
-        isFullscreen
-          ? 'fixed inset-4 z-50 bg-white p-6 shadow-2xl border border-neutral-200 overflow-y-auto flex flex-col justify-between'
-          : 'space-y-4'
-      }`}
+      className={`relative rounded-2xl transition-all duration-200 ${isFullscreen
+        ? 'fixed inset-4 z-50 bg-white p-6 shadow-2xl border border-neutral-200 overflow-y-auto flex flex-col justify-between'
+        : 'space-y-4'
+        }`}
     >
       {/* 1. Header Toolbar (If Enabled) */}
       {showControls && (
@@ -272,11 +270,10 @@ export const EmployeeBarChart = ({
               <button
                 onClick={() => handleGraphTypeSelect('horizontal')}
                 title="Horizontal Stacked Bars"
-                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                  activeGraphType === 'horizontal'
-                    ? 'bg-white shadow-2xs font-bold text-neutral-900'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${activeGraphType === 'horizontal'
+                  ? 'bg-white shadow-2xs font-bold text-neutral-900'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <BarChart2 className="size-3.5 rotate-90" />
                 <span>Bars</span>
@@ -284,11 +281,10 @@ export const EmployeeBarChart = ({
               <button
                 onClick={() => handleGraphTypeSelect('vertical')}
                 title="Vertical Clustered Columns"
-                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                  activeGraphType === 'vertical'
-                    ? 'bg-white shadow-2xs font-bold text-neutral-900'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${activeGraphType === 'vertical'
+                  ? 'bg-white shadow-2xs font-bold text-neutral-900'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <BarChart3 className="size-3.5" />
                 <span>Columns</span>
@@ -296,11 +292,10 @@ export const EmployeeBarChart = ({
               <button
                 onClick={() => handleGraphTypeSelect('line')}
                 title="Spline Area Curves"
-                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                  activeGraphType === 'line'
-                    ? 'bg-white shadow-2xs font-bold text-neutral-900'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${activeGraphType === 'line'
+                  ? 'bg-white shadow-2xs font-bold text-neutral-900'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <LineChart className="size-3.5 text-blue-600" />
                 <span>Trend</span>
@@ -308,11 +303,10 @@ export const EmployeeBarChart = ({
               <button
                 onClick={() => handleGraphTypeSelect('matrix')}
                 title="4-Quadrant Efficiency Matrix"
-                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                  activeGraphType === 'matrix'
-                    ? 'bg-white shadow-2xs font-bold text-purple-700'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${activeGraphType === 'matrix'
+                  ? 'bg-white shadow-2xs font-bold text-purple-700'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <Compass className="size-3.5 text-purple-600" />
                 <span>Matrix</span>
@@ -320,11 +314,10 @@ export const EmployeeBarChart = ({
               <button
                 onClick={() => handleGraphTypeSelect('radar')}
                 title="Multi-Axis Velocity Radar"
-                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                  activeGraphType === 'radar'
-                    ? 'bg-white shadow-2xs font-bold text-emerald-700'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${activeGraphType === 'radar'
+                  ? 'bg-white shadow-2xs font-bold text-emerald-700'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <Activity className="size-3.5 text-emerald-600" />
                 <span>Radar</span>
@@ -335,51 +328,46 @@ export const EmployeeBarChart = ({
             <div className="flex items-center bg-neutral-100 p-0.5 rounded-xl border border-neutral-200 text-[11px] font-medium">
               <button
                 onClick={() => handleMetricSelect('tasks')}
-                className={`px-2 py-1 rounded-lg transition ${
-                  activeMetric === 'tasks'
-                    ? 'bg-white shadow-2xs font-bold text-neutral-900'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2 py-1 rounded-lg transition ${activeMetric === 'tasks'
+                  ? 'bg-white shadow-2xs font-bold text-neutral-900'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 Tasks
               </button>
               <button
                 onClick={() => handleMetricSelect('points')}
-                className={`px-2 py-1 rounded-lg transition ${
-                  activeMetric === 'points'
-                    ? 'bg-white shadow-2xs font-bold text-purple-700'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2 py-1 rounded-lg transition ${activeMetric === 'points'
+                  ? 'bg-white shadow-2xs font-bold text-purple-700'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 Points
               </button>
               <button
                 onClick={() => handleMetricSelect('capacity')}
-                className={`px-2 py-1 rounded-lg transition ${
-                  activeMetric === 'capacity'
-                    ? 'bg-white shadow-2xs font-bold text-blue-700'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2 py-1 rounded-lg transition ${activeMetric === 'capacity'
+                  ? 'bg-white shadow-2xs font-bold text-blue-700'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 Capacity %
               </button>
               <button
                 onClick={() => handleMetricSelect('completion')}
-                className={`px-2 py-1 rounded-lg transition ${
-                  activeMetric === 'completion'
-                    ? 'bg-white shadow-2xs font-bold text-emerald-700'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2 py-1 rounded-lg transition ${activeMetric === 'completion'
+                  ? 'bg-white shadow-2xs font-bold text-emerald-700'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 Rate %
               </button>
               <button
                 onClick={() => handleMetricSelect('efficiency')}
-                className={`px-2 py-1 rounded-lg transition ${
-                  activeMetric === 'efficiency'
-                    ? 'bg-white shadow-2xs font-bold text-amber-700'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`px-2 py-1 rounded-lg transition ${activeMetric === 'efficiency'
+                  ? 'bg-white shadow-2xs font-bold text-amber-700'
+                  : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 Efficiency
               </button>
@@ -427,8 +415,8 @@ export const EmployeeBarChart = ({
                 {activeMetric === 'capacity' || activeMetric === 'completion' || activeMetric === 'efficiency'
                   ? '%'
                   : activeMetric === 'points'
-                  ? 'pts'
-                  : 'items'}
+                    ? 'pts'
+                    : 'items'}
               </strong>
             </span>
           </div>
@@ -641,14 +629,14 @@ export const EmployeeBarChart = ({
                             activeMetric === 'points'
                               ? 'url(#vGradPurple)'
                               : activeMetric === 'efficiency'
-                              ? 'url(#vGradAmber)'
-                              : activeMetric === 'capacity'
-                              ? item.totalVal > 110
-                                ? '#E11D48'
-                                : item.totalVal < 40
-                                ? '#F59E0B'
-                                : '#3B82F6'
-                              : 'url(#vGradCompleted)'
+                                ? 'url(#vGradAmber)'
+                                : activeMetric === 'capacity'
+                                  ? item.totalVal > 110
+                                    ? '#E11D48'
+                                    : item.totalVal < 40
+                                      ? '#F59E0B'
+                                      : '#3B82F6'
+                                  : 'url(#vGradCompleted)'
                           }
                           rx="5"
                           filter={isHovered ? 'url(#columnGlow)' : undefined}
@@ -1000,51 +988,46 @@ export const EmployeeBarChart = ({
                 <span className="text-neutral-400 mr-1">Filter Quadrant:</span>
                 <button
                   onClick={() => setQuadrantFilter('ALL')}
-                  className={`px-2.5 py-1 rounded-lg transition ${
-                    quadrantFilter === 'ALL'
-                      ? 'bg-neutral-900 text-white font-bold'
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg transition ${quadrantFilter === 'ALL'
+                    ? 'bg-neutral-900 text-white font-bold'
+                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                    }`}
                 >
                   All ({chartData.length})
                 </button>
                 <button
                   onClick={() => setQuadrantFilter('LEADERS')}
-                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                    quadrantFilter === 'LEADERS'
-                      ? 'bg-emerald-600 text-white font-bold'
-                      : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${quadrantFilter === 'LEADERS'
+                    ? 'bg-emerald-600 text-white font-bold'
+                    : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                    }`}
                 >
                   <span>Leaders</span>
                 </button>
                 <button
                   onClick={() => setQuadrantFilter('EFFICIENT')}
-                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                    quadrantFilter === 'EFFICIENT'
-                      ? 'bg-blue-600 text-white font-bold'
-                      : 'bg-blue-50 text-blue-800 hover:bg-blue-100'
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${quadrantFilter === 'EFFICIENT'
+                    ? 'bg-blue-600 text-white font-bold'
+                    : 'bg-blue-50 text-blue-800 hover:bg-blue-100'
+                    }`}
                 >
                   <span>Efficient</span>
                 </button>
                 <button
                   onClick={() => setQuadrantFilter('OVERLOADED')}
-                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                    quadrantFilter === 'OVERLOADED'
-                      ? 'bg-rose-600 text-white font-bold'
-                      : 'bg-rose-50 text-rose-800 hover:bg-rose-100'
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${quadrantFilter === 'OVERLOADED'
+                    ? 'bg-rose-600 text-white font-bold'
+                    : 'bg-rose-50 text-rose-800 hover:bg-rose-100'
+                    }`}
                 >
                   <span>Overloaded</span>
                 </button>
                 <button
                   onClick={() => setQuadrantFilter('AVAILABLE')}
-                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
-                    quadrantFilter === 'AVAILABLE'
-                      ? 'bg-amber-600 text-white font-bold'
-                      : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${quadrantFilter === 'AVAILABLE'
+                    ? 'bg-amber-600 text-white font-bold'
+                    : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
+                    }`}
                 >
                   <span>Available</span>
                 </button>
@@ -1193,8 +1176,8 @@ export const EmployeeBarChart = ({
                           d.workloadStatus === 'Overloaded'
                             ? '#E11D48'
                             : d.completionRate >= 70
-                            ? '#10B981'
-                            : '#3B82F6'
+                              ? '#10B981'
+                              : '#3B82F6'
                         }
                         stroke="#FFFFFF"
                         strokeWidth="2.5"
@@ -1291,20 +1274,18 @@ export const EmployeeBarChart = ({
                 <button
                   key={emp.id}
                   onClick={() => setRadarSelectedIdx(i)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
-                    radarSelectedIdx === i
-                      ? 'bg-blue-600 text-white shadow-xs font-bold'
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${radarSelectedIdx === i
+                    ? 'bg-blue-600 text-white shadow-xs font-bold'
+                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                    }`}
                 >
                   <div
-                    className={`size-2 rounded-full ${
-                      emp.workloadStatus === 'Overloaded'
-                        ? 'bg-rose-400'
-                        : emp.completionRate >= 70
+                    className={`size-2 rounded-full ${emp.workloadStatus === 'Overloaded'
+                      ? 'bg-rose-400'
+                      : emp.completionRate >= 70
                         ? 'bg-emerald-400'
                         : 'bg-blue-300'
-                    }`}
+                      }`}
                   />
                   <span>{(emp.name || 'Staff').split(' ')[0]}</span>
                 </button>
@@ -1457,25 +1438,23 @@ export const EmployeeBarChart = ({
                 onClick={() => onEmployeeClick && onEmployeeClick(item)}
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
-                className={`p-3 rounded-2xl transition cursor-pointer flex flex-col md:flex-row md:items-center gap-3 md:gap-5 border ${
-                  isHovered
-                    ? 'bg-blue-50/70 border-blue-300 shadow-sm translate-x-1'
-                    : 'bg-white border-neutral-200/80 hover:border-neutral-300'
-                }`}
+                className={`p-3 rounded-2xl transition cursor-pointer flex flex-col md:flex-row md:items-center gap-3 md:gap-5 border ${isHovered
+                  ? 'bg-blue-50/70 border-blue-300 shadow-sm translate-x-1'
+                  : 'bg-white border-neutral-200/80 hover:border-neutral-300'
+                  }`}
               >
                 {/* Employee Profile & Rank */}
                 <div className="flex items-center gap-3 w-52 shrink-0 truncate">
                   {/* Rank Badge */}
                   <div
-                    className={`size-6 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 ${
-                      idx === 0
-                        ? 'bg-amber-100 text-amber-800 ring-2 ring-amber-300'
-                        : idx === 1
+                    className={`size-6 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 ${idx === 0
+                      ? 'bg-amber-100 text-amber-800 ring-2 ring-amber-300'
+                      : idx === 1
                         ? 'bg-slate-200 text-slate-700'
                         : idx === 2
-                        ? 'bg-amber-50 text-amber-900 border border-amber-200'
-                        : 'bg-neutral-100 text-neutral-500'
-                    }`}
+                          ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                          : 'bg-neutral-100 text-neutral-500'
+                      }`}
                   >
                     #{idx + 1}
                   </div>
@@ -1490,13 +1469,12 @@ export const EmployeeBarChart = ({
                       )}
                     </div>
                     <span
-                      className={`absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full ring-2 ring-white ${
-                        item.workloadStatus === 'Overloaded'
-                          ? 'bg-rose-500'
-                          : item.workloadStatus === 'Underutilized'
+                      className={`absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full ring-2 ring-white ${item.workloadStatus === 'Overloaded'
+                        ? 'bg-rose-500'
+                        : item.workloadStatus === 'Underutilized'
                           ? 'bg-amber-500'
                           : 'bg-emerald-500'
-                      }`}
+                        }`}
                     />
                   </div>
 
@@ -1533,13 +1511,12 @@ export const EmployeeBarChart = ({
                       )}
                       {activeMetric === 'capacity' && (
                         <span
-                          className={`font-bold ${
-                            item.totalVal > 110
-                              ? 'text-rose-600'
-                              : item.totalVal < 40
+                          className={`font-bold ${item.totalVal > 110
+                            ? 'text-rose-600'
+                            : item.totalVal < 40
                               ? 'text-amber-600'
                               : 'text-neutral-800'
-                          }`}
+                            }`}
                         >
                           {item.totalVal}% Capacity Load ({item.capacityHours || 40}h bandwidth)
                         </span>
@@ -1603,13 +1580,12 @@ export const EmployeeBarChart = ({
                       />
                     ) : activeMetric === 'capacity' ? (
                       <div
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          item.totalVal > 110
-                            ? 'bg-rose-500'
-                            : item.totalVal < 40
+                        className={`h-full rounded-full transition-all duration-300 ${item.totalVal > 110
+                          ? 'bg-rose-500'
+                          : item.totalVal < 40
                             ? 'bg-amber-400'
                             : 'bg-blue-600'
-                        }`}
+                          }`}
                         style={{ width: `${Math.min(item.totalVal, 100)}%` }}
                       />
                     ) : (

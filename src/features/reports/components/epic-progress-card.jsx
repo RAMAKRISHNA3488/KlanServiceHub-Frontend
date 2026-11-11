@@ -18,7 +18,6 @@ import {
   Target,
   Download,
   Calendar,
-  Sparkles,
   ShieldAlert,
   ArrowUpDown,
   Filter,

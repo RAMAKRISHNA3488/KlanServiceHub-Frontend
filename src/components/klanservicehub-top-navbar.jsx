@@ -24,7 +24,6 @@ import {
   Users,
   LayoutDashboard,
   Kanban,
-  Sparkles,
   Command,
   Menu,
   X,

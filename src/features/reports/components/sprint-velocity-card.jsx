@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Sparkles,
   TrendingUp,
   Calendar,
   CheckCircle2,
@@ -27,7 +26,7 @@ export const SprintVelocityCard = ({ sprintsData, loading = false, onDrillDown }
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-            <Sparkles className="size-4 text-purple-600" />
+            <TrendingUp className="size-4 text-purple-600" />
             Sprint Velocity & Execution
           </h3>
           <p className="text-xs text-neutral-500 mt-0.5">

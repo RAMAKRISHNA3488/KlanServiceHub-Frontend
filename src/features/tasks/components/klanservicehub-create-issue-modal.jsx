@@ -15,7 +15,6 @@ import {
   List,
   TrendingUp,
   ChevronDown,
-  Sparkles,
   User,
   Calendar,
   Layers,

@@ -17,7 +17,7 @@ import {
   FolderGit2,
   PlayCircle,
   RefreshCw,
-  Sparkles,
+  LayoutGrid,
   Plus,
   Trash2,
   Settings,
@@ -1141,7 +1141,7 @@ export const DashboardsView = () => {
             <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
-                  <Sparkles className="size-5" />
+                  <LayoutGrid className="size-5" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-neutral-900">Gadget Directory & Library</h3>
