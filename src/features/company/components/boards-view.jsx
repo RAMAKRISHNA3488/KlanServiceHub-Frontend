@@ -197,6 +197,10 @@ export const BoardsView = () => {
     await queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
   };
 
+  const activeBoard = useMemo(() => {
+    return boards.find((b) => b.id === selectedBoardId) || boards[0] || null;
+  }, [boards, selectedBoardId]);
+
   // Derive dynamic board columns from active workflow statuses and project WIP overrides
   const defaultWorkflow = workflows[0];
   const workflowStatuses = defaultWorkflow?.statuses?.length > 0 ? defaultWorkflow.statuses : null;
@@ -758,7 +762,6 @@ export const BoardsView = () => {
     );
   }
 
-  const activeBoard = boards.find((b) => b.id === selectedBoardId) || boards[0];
   const activeProjectObj = projects.find((p) => (p.$id || p.id) === filters.projectId);
   const boardDisplayName = activeProjectObj
     ? `${activeProjectObj.name} • Engineering Kanban Board`
