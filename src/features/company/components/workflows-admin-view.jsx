@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { workflowsAdminApi } from '@/lib/api-client';
+import { useGetProjects } from '@/features/projects/api/use-get-projects';
+import { useUpdateProject } from '@/features/projects/api/use-update-project';
 import { toast } from 'sonner';
 import {
   GitBranch,
@@ -31,6 +33,9 @@ import {
   Layers,
   ChevronLeft,
   ChevronRight,
+  SlidersHorizontal,
+  RotateCcw,
+  ShieldCheck,
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -73,6 +78,88 @@ export const WorkflowsAdminView = () => {
   const [issueTypes, setIssueTypes] = useState([]);
   const [activeTab, setActiveTab] = useState('WORKFLOWS'); // WORKFLOWS, ISSUE_TYPES
   const [loading, setLoading] = useState(true);
+
+  // Projects integration for project-wise WIP limits & stage overload customization
+  const { data: projectsData } = useGetProjects({ workspaceId });
+  const projects = projectsData?.documents || [];
+  const { mutate: updateProject, isPending: isUpdatingProject } = useUpdateProject();
+  const [selectedProjectId, setSelectedProjectId] = useState('WORKSPACE_DEFAULT');
+
+  const selectedProject = React.useMemo(() => {
+    if (selectedProjectId === 'WORKSPACE_DEFAULT') return null;
+    return projects.find((p) => (p.$id || p.id) === selectedProjectId) || null;
+  }, [selectedProjectId, projects]);
+
+  const projectStageLimits = React.useMemo(() => {
+    return selectedProject?.stageLimits || selectedProject?.stage_limits || {};
+  }, [selectedProject]);
+
+  // Project Stage WIP Limit Edit Modal
+  const [editingProjectStage, setEditingProjectStage] = useState(null); // { status, maxTasks, overloadColor }
+
+  const handleOpenEditProjectStage = (st) => {
+    if (!selectedProject) return;
+    const isDone = (st.category || '').toUpperCase() === 'DONE' || st.name.toUpperCase().includes('DONE');
+    if (isDone) return;
+
+    const override = projectStageLimits[st.name];
+    const defaultLimit = st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5);
+    const defaultColor = st.overloadColor || st.overload_color || '#EF4444';
+
+    setEditingProjectStage({
+      status: st,
+      maxTasks: override?.maxTasks !== undefined ? override.maxTasks : defaultLimit,
+      overloadColor: override?.overloadColor || defaultColor,
+    });
+  };
+
+  const handleSaveProjectStageLimit = (e) => {
+    e.preventDefault();
+    if (!selectedProject || !editingProjectStage) return;
+
+    const statusName = editingProjectStage.status.name;
+    const isDone = (editingProjectStage.status.category || '').toUpperCase() === 'DONE' || statusName.toUpperCase().includes('DONE');
+
+    const updatedStageLimits = {
+      ...projectStageLimits,
+      [statusName]: {
+        maxTasks: isDone ? 0 : (Number(editingProjectStage.maxTasks) || 5),
+        overloadColor: editingProjectStage.overloadColor || '#EF4444',
+      },
+    };
+
+    updateProject({
+      form: { stageLimits: updatedStageLimits },
+      param: { projectId: selectedProject.$id || selectedProject.id },
+    }, {
+      onSuccess: () => {
+        toast.success(`Updated ${statusName.replace(/_/g, ' ')} WIP limits for ${selectedProject.name}!`);
+        setEditingProjectStage(null);
+        queryClient.invalidateQueries({ queryKey: ['projects', workspaceId] });
+        queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
+      },
+    });
+  };
+
+  const handleResetProjectStageLimit = (statusName) => {
+    if (!selectedProject) return;
+    const updatedStageLimits = { ...projectStageLimits };
+    delete updatedStageLimits[statusName];
+
+    updateProject({
+      form: { stageLimits: updatedStageLimits },
+      param: { projectId: selectedProject.$id || selectedProject.id },
+    }, {
+      onSuccess: () => {
+        toast.success(`Reset ${statusName.replace(/_/g, ' ')} to workspace default for ${selectedProject.name}!`);
+        setEditingProjectStage(null);
+        queryClient.invalidateQueries({ queryKey: ['projects', workspaceId] });
+        queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
+      },
+    });
+  };
 
   // Edit Workflow Metadata Modal/State
   const [editWorkflowModal, setEditWorkflowModal] = useState(false);
@@ -481,6 +568,89 @@ export const WorkflowsAdminView = () => {
             </button>
           </div>
 
+          {/* Project WIP Limits & Overload Scope Switcher */}
+          <div className="rounded-xl border border-neutral-200/90 bg-white p-4 shadow-2xs space-y-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="size-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                  <SlidersHorizontal className="size-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-2">
+                    <span>Capacity Limit & Overload Scope</span>
+                    {selectedProject ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wide">
+                        Project Customization Active
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-neutral-100 text-neutral-600 uppercase tracking-wide">
+                        Workspace Baseline
+                      </span>
+                    )}
+                  </h4>
+                  <p className="text-[11px] text-neutral-500">
+                    {selectedProject
+                      ? `Customizing stage WIP capacity limits and alert colors for "${selectedProject.name}". Unconfigured stages automatically inherit workspace defaults.`
+                      : 'Configuring baseline WIP capacity and overload alert colors applied to all standard project boards.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Selector dropdown */}
+              <div className="flex items-center gap-2 self-start md:self-auto">
+                <label className="text-xs font-semibold text-neutral-600 whitespace-nowrap">
+                  Configure For:
+                </label>
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-800 shadow-2xs focus:border-blue-500 focus:outline-none min-w-[210px]"
+                >
+                  <option value="WORKSPACE_DEFAULT">🌐 Workspace Baseline (All Projects)</option>
+                  {projects.map((p) => (
+                    <option key={p.$id || p.id} value={p.$id || p.id}>
+                      📁 {p.name} ({p.key || 'PROJ'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {selectedProject && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2.5 border-t border-neutral-100 text-xs">
+                <div className="flex items-center gap-2 text-neutral-600">
+                  <ShieldCheck className="size-3.5 text-blue-600 shrink-0" />
+                  <span>
+                    <strong>{Object.keys(projectStageLimits).filter(k => !k.toUpperCase().includes('DONE')).length}</strong> of{' '}
+                    <strong>{(defaultWorkflow.statuses || []).filter(s => (s.category || '').toUpperCase() !== 'DONE').length}</strong> active stages customized for{' '}
+                    <span className="font-semibold text-neutral-900">{selectedProject.name}</span>.
+                  </span>
+                </div>
+                {Object.keys(projectStageLimits).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateProject({
+                        form: { stageLimits: {} },
+                        param: { projectId: selectedProject.$id || selectedProject.id },
+                      }, {
+                        onSuccess: () => {
+                          toast.success(`Reset all stage limits to workspace default for ${selectedProject.name}!`);
+                          queryClient.invalidateQueries({ queryKey: ['projects', workspaceId] });
+                          queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
+                        }
+                      });
+                    }}
+                    className="text-[11px] font-semibold text-neutral-500 hover:text-red-600 transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="size-3" />
+                    Reset All to Workspace Default
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Visual Pipeline with Edit, Add, Reorder, Delete & Horizontal Scrolling */}
           <div className="rounded-xl bg-neutral-50 p-6 border border-neutral-200/80">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -520,9 +690,26 @@ export const WorkflowsAdminView = () => {
               className="flex items-center gap-3 overflow-x-auto pb-5 pt-1 custom-scrollbar w-full scroll-smooth"
               style={{ scrollBehavior: 'smooth' }}
             >
-              {(defaultWorkflow.statuses || []).map((st, idx) => (
+              {(defaultWorkflow.statuses || []).map((st, idx) => {
+                const isDone = st.category === 'DONE' || st.name.toUpperCase().includes('DONE');
+                const projectOverride = selectedProject ? projectStageLimits[st.name] : null;
+                const defaultLimit = st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5);
+                const effectiveMaxTasks = isDone
+                  ? 0
+                  : (projectOverride?.maxTasks !== undefined
+                      ? projectOverride.maxTasks
+                      : defaultLimit);
+                const defaultColor = st.overloadColor || st.overload_color || '#EF4444';
+                const effectiveOverloadColor = projectOverride?.overloadColor || defaultColor;
+                const isProjectCustomized = Boolean(projectOverride);
+
+                return (
                 <React.Fragment key={st.id}>
-                  <div className="flex flex-col justify-between rounded-xl border border-neutral-200 bg-white p-3.5 shadow-xs w-[215px] shrink-0 min-h-[125px] hover:border-blue-300 hover:shadow-md transition group">
+                  <div className={`flex flex-col justify-between rounded-xl border bg-white p-3.5 shadow-xs w-[225px] shrink-0 min-h-[135px] transition group ${
+                    selectedProject && isProjectCustomized
+                      ? 'border-blue-400 ring-1 ring-blue-200 bg-blue-50/20 shadow-sm'
+                      : 'border-neutral-200 hover:border-blue-300 hover:shadow-md'
+                  }`}>
                     {/* Top Row: Step badge on left, color & actions on right */}
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-neutral-100">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">
@@ -535,27 +722,41 @@ export const WorkflowsAdminView = () => {
                           style={{ backgroundColor: st.color || '#3B82F6' }}
                           title={`Color: ${st.color || '#3B82F6'}`}
                         />
-                        <button
-                          onClick={() => handleOpenEditStatus(st)}
-                          className="p-1 rounded text-neutral-400 hover:text-blue-600 hover:bg-blue-50 transition"
-                          title="Edit Status"
-                        >
-                          <Pencil className="size-3" />
-                        </button>
-                        {defaultWorkflow.statuses.length > 2 && (
-                          <button
-                            onClick={() =>
-                              setDeleteConfirmStatus({
-                                workflowId: defaultWorkflow.id,
-                                statusId: st.id,
-                                name: st.name,
-                              })
-                            }
-                            className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
-                            title="Remove Status"
-                          >
-                            <Trash2 className="size-3" />
-                          </button>
+                        {selectedProject ? (
+                          !isDone && (
+                            <button
+                              onClick={() => handleOpenEditProjectStage(st)}
+                              className="p-1 rounded text-neutral-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                              title={`Customize ${st.name} WIP Limit for ${selectedProject.name}`}
+                            >
+                              <Pencil className="size-3" />
+                            </button>
+                          )
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleOpenEditStatus(st)}
+                              className="p-1 rounded text-neutral-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                              title="Edit Status"
+                            >
+                              <Pencil className="size-3" />
+                            </button>
+                            {defaultWorkflow.statuses.length > 2 && (
+                              <button
+                                onClick={() =>
+                                  setDeleteConfirmStatus({
+                                    workflowId: defaultWorkflow.id,
+                                    statusId: st.id,
+                                    name: st.name,
+                                  })
+                                }
+                                className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                title="Remove Status"
+                              >
+                                <Trash2 className="size-3" />
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -568,18 +769,45 @@ export const WorkflowsAdminView = () => {
                     </div>
 
                     {/* Stage WIP Capacity & Overload Indicator */}
-                    <div className="flex items-center justify-between text-[10px] text-neutral-500 py-1.5 border-t border-neutral-100">
-                      <span className="font-medium">Overload Limit:</span>
-                      {st.category === 'DONE' ? (
-                        <span className="font-semibold text-neutral-400">Exempt (Done)</span>
-                      ) : (
-                        <div className="flex items-center gap-1.5 font-bold text-neutral-700">
-                          <span>{st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)} max</span>
-                          <span
-                            className="size-2 rounded-full border border-black/10 shrink-0"
-                            style={{ backgroundColor: st.overloadColor || st.overload_color || '#EF4444' }}
-                            title={`Custom Overload Color: ${st.overloadColor || st.overload_color || '#EF4444'}`}
-                          />
+                    <div className="flex flex-col gap-1 py-1.5 border-t border-neutral-100 text-[10px]">
+                      <div className="flex items-center justify-between text-neutral-500">
+                        <span className="font-medium">Overload Limit:</span>
+                        {isDone ? (
+                          <span className="font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                            Exempt (Done)
+                          </span>
+                        ) : (
+                          <div className="flex items-center gap-1.5 font-bold text-neutral-700">
+                            <span>{effectiveMaxTasks} max</span>
+                            <span
+                              className="size-2 rounded-full border border-black/10 shrink-0"
+                              style={{ backgroundColor: effectiveOverloadColor }}
+                              title={`Overload Color: ${effectiveOverloadColor}`}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {selectedProject && !isDone && (
+                        <div className="flex items-center justify-between pt-1">
+                          {isProjectCustomized ? (
+                            <span className="text-[9px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 flex items-center gap-1">
+                              <span className="size-1 rounded-full bg-blue-600 inline-block" />
+                              Project Override
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-medium text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
+                              Inheriting Default
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditProjectStage(st)}
+                            className="text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                          >
+                            {isProjectCustomized ? 'Edit' : 'Customize'}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -599,18 +827,18 @@ export const WorkflowsAdminView = () => {
                       {/* Card Reordering Arrows */}
                       <div className="flex items-center gap-0.5 bg-neutral-100 rounded-md p-0.5">
                         <button
-                          disabled={idx === 0}
+                          disabled={idx === 0 || Boolean(selectedProject)}
                           onClick={() => handleReorderStatus(idx, 'left')}
                           className="p-0.5 rounded text-neutral-500 hover:text-neutral-900 hover:bg-white disabled:opacity-30 disabled:hover:bg-transparent transition"
-                          title="Move step left"
+                          title={selectedProject ? "Switch to Workspace Baseline to reorder stages" : "Move step left"}
                         >
                           <ChevronLeft className="size-3" />
                         </button>
                         <button
-                          disabled={idx === defaultWorkflow.statuses.length - 1}
+                          disabled={idx === defaultWorkflow.statuses.length - 1 || Boolean(selectedProject)}
                           onClick={() => handleReorderStatus(idx, 'right')}
                           className="p-0.5 rounded text-neutral-500 hover:text-neutral-900 hover:bg-white disabled:opacity-30 disabled:hover:bg-transparent transition"
-                          title="Move step right"
+                          title={selectedProject ? "Switch to Workspace Baseline to reorder stages" : "Move step right"}
                         >
                           <ChevronRight className="size-3" />
                         </button>
@@ -622,7 +850,8 @@ export const WorkflowsAdminView = () => {
                     <ArrowRight className="size-4 text-neutral-400 shrink-0 mx-0.5" />
                   )}
                 </React.Fragment>
-              ))}
+                );
+              })}
 
               {/* Quick Add Step Button inside Pipeline */}
               <button
@@ -958,6 +1187,217 @@ export const WorkflowsAdminView = () => {
                 >
                   Save Status
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Project-Specific Stage WIP & Overload Customization Modal */}
+      {editingProjectStage && selectedProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-neutral-200">
+            <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="size-8 rounded-lg flex items-center justify-center font-bold text-white shadow-2xs"
+                  style={{ backgroundColor: editingProjectStage.status.color || '#3B82F6' }}
+                >
+                  <SlidersHorizontal className="size-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+                    Customize {editingProjectStage.status.name.replace(/_/g, ' ')} WIP Limit
+                  </h3>
+                  <p className="text-xs text-neutral-500">
+                    Project:{' '}
+                    <span className="font-semibold text-blue-600">
+                      {selectedProject.name} ({selectedProject.key || 'PROJ'})
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingProjectStage(null)}
+                className="text-neutral-400 hover:text-neutral-700 p-1 rounded-lg hover:bg-neutral-100 transition-colors"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProjectStageLimit} className="mt-4 space-y-4">
+              <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/70 text-xs text-blue-800 flex items-start gap-2">
+                <ShieldCheck className="size-4 text-blue-600 shrink-0 mt-0.5" />
+                <div className="leading-relaxed">
+                  <strong>Project-Specific Override:</strong> Changes saved here apply strictly to the Kanban board and telemetry for{' '}
+                  <strong>{selectedProject.name}</strong>. All other workspace projects continue using the default baseline.
+                </div>
+              </div>
+
+              {/* Status Reference Info */}
+              <div className="flex items-center justify-between p-2.5 bg-neutral-50 rounded-xl border border-neutral-200 text-xs">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="size-2.5 rounded-full"
+                    style={{ backgroundColor: editingProjectStage.status.color || '#3B82F6' }}
+                  />
+                  <span className="font-bold text-neutral-800">{editingProjectStage.status.name}</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-200 text-neutral-700 uppercase">
+                    {editingProjectStage.status.category || 'IN_PROGRESS'}
+                  </span>
+                </div>
+                <div className="text-[11px] text-neutral-500">
+                  Workspace Baseline:{' '}
+                  <span className="font-semibold text-neutral-700">
+                    {editingProjectStage.status.maxTasks ?? 5} tickets
+                  </span>
+                </div>
+              </div>
+
+              {/* Capacity Input */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-neutral-700">
+                    Stage Capacity / WIP Limit (Tickets)
+                  </label>
+                  <span className="text-[11px] text-neutral-500">1 – 100 tickets</span>
+                </div>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  required
+                  value={editingProjectStage.maxTasks}
+                  onChange={(e) =>
+                    setEditingProjectStage({
+                      ...editingProjectStage,
+                      maxTasks: Math.max(1, parseInt(e.target.value, 10) || 1),
+                    })
+                  }
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                />
+                <p className="mt-1 text-[11px] text-neutral-500">
+                  When active tickets in this column exceed this count on {selectedProject.name}&apos;s Kanban board, the column top line highlights in the custom overload alert color.
+                </p>
+              </div>
+
+              {/* Overload Alert Color */}
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Custom Stage Overload Indicator Color
+                </label>
+                <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                  {OVERLOAD_COLOR_PRESETS.map((p) => (
+                    <button
+                      key={p.color}
+                      type="button"
+                      onClick={() =>
+                        setEditingProjectStage({
+                          ...editingProjectStage,
+                          overloadColor: p.color,
+                        })
+                      }
+                      className={`size-6 rounded-full border transition-all ${
+                        (editingProjectStage.overloadColor || '#EF4444') === p.color
+                          ? 'ring-2 ring-blue-600 ring-offset-2 scale-110'
+                          : 'hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: p.color }}
+                      title={p.label}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={editingProjectStage.overloadColor || '#EF4444'}
+                    onChange={(e) =>
+                      setEditingProjectStage({
+                        ...editingProjectStage,
+                        overloadColor: e.target.value,
+                      })
+                    }
+                    className="h-9 w-14 rounded-lg border border-neutral-300 p-1 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={editingProjectStage.overloadColor || '#EF4444'}
+                    onChange={(e) =>
+                      setEditingProjectStage({
+                        ...editingProjectStage,
+                        overloadColor: e.target.value,
+                      })
+                    }
+                    className="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-xs font-mono uppercase focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Live Visual Telemetry Preview */}
+              <div className="p-3.5 rounded-xl border border-neutral-200 bg-neutral-50/80 space-y-2.5">
+                <div className="flex items-center justify-between text-[10.5px] font-bold text-neutral-500 uppercase tracking-wider">
+                  <span>Kanban Board Top Telemetry Preview</span>
+                  <span className="text-[10px] text-blue-600 font-normal">Active for {selectedProject.name}</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px] text-neutral-600 font-medium">
+                      <span>Healthy Flow (&le; {editingProjectStage.maxTasks ?? 5} tickets):</span>
+                      <span className="text-emerald-700 font-semibold text-xs flex items-center gap-1">
+                        <span className="size-2 rounded-full bg-emerald-500 inline-block" /> Normal Green
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-emerald-500 w-full shadow-2xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px] text-neutral-600 font-medium">
+                      <span>Stage Overloaded (&gt; {editingProjectStage.maxTasks ?? 5} tickets):</span>
+                      <span className="font-semibold text-xs flex items-center gap-1" style={{ color: editingProjectStage.overloadColor || '#EF4444' }}>
+                        <span className="size-2 rounded-full inline-block" style={{ backgroundColor: editingProjectStage.overloadColor || '#EF4444' }} /> Custom Alert Line
+                      </span>
+                    </div>
+                    <div
+                      className="h-1.5 rounded-full w-full shadow-2xs transition-colors duration-200"
+                      style={{ backgroundColor: editingProjectStage.overloadColor || '#EF4444' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions Footer */}
+              <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
+                <div>
+                  {projectStageLimits[editingProjectStage.status.name] && (
+                    <button
+                      type="button"
+                      disabled={isUpdatingProject}
+                      onClick={() => handleResetProjectStageLimit(editingProjectStage.status.name)}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors"
+                    >
+                      <RotateCcw className="size-3.5" />
+                      Reset to Default
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingProjectStage(null)}
+                    disabled={isUpdatingProject}
+                    className="rounded-lg px-4 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-100 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUpdatingProject}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  >
+                    <Check className="size-3.5" />
+                    {isUpdatingProject ? 'Saving...' : 'Save Project Limit'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
