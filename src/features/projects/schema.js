@@ -16,5 +16,6 @@ export const updateProjectSchema = z.object({
     workspaceId: z.string({
         message: 'Workspace id is required.',
     }).optional(),
+    stageLimits: z.any().optional(),
 });
 

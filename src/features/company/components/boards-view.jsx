@@ -197,9 +197,22 @@ export const BoardsView = () => {
     await queryClient.invalidateQueries({ queryKey: ['boards-view-data', workspaceId] });
   };
 
-  // Derive dynamic board columns from active workflow statuses
+  // Derive dynamic board columns from active workflow statuses and project WIP overrides
   const defaultWorkflow = workflows[0];
   const workflowStatuses = defaultWorkflow?.statuses?.length > 0 ? defaultWorkflow.statuses : null;
+
+  const currentProjectId = (filters.projectId && filters.projectId !== 'ALL')
+    ? filters.projectId
+    : (activeBoard?.projectId || activeBoard?.project_id || null);
+
+  const currentProject = useMemo(() => {
+    if (!currentProjectId || !projects || projects.length === 0) return null;
+    return projects.find((p) => (p.$id || p.id) === currentProjectId);
+  }, [currentProjectId, projects]);
+
+  const projectStageLimits = useMemo(() => {
+    return currentProject?.stageLimits || currentProject?.stage_limits || {};
+  }, [currentProject]);
 
   const columns = useMemo(() => {
     if (workflowStatuses && workflowStatuses.length > 0) {
@@ -235,6 +248,17 @@ export const BoardsView = () => {
         }
 
         const isDoneStatus = cat === 'DONE' || id === 'DONE';
+        const projectLimit = projectStageLimits?.[id] || projectStageLimits?.[st.name];
+        const resolvedMaxTasks = isDoneStatus
+          ? 0
+          : (projectLimit?.maxTasks !== undefined
+              ? Number(projectLimit.maxTasks)
+              : (st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)));
+        const resolvedOverloadColor = projectLimit?.overloadColor
+          || st.overloadColor
+          || st.overload_color
+          || '#EF4444';
+
         unifiedList.push({
           id,
           rawName: id === 'IN_REVIEW' ? 'IN_REVIEW' : st.name,
@@ -244,8 +268,9 @@ export const BoardsView = () => {
           icon: Icon,
           bg,
           border,
-          maxTasks: isDoneStatus ? 0 : (st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)),
-          overloadColor: st.overloadColor || st.overload_color || '#EF4444',
+          maxTasks: resolvedMaxTasks,
+          overloadColor: resolvedOverloadColor,
+          isProjectCustomized: Boolean(projectLimit),
         });
       }
       return unifiedList;
@@ -253,13 +278,13 @@ export const BoardsView = () => {
 
     // Default fallback columns if no custom workflow configured
     return [
-      { id: 'BACKLOG', label: 'BACKLOG', color: '#94A3B8', category: 'TODO', icon: CircleDot, bg: 'bg-slate-50/70', border: 'border-slate-200', maxTasks: 5, overloadColor: '#EF4444' },
-      { id: 'TODO', label: 'TO DO', color: '#3B82F6', category: 'TODO', icon: CircleDot, bg: 'bg-blue-50/70', border: 'border-blue-200', maxTasks: 5, overloadColor: '#EF4444' },
-      { id: 'IN_PROGRESS', label: 'IN PROGRESS', color: '#F59E0B', category: 'IN_PROGRESS', icon: Clock, bg: 'bg-amber-50/70', border: 'border-amber-200', maxTasks: 5, overloadColor: '#EF4444' },
-      { id: 'IN_REVIEW', label: 'IN REVIEW', color: '#8B5CF6', category: 'IN_PROGRESS', icon: Code2, bg: 'bg-purple-50/70', border: 'border-purple-200', maxTasks: 5, overloadColor: '#EF4444' },
+      { id: 'BACKLOG', label: 'BACKLOG', color: '#94A3B8', category: 'TODO', icon: CircleDot, bg: 'bg-slate-50/70', border: 'border-slate-200', maxTasks: projectStageLimits?.BACKLOG?.maxTasks ?? 5, overloadColor: projectStageLimits?.BACKLOG?.overloadColor || '#EF4444' },
+      { id: 'TODO', label: 'TO DO', color: '#3B82F6', category: 'TODO', icon: CircleDot, bg: 'bg-blue-50/70', border: 'border-blue-200', maxTasks: projectStageLimits?.TODO?.maxTasks ?? 5, overloadColor: projectStageLimits?.TODO?.overloadColor || '#EF4444' },
+      { id: 'IN_PROGRESS', label: 'IN PROGRESS', color: '#F59E0B', category: 'IN_PROGRESS', icon: Clock, bg: 'bg-amber-50/70', border: 'border-amber-200', maxTasks: projectStageLimits?.IN_PROGRESS?.maxTasks ?? 5, overloadColor: projectStageLimits?.IN_PROGRESS?.overloadColor || '#EF4444' },
+      { id: 'IN_REVIEW', label: 'IN REVIEW', color: '#8B5CF6', category: 'IN_PROGRESS', icon: Code2, bg: 'bg-purple-50/70', border: 'border-purple-200', maxTasks: projectStageLimits?.IN_REVIEW?.maxTasks ?? 5, overloadColor: projectStageLimits?.IN_REVIEW?.overloadColor || '#EF4444' },
       { id: 'DONE', label: 'DONE', color: '#10B981', category: 'DONE', icon: CheckCircle2, bg: 'bg-emerald-50/70', border: 'border-emerald-200', maxTasks: 0, overloadColor: '#EF4444' },
     ];
-  }, [workflowStatuses]);
+  }, [workflowStatuses, projectStageLimits]);
 
   const handleCreateBoard = async (e) => {
     e.preventDefault();
@@ -1362,6 +1387,25 @@ export const BoardsView = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+              )}
+
+              {editBoardForm.projectId && (
+                <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200 text-xs text-blue-900 flex items-center justify-between gap-3 animate-in fade-in">
+                  <div className="space-y-0.5">
+                    <p className="font-bold">Project WIP Limits Active</p>
+                    <p className="text-[11px] text-blue-700">
+                      Stages on this board apply this project's custom capacity thresholds and alert highlight colors.
+                    </p>
+                  </div>
+                  <a
+                    href={`/workspaces/${workspaceId}/projects/${editBoardForm.projectId}/settings`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white border border-blue-300 text-[11px] font-bold text-blue-700 hover:bg-blue-50 shadow-2xs shrink-0"
+                  >
+                    Edit Limits ↗
+                  </a>
                 </div>
               )}
 

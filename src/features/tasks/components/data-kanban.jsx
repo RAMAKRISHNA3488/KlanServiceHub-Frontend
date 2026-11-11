@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { TaskStatus } from '@/features/tasks/types';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
+import { useGetProject } from '@/features/projects/api/use-get-project';
 import { workflowsAdminApi } from '@/lib/api-client';
 import { KanbanCard } from './kanban-card';
 import { KanbanColumnHeader } from './kanban-column-header';
@@ -16,10 +17,15 @@ const DEFAULT_BOARDS = [
   { id: TaskStatus.DONE, label: 'Done', color: '#10B981', category: 'DONE', maxTasks: 0, overloadColor: '#EF4444' },
 ];
 
-export const DataKanban = ({ data, onChange, isAdmin }) => {
+export const DataKanban = ({ data, onChange, isAdmin, projectId }) => {
     const workspaceId = useWorkspaceId();
     const [workflows, setWorkflows] = useState([]);
     const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
+
+    const { data: project } = useGetProject({ projectId });
+    const projectStageLimits = useMemo(() => {
+        return project?.stageLimits || project?.stage_limits || {};
+    }, [project]);
 
     useEffect(() => {
         if (workspaceId) {
@@ -49,19 +55,41 @@ export const DataKanban = ({ data, onChange, isAdmin }) => {
                 const cat = st.category || 'IN_PROGRESS';
                 const isDoneStatus = cat === 'DONE' || id === 'DONE';
 
+                // Project-specific WIP limit override
+                const projectLimit = projectStageLimits?.[id] || projectStageLimits?.[st.name];
+                const resolvedMaxTasks = isDoneStatus
+                    ? 0
+                    : (projectLimit?.maxTasks !== undefined
+                        ? Number(projectLimit.maxTasks)
+                        : (st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)));
+                const resolvedOverloadColor = projectLimit?.overloadColor
+                    || st.overloadColor
+                    || st.overload_color
+                    || '#EF4444';
+
                 list.push({
                     id,
                     label: id === 'IN_REVIEW' ? 'In Review' : st.name.replace(/_/g, ' '),
                     color: id === 'IN_REVIEW' ? '#8B5CF6' : (st.color || '#3B82F6'),
                     category: cat,
-                    maxTasks: isDoneStatus ? 0 : (st.maxTasks !== undefined ? st.maxTasks : (st.max_tasks !== undefined ? st.max_tasks : 5)),
-                    overloadColor: st.overloadColor || st.overload_color || '#EF4444',
+                    maxTasks: resolvedMaxTasks,
+                    overloadColor: resolvedOverloadColor,
+                    isProjectCustomized: Boolean(projectLimit),
                 });
             }
             return list;
         }
-        return DEFAULT_BOARDS;
-    }, [workflowStatuses]);
+        return DEFAULT_BOARDS.map((b) => {
+            const isDoneStatus = b.category === 'DONE' || b.id === 'DONE';
+            const projectLimit = projectStageLimits?.[b.id];
+            return {
+                ...b,
+                maxTasks: isDoneStatus ? 0 : (projectLimit?.maxTasks !== undefined ? Number(projectLimit.maxTasks) : b.maxTasks),
+                overloadColor: projectLimit?.overloadColor || b.overloadColor,
+                isProjectCustomized: Boolean(projectLimit),
+            };
+        });
+    }, [workflowStatuses, projectStageLimits]);
 
     const boardIds = useMemo(() => columns.map((c) => c.id), [columns]);
 

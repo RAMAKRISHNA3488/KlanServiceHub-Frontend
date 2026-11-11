@@ -337,7 +337,12 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
             </TabsContent>
 
             <TabsContent value="kanban" className="mt-0 w-full min-w-0">
-              <DataKanban data={filteredKanbanTasks} onChange={onKanbanChange} isAdmin={isAdmin}/>
+              <DataKanban
+                data={filteredKanbanTasks}
+                onChange={onKanbanChange}
+                isAdmin={isAdmin}
+                projectId={projectId || (filteredProjectId !== 'ALL' ? filteredProjectId : null)}
+              />
             </TabsContent>
 
             <TabsContent value="calendar" className="mt-0 w-full min-w-0 h-[calc(100vh-240px)] min-h-[550px] pb-2">
