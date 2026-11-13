@@ -56,7 +56,6 @@ import { SecurityView } from '@/features/company/components/security-view';
 import { AuditLogsView } from '@/features/company/components/audit-logs-view';
 import { BillingView } from '@/features/company/components/billing-view';
 import { DataManagementView } from '@/features/company/components/data-management-view';
-import { PlatformAdminView } from '@/features/platform-admin/components/platform-admin-view';
 import { RoadmapView } from '@/features/company/components/roadmap-view';
 import { ReleasesView } from '@/features/company/components/releases-view';
 import {
@@ -229,8 +228,6 @@ export const App = () => {
           <Route path="/workspaces/:workspaceId/portfolios" element={<PortfoliosView />} />
 
           {/* Enterprise Company Owner & Admin Suite */}
-          <Route path="/platform-admin" element={<PlatformAdminView />} />
-          <Route path="/workspaces/:workspaceId/platform-admin" element={<PlatformAdminView />} />
           <Route path="/workspaces/:workspaceId/company-profile" element={<CompanyProfileView />} />
           <Route path="/workspaces/:workspaceId/users-admin" element={<UsersAdminView />} />
           <Route path="/workspaces/:workspaceId/groups-admin" element={<GroupsAdminView />} />

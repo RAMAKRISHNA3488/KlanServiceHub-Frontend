@@ -318,14 +318,14 @@ export const DataKanban = ({ data, onChange, isAdmin, projectId }) => {
             return (
               <div
                 key={col.id}
-                className="min-w-[270px] max-w-[320px] flex-1 rounded-xl bg-neutral-100/90 border border-neutral-200/80 p-2.5 shadow-2xs flex flex-col shrink-0 overflow-hidden relative"
+                className="min-w-[320px] max-w-[360px] flex-1 rounded-2xl bg-neutral-100/90 border border-neutral-200/80 p-3 shadow-xs flex flex-col shrink-0 overflow-hidden relative"
               >
                 {/* Top Stage WIP / Overload Telemetry Line */}
                 <div
-                  className={`h-1.5 -mx-2.5 -mt-2.5 mb-2 rounded-t-xl transition-all duration-300 ${
+                  className={`h-2 -mx-3 -mt-3 mb-2.5 rounded-t-2xl transition-all duration-300 ${
                     isDone
                       ? 'bg-neutral-300/60'
-                      : (isOverload ? 'shadow-2xs animate-pulse' : 'bg-emerald-500 shadow-2xs')
+                      : (isOverload ? 'shadow-xs animate-pulse' : 'bg-emerald-500 shadow-2xs')
                   }`}
                   style={(!isDone && isOverload) ? { backgroundColor: overloadColor } : undefined}
                   title={

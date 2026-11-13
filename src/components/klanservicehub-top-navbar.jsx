@@ -27,7 +27,6 @@ import {
   Command,
   Menu,
   X,
-  Crown,
 } from 'lucide-react';
 
 export const KlanserviceHubTopNavbar = () => {
@@ -268,16 +267,6 @@ export const KlanserviceHubTopNavbar = () => {
           </div>
 
           <NotificationCenter />
-
-          {/* Platform Super Admin Control Plane */}
-          <Link
-            href={`/workspaces/${workspaceId}/platform-admin`}
-            className="p-1.5 rounded-md hover:bg-amber-100/70 text-amber-800 bg-amber-50/80 border border-amber-200/80 transition hidden sm:inline-flex items-center gap-1.5 px-2 text-[11px] font-bold shadow-2xs"
-            title="Platform Super Admin Control Plane"
-          >
-            <Crown className="size-3.5 text-amber-600" />
-            <span className="hidden md:inline">Platform Admin</span>
-          </Link>
 
           {/* Settings Quick Link */}
           <Link

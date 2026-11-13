@@ -951,11 +951,11 @@ export const BoardsView = () => {
                 isOver
                   ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-400/40 shadow-md'
                   : `${col.border} ${col.bg}`
-              } p-2.5 sm:p-3 min-w-[82vw] sm:min-w-[280px] flex-1 min-h-[480px] sm:min-h-[550px] shadow-xs shrink-0`}
+              } p-2.5 sm:p-3.5 min-w-[85vw] sm:min-w-[320px] sm:max-w-[360px] flex-1 min-h-[500px] sm:min-h-[580px] shadow-xs shrink-0`}
             >
               {/* Top Stage WIP / Overload Telemetry Line */}
               <div
-                className={`h-1.5 w-full -mx-2.5 sm:-mx-3 -mt-2.5 sm:-mt-3 mb-2 rounded-t-xl sm:rounded-t-2xl transition-all duration-300 ${
+                className={`h-2 w-full -mx-2.5 sm:-mx-3.5 -mt-2.5 sm:-mt-3.5 mb-2.5 sm:mb-3 rounded-t-xl sm:rounded-t-2xl transition-all duration-300 ${
                   isDone
                     ? 'bg-neutral-300/60'
                     : (isOverload ? 'shadow-2xs animate-pulse' : 'bg-emerald-500 shadow-2xs')

@@ -476,17 +476,3 @@ export const portfolioApi = {
   getEnterpriseHome: (workspaceId) => apiFetch(`/api/enterprise/home${workspaceId && workspaceId !== 'undefined' ? `?workspaceId=${workspaceId}` : ''}`),
 };
 
-export const platformAdminApi = {
-  getOverview: () => apiFetch('/api/platform-admin/overview'),
-  getCompanies: () => apiFetch('/api/platform-admin/companies'),
-  createCompany: (data) => apiFetch('/api/platform-admin/companies', { method: 'POST', body: JSON.stringify(data) }),
-  updateCompany: (workspaceId, data) => apiFetch(`/api/platform-admin/companies/${workspaceId}`, { method: 'PATCH', body: JSON.stringify(data) }),
-  updateCompanyStatus: (workspaceId, status) => apiFetch(`/api/platform-admin/companies/${workspaceId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-  deleteCompany: (workspaceId) => apiFetch(`/api/platform-admin/companies/${workspaceId}`, { method: 'DELETE' }),
-  getBillings: () => apiFetch('/api/platform-admin/billings'),
-  updateSubscription: (workspaceId, data) => apiFetch(`/api/platform-admin/billings/${workspaceId}/subscription`, { method: 'PATCH', body: JSON.stringify(data) }),
-  getUsers: () => apiFetch('/api/platform-admin/users'),
-  updateUserStatus: (userId, status) => apiFetch(`/api/platform-admin/users/${userId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-  toggleSuperAdmin: (userId, isSuperAdmin) => apiFetch(`/api/platform-admin/users/${userId}/super-admin`, { method: 'PATCH', body: JSON.stringify({ isSuperAdmin }) }),
-};
-
