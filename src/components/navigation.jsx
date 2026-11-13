@@ -29,6 +29,7 @@ import {
   ListTodo,
   Columns3,
   LifeBuoy,
+  Crown,
 } from 'lucide-react';
 
 const planningRoutes = [
@@ -56,6 +57,7 @@ const crossProjectRoutes = [
 ];
 
 const ownerAdminRoutes = [
+  { label: 'Platform Super Admin', href: '/platform-admin', icon: Crown, isSpecial: true },
   { label: 'Workspaces Directory', href: '/workspaces-admin', icon: Building2 },
   { label: 'Company Profile', href: '/company-profile', icon: Building2 },
   { label: 'User Directory', href: '/users-admin', icon: Users2 },
@@ -226,17 +228,32 @@ export const Navigation = () => {
                     className={cn(
                       'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition group text-xs',
                       isActive
-                        ? 'bg-blue-50 text-blue-700 font-bold shadow-xs'
-                        : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
+                        ? item.isSpecial
+                          ? 'bg-amber-50 text-amber-950 font-bold border border-amber-300 shadow-xs'
+                          : 'bg-blue-50 text-blue-700 font-bold shadow-xs'
+                        : item.isSpecial
+                          ? 'text-amber-900 bg-amber-50/40 hover:bg-amber-100/60 border border-amber-200/60 font-bold'
+                          : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
                     )}
                   >
                     <Icon
                       className={cn(
                         'size-4 shrink-0 transition',
-                        isActive ? 'text-blue-600' : 'text-neutral-400 group-hover:text-neutral-600',
+                        isActive
+                          ? item.isSpecial
+                            ? 'text-amber-600'
+                            : 'text-blue-600'
+                          : item.isSpecial
+                            ? 'text-amber-600'
+                            : 'text-neutral-400 group-hover:text-neutral-600',
                       )}
                     />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate flex-1">{item.label}</span>
+                    {item.isSpecial && (
+                      <span className="text-[8.5px] font-extrabold uppercase tracking-wide px-1.5 py-0.2 rounded bg-amber-200/90 text-amber-950 border border-amber-300">
+                        Global
+                      </span>
+                    )}
                   </Link>
                 </li>
               );
