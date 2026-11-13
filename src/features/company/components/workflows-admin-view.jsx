@@ -711,14 +711,14 @@ export const WorkflowsAdminView = () => {
                       : 'border-neutral-200/90 hover:border-blue-300 hover:shadow-lg'
                   }`}>
                     {/* Top Row: Step badge on left, color & actions on right */}
-                    <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-neutral-100">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-md shadow-2xs">
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-neutral-100">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">
                         Step {idx + 1}
                       </span>
                       
                       <div className="flex items-center gap-1">
                         <span
-                          className="size-3 rounded-full ring-2 ring-white shadow-2xs shrink-0 mr-1"
+                          className="size-2.5 rounded-full ring-2 ring-white shadow-2xs shrink-0 mr-1"
                           style={{ backgroundColor: st.color || '#3B82F6' }}
                           title={`Color: ${st.color || '#3B82F6'}`}
                         />
@@ -726,20 +726,20 @@ export const WorkflowsAdminView = () => {
                           !isDone && (
                             <button
                               onClick={() => handleOpenEditProjectStage(st)}
-                              className="p-1.5 rounded-lg text-neutral-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                              className="p-1 rounded-md text-neutral-400 hover:text-blue-600 hover:bg-blue-50 transition"
                               title={`Customize ${st.name} WIP Limit for ${selectedProject.name}`}
                             >
-                              <Pencil className="size-3.5" />
+                              <Pencil className="size-3" />
                             </button>
                           )
                         ) : (
                           <>
                             <button
                               onClick={() => handleOpenEditStatus(st)}
-                              className="p-1.5 rounded-lg text-neutral-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                              className="p-1 rounded-md text-neutral-400 hover:text-blue-600 hover:bg-blue-50 transition"
                               title="Edit Status"
                             >
-                              <Pencil className="size-3.5" />
+                              <Pencil className="size-3" />
                             </button>
                             {defaultWorkflow.statuses.length > 2 && (
                               <button
@@ -750,10 +750,10 @@ export const WorkflowsAdminView = () => {
                                     name: st.name,
                                   })
                                 }
-                                className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                className="p-1 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                                 title="Remove Status"
                               >
-                                <Trash2 className="size-3.5" />
+                                <Trash2 className="size-3" />
                               </button>
                             )}
                           </>
@@ -762,25 +762,25 @@ export const WorkflowsAdminView = () => {
                     </div>
 
                     {/* Middle Row: Status Name */}
-                    <div className="py-2.5">
-                      <p className="text-sm font-black text-neutral-900 tracking-tight break-words line-clamp-2 leading-snug" title={st.name}>
+                    <div className="py-2">
+                      <p className="text-xs font-bold text-neutral-800 break-words line-clamp-2 leading-snug" title={st.name}>
                         {st.name}
                       </p>
                     </div>
 
                     {/* Stage WIP Capacity & Overload Indicator Box */}
-                    <div className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 text-[11px]">
+                    <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-neutral-50 border border-neutral-200/60 text-[10.5px]">
                       <div className="flex items-center justify-between text-neutral-600">
-                        <span className="font-bold text-[10px] text-neutral-500 uppercase tracking-wider">Overload Limit:</span>
+                        <span className="font-semibold text-[9.5px] text-neutral-400 uppercase tracking-wider">Overload Limit:</span>
                         {isDone ? (
-                          <span className="font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-200 text-[10px]">
+                          <span className="font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 text-[9.5px]">
                             Exempt (Done)
                           </span>
                         ) : (
-                          <div className="flex items-center gap-1.5 font-bold text-xs text-neutral-800">
+                          <div className="flex items-center gap-1.5 font-semibold text-[10.5px] text-neutral-700">
                             <span>{effectiveMaxTasks} tickets max</span>
                             <span
-                              className="size-2.5 rounded-full border border-black/10 shrink-0 shadow-2xs"
+                              className="size-2 rounded-full border border-black/10 shrink-0 shadow-2xs"
                               style={{ backgroundColor: effectiveOverloadColor }}
                               title={`Overload Color: ${effectiveOverloadColor}`}
                             />
@@ -789,14 +789,14 @@ export const WorkflowsAdminView = () => {
                       </div>
 
                       {selectedProject && !isDone && (
-                        <div className="flex items-center justify-between pt-1.5 border-t border-neutral-200/60">
+                        <div className="flex items-center justify-between pt-1 border-t border-neutral-200/50">
                           {isProjectCustomized ? (
-                            <span className="text-[9.5px] font-bold text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded-md border border-blue-200 flex items-center gap-1">
-                              <span className="size-1.5 rounded-full bg-blue-600 inline-block" />
+                            <span className="text-[9px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 flex items-center gap-1">
+                              <span className="size-1 rounded-full bg-blue-600 inline-block" />
                               Project Override
                             </span>
                           ) : (
-                            <span className="text-[9.5px] font-medium text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-md">
+                            <span className="text-[9px] font-medium text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
                               Inheriting Default
                             </span>
                           )}
@@ -804,7 +804,7 @@ export const WorkflowsAdminView = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenEditProjectStage(st)}
-                            className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                            className="text-[10px] font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                           >
                             {isProjectCustomized ? 'Edit' : 'Customize'}
                           </button>
@@ -813,8 +813,8 @@ export const WorkflowsAdminView = () => {
                     </div>
 
                     {/* Bottom Row: Category on left, reorder arrows on right */}
-                    <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-neutral-100">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wide ${
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-100">
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${
                         st.category === 'DONE' 
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
                           : st.category === 'TODO' 
@@ -825,14 +825,14 @@ export const WorkflowsAdminView = () => {
                       </span>
 
                       {/* Card Reordering Arrows */}
-                      <div className="flex items-center gap-1 bg-neutral-100 rounded-lg p-0.5">
+                      <div className="flex items-center gap-0.5 bg-neutral-100 rounded-lg p-0.5">
                         <button
                           disabled={idx === 0 || Boolean(selectedProject)}
                           onClick={() => handleReorderStatus(idx, 'left')}
                           className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-white disabled:opacity-30 disabled:hover:bg-transparent transition shadow-2xs"
                           title={selectedProject ? "Switch to Workspace Baseline to reorder stages" : "Move step left"}
                         >
-                          <ChevronLeft className="size-3.5" />
+                          <ChevronLeft className="size-3" />
                         </button>
                         <button
                           disabled={idx === defaultWorkflow.statuses.length - 1 || Boolean(selectedProject)}
@@ -840,7 +840,7 @@ export const WorkflowsAdminView = () => {
                           className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-white disabled:opacity-30 disabled:hover:bg-transparent transition shadow-2xs"
                           title={selectedProject ? "Switch to Workspace Baseline to reorder stages" : "Move step right"}
                         >
-                          <ChevronRight className="size-3.5" />
+                          <ChevronRight className="size-3" />
                         </button>
                       </div>
                     </div>
@@ -859,9 +859,9 @@ export const WorkflowsAdminView = () => {
                 className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-neutral-300 bg-white/70 p-5 w-[170px] min-h-[185px] shrink-0 text-neutral-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 transition-all shadow-xs group cursor-pointer"
               >
                 <div className="size-9 rounded-xl bg-neutral-100 group-hover:bg-blue-100 text-neutral-500 group-hover:text-blue-600 flex items-center justify-center transition shadow-2xs">
-                  <Plus className="size-5" />
+                  <Plus className="size-4" />
                 </div>
-                <span className="text-xs font-bold text-neutral-700 group-hover:text-blue-700">Add Stage</span>
+                <span className="text-[11px] font-semibold text-neutral-600 group-hover:text-blue-700">Add Stage</span>
               </button>
             </div>
           </div>
