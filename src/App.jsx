@@ -28,6 +28,12 @@ import { EmailFirstAuth } from '@/features/auth/components/email-first-auth';
 import { OnboardingWizard } from '@/features/onboarding/components/onboarding-wizard';
 import { InvitationAcceptancePage } from '@/app/(public)/invite/[token]/page';
 
+// Super Admin Control Plane Suite
+import { SuperAdminLogin } from '@/features/super-admin/components/super-admin-login';
+import { SuperAdminGuard } from '@/features/super-admin/components/super-admin-guard';
+import { SuperAdminLayout } from '@/features/super-admin/components/super-admin-layout';
+import { SuperAdminDashboard } from '@/features/super-admin/components/super-admin-dashboard';
+
 // Legal & Trust Center Pages
 import { TermsPage } from '@/features/legal/components/terms-page';
 import { PrivacyPage } from '@/features/legal/components/privacy-page';
@@ -149,6 +155,20 @@ export const App = () => {
           <Route path="/sign-up" element={<EmailFirstAuth initialMode="SIGN_UP" />} />
           <Route path="/forgot-password" element={<EmailFirstAuth initialMode="FORGOT_PASSWORD" />} />
           <Route path="/reset-password" element={<EmailFirstAuth initialMode="RESET_PASSWORD" />} />
+        </Route>
+      </Route>
+
+      {/* Super Admin Control Plane Suite (Dedicated Login, Guard & Master Dashboard) */}
+      <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+
+      <Route element={<SuperAdminGuard />}>
+        <Route element={<SuperAdminLayout />}>
+          <Route path="/super-admin" element={<Navigate to="/super-admin/dashboard" replace />} />
+          <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/organizations" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/users" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/audit-logs" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/system-health" element={<SuperAdminDashboard />} />
         </Route>
       </Route>
 

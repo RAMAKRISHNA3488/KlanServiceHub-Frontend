@@ -476,3 +476,36 @@ export const portfolioApi = {
   getEnterpriseHome: (workspaceId) => apiFetch(`/api/enterprise/home${workspaceId && workspaceId !== 'undefined' ? `?workspaceId=${workspaceId}` : ''}`),
 };
 
+export const platformAdminApi = {
+  login: (payload) => apiFetch('/api/platform-admin/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+  verifyMfa: async (payload) => {
+    const data = await apiFetch('/api/platform-admin/auth/verify-mfa', { method: 'POST', body: JSON.stringify(payload) });
+    if (data?.token && typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+    }
+    return data;
+  },
+  getCurrent: () => apiFetch('/api/platform-admin/auth/current'),
+  logout: async () => {
+    try {
+      await apiFetch('/api/platform-admin/auth/logout', { method: 'POST' });
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+      }
+    }
+  },
+  getOverview: () => apiFetch('/api/platform-admin/overview'),
+  getSystemHealth: () => apiFetch('/api/platform-admin/system-health'),
+  getOrganizations: () => apiFetch('/api/platform-admin/organizations'),
+  updateOrganizationStatus: (id, status) => apiFetch(`/api/platform-admin/organizations/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  getUsers: () => apiFetch('/api/platform-admin/users'),
+  updateUserStatus: (id, status) => apiFetch(`/api/platform-admin/users/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  toggleSuperAdmin: (id, isSuperAdmin) => apiFetch(`/api/platform-admin/users/${id}/super-admin`, { method: 'PATCH', body: JSON.stringify({ isSuperAdmin }) }),
+  getAuditLogs: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiFetch(`/api/platform-admin/audit-logs${query ? `?${query}` : ''}`);
+  },
+};
+
+
