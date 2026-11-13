@@ -951,7 +951,7 @@ export const BoardsView = () => {
                 isOver
                   ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-400/40 shadow-md'
                   : `${col.border} ${col.bg}`
-              } p-2.5 sm:p-3.5 min-w-[85vw] sm:min-w-[320px] sm:max-w-[360px] flex-1 min-h-[500px] sm:min-h-[580px] shadow-xs shrink-0`}
+              } p-2.5 sm:p-3.5 min-w-[85vw] sm:min-w-[340px] sm:max-w-[380px] flex-1 min-h-[500px] sm:min-h-[580px] shadow-xs shrink-0`}
             >
               {/* Top Stage WIP / Overload Telemetry Line */}
               <div

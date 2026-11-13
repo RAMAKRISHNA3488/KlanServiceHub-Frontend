@@ -318,7 +318,7 @@ export const DataKanban = ({ data, onChange, isAdmin, projectId }) => {
             return (
               <div
                 key={col.id}
-                className="min-w-[320px] max-w-[360px] flex-1 rounded-2xl bg-neutral-100/90 border border-neutral-200/80 p-3 shadow-xs flex flex-col shrink-0 overflow-hidden relative"
+                className="min-w-[340px] max-w-[380px] flex-1 rounded-2xl bg-neutral-100/90 border border-neutral-200/80 p-3 shadow-xs flex flex-col shrink-0 overflow-hidden relative"
               >
                 {/* Top Stage WIP / Overload Telemetry Line */}
                 <div

@@ -705,13 +705,13 @@ export const WorkflowsAdminView = () => {
 
                 return (
                 <React.Fragment key={st.id}>
-                  <div className={`flex flex-col justify-between rounded-2xl border bg-white p-4.5 sm:p-5 shadow-xs w-[290px] shrink-0 min-h-[185px] transition-all duration-200 group ${
+                  <div className={`flex flex-col justify-between rounded-xl border bg-white p-3.5 sm:p-4 shadow-xs w-[340px] shrink-0 min-h-[145px] transition-all duration-200 group ${
                     selectedProject && isProjectCustomized
                       ? 'border-blue-400 ring-2 ring-blue-100 bg-blue-50/20 shadow-md'
-                      : 'border-neutral-200/90 hover:border-blue-300 hover:shadow-lg'
+                      : 'border-neutral-200/90 hover:border-blue-300 hover:shadow-md'
                   }`}>
                     {/* Top Row: Step badge on left, color & actions on right */}
-                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-neutral-100">
+                    <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-neutral-100">
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">
                         Step {idx + 1}
                       </span>
@@ -762,14 +762,14 @@ export const WorkflowsAdminView = () => {
                     </div>
 
                     {/* Middle Row: Status Name */}
-                    <div className="py-2">
-                      <p className="text-xs font-bold text-neutral-800 break-words line-clamp-2 leading-snug" title={st.name}>
+                    <div className="py-1">
+                      <p className="text-xs font-bold text-neutral-800 break-words line-clamp-1 leading-snug" title={st.name}>
                         {st.name}
                       </p>
                     </div>
 
                     {/* Stage WIP Capacity & Overload Indicator Box */}
-                    <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-neutral-50 border border-neutral-200/60 text-[10.5px]">
+                    <div className="flex flex-col gap-1 p-2 rounded-lg bg-neutral-50 border border-neutral-200/60 text-[10.5px]">
                       <div className="flex items-center justify-between text-neutral-600">
                         <span className="font-semibold text-[9.5px] text-neutral-400 uppercase tracking-wider">Overload Limit:</span>
                         {isDone ? (
@@ -813,7 +813,7 @@ export const WorkflowsAdminView = () => {
                     </div>
 
                     {/* Bottom Row: Category on left, reorder arrows on right */}
-                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-100">
+                    <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-neutral-100">
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${
                         st.category === 'DONE' 
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
@@ -856,9 +856,9 @@ export const WorkflowsAdminView = () => {
               {/* Quick Add Step Button inside Pipeline */}
               <button
                 onClick={() => setAddStatusModal(true)}
-                className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-neutral-300 bg-white/70 p-5 w-[170px] min-h-[185px] shrink-0 text-neutral-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 transition-all shadow-xs group cursor-pointer"
+                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-neutral-300 bg-white/70 p-4 w-[150px] min-h-[145px] shrink-0 text-neutral-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 transition-all shadow-xs group cursor-pointer"
               >
-                <div className="size-9 rounded-xl bg-neutral-100 group-hover:bg-blue-100 text-neutral-500 group-hover:text-blue-600 flex items-center justify-center transition shadow-2xs">
+                <div className="size-8 rounded-lg bg-neutral-100 group-hover:bg-blue-100 text-neutral-500 group-hover:text-blue-600 flex items-center justify-center transition shadow-2xs">
                   <Plus className="size-4" />
                 </div>
                 <span className="text-[11px] font-semibold text-neutral-600 group-hover:text-blue-700">Add Stage</span>
