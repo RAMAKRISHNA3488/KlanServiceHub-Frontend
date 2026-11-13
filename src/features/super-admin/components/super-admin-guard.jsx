@@ -68,3 +68,4 @@ export const SuperAdminGuard = () => {
 
   return <Outlet />;
 };
+
