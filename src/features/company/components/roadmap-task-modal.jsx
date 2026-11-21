@@ -73,6 +73,34 @@ const getPriorityConfig = (priority) => {
   return PRIORITY_MAP[norm] || PRIORITY_MAP.P2;
 };
 
+const renderCommentContent = (content) => {
+  if (!content) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = content.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (urlRegex.test(part)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline underline-offset-2 break-all [overflow-wrap:anywhere] font-medium"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return (
+      <span key={index} className="break-words break-all [overflow-wrap:anywhere]">
+        {part}
+      </span>
+    );
+  });
+};
+
 export const RoadmapTaskModal = ({
   taskId,
   initialTask,
@@ -624,7 +652,7 @@ export const RoadmapTaskModal = ({
                     {comments.map((c, idx) => (
                       <div
                         key={c.id || idx}
-                        className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 text-xs space-y-1.5"
+                        className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 text-xs space-y-1.5 min-w-0 max-w-full overflow-hidden"
                       >
                         <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
                           <span>{c.userName || c.user_name || 'Member'}</span>
@@ -647,7 +675,13 @@ export const RoadmapTaskModal = ({
                             })()}
                           </span>
                         </div>
-                        {c.content && <p className="text-neutral-700">{c.content}</p>}
+                        {c.content && (
+                          <div className="min-w-0 max-w-full overflow-hidden">
+                            <p className="text-neutral-700 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] leading-relaxed">
+                              {renderCommentContent(c.content)}
+                            </p>
+                          </div>
+                        )}
 
                         {/* Images */}
                         {c.images && Array.isArray(c.images) && c.images.length > 0 && (

@@ -89,6 +89,34 @@ const formatCommentDate = (dateVal) => {
   return `${dateStr} at ${timeStr}`;
 };
 
+const renderCommentContent = (content) => {
+  if (!content) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = content.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (urlRegex.test(part)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline underline-offset-2 break-all [overflow-wrap:anywhere] font-medium"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return (
+      <span key={index} className="break-words break-all [overflow-wrap:anywhere]">
+        {part}
+      </span>
+    );
+  });
+};
+
 export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdated }) => {
   const workspaceId = useWorkspaceId();
   const queryClient = useQueryClient();
@@ -709,7 +737,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         {/* Modal Main Content: 2 Columns */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-y-auto divide-y lg:divide-y-0 lg:divide-x divide-neutral-200">
           {/* Left Main Details Column */}
-          <div className="lg:col-span-8 p-6 space-y-6">
+          <div className="lg:col-span-8 p-6 space-y-6 min-w-0 overflow-hidden">
             {/* Issue Title Input & Timestamp Metadata */}
             <div className="space-y-1">
               <input
@@ -888,7 +916,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                         return (
                           <div
                             key={c.id}
-                            className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3 border border-neutral-100 hover:border-neutral-200 transition"
+                            className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3 border border-neutral-100 hover:border-neutral-200 transition min-w-0 max-w-full overflow-hidden"
                           >
                             {c.user_avatar ? (
                               <img
@@ -903,7 +931,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                   'U'}
                               </div>
                             )}
-                            <div className="flex-1 min-w-0">
+                            <div className="flex-1 min-w-0 overflow-hidden">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <span className="font-bold text-xs text-neutral-900">
@@ -960,7 +988,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                     rows={2}
                                     value={editingContent}
                                     onChange={(e) => setEditingContent(e.target.value)}
-                                    className="w-full rounded-lg border border-blue-400 bg-white p-2 text-xs text-neutral-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+                                    className="w-full rounded-lg border border-blue-400 bg-white p-2 text-xs text-neutral-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm break-words break-all [overflow-wrap:anywhere]"
                                   />
                                   <div className="flex items-center gap-2">
                                     <button
@@ -985,10 +1013,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                   </div>
                                 </div>
                               ) : (
-                                <div>
+                                <div className="min-w-0 max-w-full overflow-hidden">
                                   {c.content && (
-                                    <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap">
-                                      {c.content}
+                                    <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] leading-relaxed">
+                                      {renderCommentContent(c.content)}
                                     </p>
                                   )}
 
@@ -1364,7 +1392,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           </div>
 
           {/* Right Properties Column (KlanserviceHub Style Box) */}
-          <div className="lg:col-span-4 p-6 bg-neutral-50/50 space-y-5 text-xs">
+          <div className="lg:col-span-4 p-6 bg-neutral-50/50 space-y-5 text-xs min-w-0">
             <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">Details</h3>
 
             {/* Parent Ticket card if this is a subtask */}

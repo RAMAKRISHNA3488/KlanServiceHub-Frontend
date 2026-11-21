@@ -89,6 +89,34 @@ const formatCommentDate = (dateVal) => {
   return `${dateStr} at ${timeStr}`;
 };
 
+const renderCommentContent = (content) => {
+  if (!content) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = content.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (urlRegex.test(part)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline underline-offset-2 break-all [overflow-wrap:anywhere] font-medium"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return (
+      <span key={index} className="break-words break-all [overflow-wrap:anywhere]">
+        {part}
+      </span>
+    );
+  });
+};
+
 export const TaskIdClient = () => {
   const router = useRouter();
   const taskId = useTaskId();
@@ -553,7 +581,7 @@ export const TaskIdClient = () => {
       {/* Main Grid: Details + KlanserviceHub Properties Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side: Summary, Description, Comments, Subtasks */}
-        <div className="lg:col-span-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-6">
+        <div className="lg:col-span-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-6 min-w-0 overflow-hidden">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <TypeIcon className="size-5 shrink-0" style={{ color: typeConfig.color }} />
@@ -724,7 +752,7 @@ export const TaskIdClient = () => {
                       return (
                         <div
                           key={c.id}
-                          className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3.5 border border-neutral-100 hover:border-neutral-200 transition"
+                          className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3.5 border border-neutral-100 hover:border-neutral-200 transition min-w-0 max-w-full overflow-hidden"
                         >
                           {c.user_avatar ? (
                             <img
@@ -739,7 +767,7 @@ export const TaskIdClient = () => {
                                 'U'}
                             </div>
                           )}
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 overflow-hidden">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-xs text-neutral-900">
@@ -797,7 +825,7 @@ export const TaskIdClient = () => {
                                   rows={2}
                                   value={editingContent}
                                   onChange={(e) => setEditingContent(e.target.value)}
-                                  className="w-full rounded-lg border border-blue-400 bg-white p-2 text-xs text-neutral-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+                                  className="w-full rounded-lg border border-blue-400 bg-white p-2 text-xs text-neutral-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm break-words break-all [overflow-wrap:anywhere]"
                                 />
                                 <div className="flex items-center gap-2">
                                   <button
@@ -824,9 +852,11 @@ export const TaskIdClient = () => {
                             ) : (
                               <div>
                                 {c.content && (
-                                  <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap">
-                                    {c.content}
-                                  </p>
+                                  <div className="min-w-0 max-w-full overflow-hidden">
+                                    <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] leading-relaxed">
+                                      {renderCommentContent(c.content)}
+                                    </p>
+                                  </div>
                                 )}
 
                                 {/* Comment Images */}
@@ -977,7 +1007,7 @@ export const TaskIdClient = () => {
         </div>
 
         {/* Right Side: Properties Panel (ISSUE DETAILS) */}
-        <div className="lg:col-span-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5 text-xs">
+        <div className="lg:col-span-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5 text-xs min-w-0">
           <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">
             Issue Details
           </h3>
