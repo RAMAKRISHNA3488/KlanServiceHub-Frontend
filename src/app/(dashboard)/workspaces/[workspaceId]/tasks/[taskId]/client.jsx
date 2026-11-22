@@ -581,7 +581,7 @@ export const TaskIdClient = () => {
       {/* Main Grid: Details + KlanserviceHub Properties Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side: Summary, Description, Comments, Subtasks */}
-        <div className="lg:col-span-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-6 min-w-0 overflow-hidden">
+        <div className="lg:col-span-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-6 min-w-0 overflow-x-hidden">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <TypeIcon className="size-5 shrink-0" style={{ color: typeConfig.color }} />

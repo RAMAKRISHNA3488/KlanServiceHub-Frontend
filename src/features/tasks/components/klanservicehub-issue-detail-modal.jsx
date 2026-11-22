@@ -735,9 +735,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         </div>
 
         {/* Modal Main Content: 2 Columns */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-y-auto divide-y lg:divide-y-0 lg:divide-x divide-neutral-200">
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-y-auto lg:overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-neutral-200">
           {/* Left Main Details Column */}
-          <div className="lg:col-span-8 p-6 space-y-6 min-w-0 overflow-hidden">
+          <div className="lg:col-span-8 p-6 space-y-6 min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full">
             {/* Issue Title Input & Timestamp Metadata */}
             <div className="space-y-1">
               <input
@@ -1392,7 +1392,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           </div>
 
           {/* Right Properties Column (KlanserviceHub Style Box) */}
-          <div className="lg:col-span-4 p-6 bg-neutral-50/50 space-y-5 text-xs min-w-0">
+          <div className="lg:col-span-4 p-6 bg-neutral-50/50 space-y-5 text-xs min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full">
             <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">Details</h3>
 
             {/* Parent Ticket card if this is a subtask */}
