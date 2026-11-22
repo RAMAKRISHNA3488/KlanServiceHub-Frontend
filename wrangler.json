@@ -8,5 +8,11 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
-  }
+  },
+  "services": [
+    {
+      "binding": "BACKEND",
+      "service": "klanservicehub-backend"
+    }
+  ]
 }

@@ -2,8 +2,20 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/')) {
+      if (env.BACKEND) {
+        return env.BACKEND.fetch(request);
+      }
       const backendUrl = new URL(url.pathname + url.search, 'https://klanservicehub-backend.klanservicehub.workers.dev');
-      return fetch(new Request(backendUrl, request));
+      const reqHeaders = new Headers(request.headers);
+      reqHeaders.set('Host', 'klanservicehub-backend.klanservicehub.workers.dev');
+
+      const isBodyAllowed = request.method !== 'GET' && request.method !== 'HEAD';
+      return fetch(backendUrl.toString(), {
+        method: request.method,
+        headers: reqHeaders,
+        body: isBodyAllowed ? request.body : undefined,
+        redirect: 'follow',
+      });
     }
 
     const response = await env.ASSETS.fetch(request);
