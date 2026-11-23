@@ -4,7 +4,6 @@ import {
   Link2,
   Plus,
   Trash2,
-  ExternalLink,
   ShieldAlert,
   AlertCircle,
   Bookmark,
@@ -12,9 +11,6 @@ import {
   Zap,
   List,
   TrendingUp,
-  Clock,
-  User,
-  ArrowRight,
   GitCommit,
   Edit2,
   Check,
@@ -76,27 +72,22 @@ function formatPriorityLabel(priority) {
 const GROUP_CONFIG = {
   blocks: {
     title: 'Blocks',
-    description: 'Tickets prevented from progressing by this ticket',
     icon: ShieldAlert,
   },
   isBlockedBy: {
     title: 'Is Blocked By',
-    description: 'Tickets this ticket depends upon',
     icon: AlertCircle,
   },
   relatesTo: {
     title: 'Relates To',
-    description: 'Related tickets without direct blocking dependency',
     icon: Link2,
   },
   duplicates: {
     title: 'Duplicates / Duplicated By',
-    description: 'Duplicate ticket references',
     icon: GitCommit,
   },
   clones: {
     title: 'Clones / Cloned By',
-    description: 'Ticket clones and copies',
     icon: GitCommit,
   },
 };
@@ -192,7 +183,7 @@ export function LinkedTicketsSection({
   const unresolvedBlockers = grouped.isBlockedBy?.filter((item) => item.isUnresolvedBlocker) || [];
 
   return (
-    <div className="space-y-3 pt-1">
+    <div className="space-y-2.5 pt-0.5">
       <UnlinkDialog />
 
       {/* Prominent Dependency Blocker Banner */}
@@ -201,14 +192,14 @@ export function LinkedTicketsSection({
         onNavigateToTicket={onNavigateToTicket}
       />
 
-      {/* Refined Minimalist Section Toolbar */}
-      <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
-        <div className="flex items-center gap-2">
-          <Link2 className="size-3.5 text-blue-600" />
-          <h3 className="text-[13px] font-semibold text-neutral-800">
+      {/* Ultra-Clean Minimalist Section Toolbar */}
+      <div className="flex items-center justify-between pb-1.5 border-b border-neutral-200">
+        <div className="flex items-center gap-1.5">
+          <Link2 className="size-3 text-blue-600" />
+          <h3 className="text-[11px] font-semibold text-neutral-700">
             Linked Tickets & Dependencies
           </h3>
-          <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200">
+          <span className="text-[9px] font-medium px-1.5 py-0.2 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200">
             {totalLinks}
           </span>
         </div>
@@ -216,9 +207,9 @@ export function LinkedTicketsSection({
         <button
           type="button"
           onClick={() => setShowLinkModal(true)}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-neutral-700 bg-white hover:bg-neutral-50 hover:text-neutral-900 border border-neutral-300 rounded-md shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium text-neutral-600 bg-white hover:bg-neutral-50 hover:text-neutral-900 border border-neutral-300 rounded shadow-2xs transition-colors cursor-pointer"
         >
-          <Plus className="size-3 text-neutral-500" />
+          <Plus className="size-2.5 text-neutral-500" />
           <span>Link ticket</span>
         </button>
       </div>
@@ -234,21 +225,21 @@ export function LinkedTicketsSection({
 
       {/* Grouped Links List */}
       {totalLinks === 0 ? (
-        <div className="p-5 text-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 space-y-2">
-          <p className="text-[12px] text-neutral-500">
+        <div className="p-4 text-center rounded border border-dashed border-neutral-200 bg-neutral-50/50 space-y-1.5">
+          <p className="text-[11px] text-neutral-500">
             No linked tickets or dependencies yet for this ticket.
           </p>
           <button
             type="button"
             onClick={() => setShowLinkModal(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 hover:text-neutral-900 transition-colors shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium text-neutral-700 bg-white border border-neutral-300 rounded hover:bg-neutral-50 transition-colors shadow-2xs cursor-pointer"
           >
-            <Plus className="size-3 text-neutral-500" />
+            <Plus className="size-2.5 text-neutral-500" />
             <span>Link a ticket</span>
           </button>
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {Object.entries(GROUP_CONFIG).map(([groupKey, config]) => {
             const items = grouped[groupKey] || [];
             if (items.length === 0) return null;
@@ -259,27 +250,24 @@ export function LinkedTicketsSection({
             return (
               <div
                 key={groupKey}
-                className="rounded-lg border border-neutral-200 bg-white overflow-hidden shadow-2xs"
+                className="rounded border border-neutral-200/90 bg-white overflow-hidden shadow-2xs"
               >
                 {/* Clean Group Header */}
                 <div
                   onClick={() => toggleGroup(groupKey)}
-                  className="flex items-center justify-between px-3 py-2 bg-neutral-50/70 border-b border-neutral-200 cursor-pointer hover:bg-neutral-100/50 transition-colors select-none"
+                  className="flex items-center justify-between px-2.5 py-1.5 bg-neutral-50/70 border-b border-neutral-200/80 cursor-pointer hover:bg-neutral-100/50 transition-colors select-none"
                 >
-                  <div className="flex items-center gap-2">
-                    <GroupIcon className="size-3.5 text-neutral-500" />
-                    <span className="text-[12px] font-semibold text-neutral-800">
+                  <div className="flex items-center gap-1.5">
+                    <GroupIcon className="size-3 text-neutral-500" />
+                    <span className="text-[11px] font-semibold text-neutral-700">
                       {config.title}
                     </span>
-                    <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200">
+                    <span className="text-[9px] font-medium px-1.5 py-0.2 rounded-full bg-neutral-100 text-neutral-500 border border-neutral-200">
                       {items.length}
-                    </span>
-                    <span className="text-[11px] text-neutral-400 font-normal hidden sm:inline">
-                      — {config.description}
                     </span>
                   </div>
                   <button type="button" className="text-neutral-400 hover:text-neutral-600">
-                    {isCollapsed ? <ChevronDown className="size-3.5" /> : <ChevronUp className="size-3.5" />}
+                    {isCollapsed ? <ChevronDown className="size-3" /> : <ChevronUp className="size-3" />}
                   </button>
                 </div>
 
@@ -306,25 +294,25 @@ export function LinkedTicketsSection({
                       return (
                         <div
                           key={link.id}
-                          className={`px-3 py-2 transition-colors flex flex-col gap-1 ${
-                            isBlocker ? 'bg-rose-50/40 hover:bg-rose-50/60' : 'hover:bg-neutral-50/80'
+                          className={`px-2.5 py-1.5 transition-colors flex flex-col gap-0.5 ${
+                            isBlocker ? 'bg-rose-50/40 hover:bg-rose-50/60' : 'hover:bg-neutral-50/70'
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-3 min-w-0">
+                          <div className="flex items-center justify-between gap-2.5 min-w-0">
                             {/* Left: Type Icon, Ticket Key, Title */}
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <TypeIcon className="size-3.5 shrink-0" style={{ color: typeCfg.color }} />
+                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                              <TypeIcon className="size-3 shrink-0" style={{ color: typeCfg.color }} />
                               <button
                                 type="button"
                                 onClick={() => onNavigateToTicket && onNavigateToTicket(t.id)}
-                                className="font-mono font-semibold text-[11px] text-blue-600 hover:text-blue-800 hover:underline shrink-0"
+                                className="font-mono font-semibold text-[10px] text-blue-600 hover:text-blue-800 hover:underline shrink-0"
                                 title="Open ticket details"
                               >
                                 {t.key || 'TASK'}
                               </button>
                               <span
                                 onClick={() => onNavigateToTicket && onNavigateToTicket(t.id)}
-                                className={`text-[12px] truncate cursor-pointer hover:text-blue-600 transition-colors ${
+                                className={`text-[11px] truncate cursor-pointer hover:text-blue-600 transition-colors ${
                                   ticketTitle === '(No summary)' ? 'text-neutral-400 italic' : 'text-neutral-800 font-medium'
                                 }`}
                                 title={ticketTitle}
@@ -334,41 +322,41 @@ export function LinkedTicketsSection({
                             </div>
 
                             {/* Right: Assignee, Priority, Status, Date, Trash */}
-                            <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-1.5 shrink-0">
                               {/* Assignee */}
                               {t.assignee ? (
                                 <div
-                                  className="flex items-center gap-1.5 text-[11px] text-neutral-600 bg-neutral-50 hover:bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-200/60 transition-colors"
+                                  className="flex items-center gap-1 text-[10px] text-neutral-600 bg-neutral-50 hover:bg-neutral-100 px-1.5 py-0.2 rounded-full border border-neutral-200/60 transition-colors"
                                   title={t.assignee.name}
                                 >
                                   {t.assignee.avatarUrl ? (
-                                    <img src={t.assignee.avatarUrl} alt="" className="size-3.5 rounded-full object-cover" />
+                                    <img src={t.assignee.avatarUrl} alt="" className="size-3 rounded-full object-cover" />
                                   ) : (
-                                    <div className="size-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">
+                                    <div className="size-3 rounded-full bg-blue-600 text-white flex items-center justify-center text-[8px] font-bold">
                                       {t.assignee.name.charAt(0)}
                                     </div>
                                   )}
-                                  <span className="max-w-[85px] truncate font-normal">{t.assignee.name}</span>
+                                  <span className="max-w-[70px] truncate font-normal">{t.assignee.name}</span>
                                 </div>
                               ) : (
-                                <span className="text-[10px] text-neutral-400 italic hidden sm:inline">Unassigned</span>
+                                <span className="text-[9px] text-neutral-400 italic hidden sm:inline">Unassigned</span>
                               )}
 
                               {/* Priority */}
                               {t.priority && (
-                                <span className="text-[10px] font-medium text-neutral-600 bg-neutral-50 px-1.5 py-0.5 rounded border border-neutral-200/80">
+                                <span className="text-[9px] font-medium text-neutral-500 bg-neutral-50 px-1 py-0.2 rounded border border-neutral-200/60">
                                   {formatPriorityLabel(t.priority)}
                                 </span>
                               )}
 
                               {/* Status Badge */}
-                              <span className={`text-[10px] font-medium uppercase px-2 py-0.5 rounded-[4px] border tracking-wide ${statusClass}`}>
+                              <span className={`text-[9px] font-medium uppercase px-1.5 py-0.2 rounded-[3px] border tracking-wide ${statusClass}`}>
                                 {formatStatusLabel(t.status)}
                               </span>
 
                               {/* Creation Date */}
                               {formattedDate && (
-                                <span className="text-[10px] text-neutral-400 font-normal hidden md:inline-block">
+                                <span className="text-[9px] text-neutral-400 font-normal hidden lg:inline-block">
                                   {formattedDate}
                                 </span>
                               )}
@@ -377,43 +365,43 @@ export function LinkedTicketsSection({
                               <button
                                 type="button"
                                 onClick={() => handleUnlink(link.id, t.key)}
-                                className="p-1 rounded text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                className="p-0.5 rounded text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                                 title="Remove relationship"
                               >
-                                <Trash2 className="size-3.5" />
+                                <Trash2 className="size-3" />
                               </button>
                             </div>
                           </div>
 
                           {/* Optional Note / Description or inline editor */}
                           {isEditing ? (
-                            <div className="flex items-center gap-2 pt-1 pl-6">
+                            <div className="flex items-center gap-1.5 pt-0.5 pl-5">
                               <input
                                 type="text"
                                 value={editDesc}
                                 onChange={(e) => setEditDesc(e.target.value)}
                                 placeholder="Add note or description..."
-                                className="flex-1 text-[11px] px-2 py-0.5 bg-white border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="flex-1 text-[10px] px-1.5 py-0.5 bg-white border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                               />
                               <button
                                 type="button"
                                 onClick={() => handleSaveDescription(link.id)}
-                                className="p-1 rounded bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                                className="p-0.5 rounded bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
                                 title="Save note"
                               >
-                                <Check className="size-3" />
+                                <Check className="size-2.5" />
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setEditingLinkId(null)}
-                                className="p-1 rounded bg-neutral-100 text-neutral-700 hover:bg-neutral-200 cursor-pointer"
+                                className="p-0.5 rounded bg-neutral-100 text-neutral-700 hover:bg-neutral-200 cursor-pointer"
                                 title="Cancel"
                               >
-                                <X className="size-3" />
+                                <X className="size-2.5" />
                               </button>
                             </div>
                           ) : link.description ? (
-                            <div className="flex items-center justify-between text-[11px] text-neutral-500 pl-6">
+                            <div className="flex items-center justify-between text-[10px] text-neutral-500 pl-5">
                               <span className="italic truncate">"{link.description}"</span>
                               <button
                                 type="button"
@@ -421,10 +409,10 @@ export function LinkedTicketsSection({
                                   setEditingLinkId(link.id);
                                   setEditDesc(link.description || '');
                                 }}
-                                className="text-neutral-400 hover:text-blue-600 ml-2 cursor-pointer p-0.5"
+                                className="text-neutral-400 hover:text-blue-600 ml-1.5 cursor-pointer p-0.5"
                                 title="Edit note"
                               >
-                                <Edit2 className="size-2.5" />
+                                <Edit2 className="size-2" />
                               </button>
                             </div>
                           ) : null}
