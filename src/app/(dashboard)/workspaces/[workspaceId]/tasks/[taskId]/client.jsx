@@ -654,15 +654,6 @@ export const TaskIdClient = () => {
             />
           </div>
 
-          {/* Dedicated Linked Tickets & Dependencies Section */}
-          {task && (
-            <LinkedTicketsSection
-              currentTask={task}
-              onNavigateToTicket={handleNavigateToLinkedTicket}
-              onRefreshTask={fetchTask}
-            />
-          )}
-
           {/* Activity Section */}
           <div className="space-y-4 pt-4 border-t border-neutral-100">
             <div className="flex items-center gap-5 border-b border-neutral-200 pb-2">
@@ -698,6 +689,17 @@ export const TaskIdClient = () => {
               >
                 <Clock className="size-3.5" />
                 Time Tracking ({task.logged_hours || 0}h logged)
+              </button>
+              <button
+                onClick={() => setActiveTab('LINKED_TICKETS')}
+                className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                  activeTab === 'LINKED_TICKETS'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                }`}
+              >
+                <Link2 className="size-3.5" />
+                Linked Tickets & Dependencies
               </button>
             </div>
 
@@ -1029,6 +1031,17 @@ export const TaskIdClient = () => {
                     Log Work
                   </button>
                 </form>
+              </div>
+            )}
+
+            {/* Tab: Linked Tickets & Dependencies */}
+            {activeTab === 'LINKED_TICKETS' && task && (
+              <div className="space-y-4">
+                <LinkedTicketsSection
+                  currentTask={task}
+                  onNavigateToTicket={handleNavigateToLinkedTicket}
+                  onRefreshTask={fetchTask}
+                />
               </div>
             )}
           </div>

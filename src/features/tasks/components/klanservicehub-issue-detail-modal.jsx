@@ -815,15 +815,6 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               />
             </div>
 
-            {/* Dedicated Linked Tickets & Dependencies Section */}
-            {task && (
-              <LinkedTicketsSection
-                currentTask={task}
-                onNavigateToTicket={handleNavigateToLinkedTicket}
-                onRefreshTask={fetchTaskDetails}
-              />
-            )}
-
             {/* Activity & Comments Tabs */}
             <div className="space-y-4 pt-2">
               <div className="flex items-center gap-4 border-b border-neutral-200 pb-2 flex-wrap">
@@ -861,15 +852,15 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   Time Tracking ({task?.logged_hours || 0}h logged)
                 </button>
                 <button
-                  onClick={() => { setActiveTab('ATTACHMENTS'); fetchAttachments(currentId); }}
+                  onClick={() => setActiveTab('LINKED_TICKETS')}
                   className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
-                    activeTab === 'ATTACHMENTS'
-                      ? 'border-violet-600 text-violet-600'
+                    activeTab === 'LINKED_TICKETS'
+                      ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
-                  <Image className="size-3.5" />
-                  Images ({attachments.length})
+                  <Link2 className="size-3.5" />
+                  Linked Tickets & Dependencies
                 </button>
               </div>
 
@@ -1201,208 +1192,16 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 </div>
               )}
 
-              {/* Tab: Image Attachments */}
-              {activeTab === 'ATTACHMENTS' && (
+              {/* Tab: Linked Tickets & Dependencies */}
+              {activeTab === 'LINKED_TICKETS' && task && (
                 <div className="space-y-4">
-                  {/* Drag & Drop Upload Zone */}
-                  <div
-                    className={`relative rounded-xl border-2 border-dashed p-6 text-center transition-all cursor-pointer ${
-                      isDragOver
-                        ? 'border-violet-500 bg-violet-50/60 scale-[1.01]'
-                        : 'border-neutral-300 hover:border-violet-400 hover:bg-violet-50/30'
-                    }`}
-                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                    onDragLeave={() => setIsDragOver(false)}
-                    onDrop={async (e) => {
-                      e.preventDefault();
-                      setIsDragOver(false);
-                      const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'));
-                      if (files.length === 0) { toast.error('Please drop image files only (PNG, JPG, GIF, WebP)'); return; }
-                      setUploadingImage(true);
-                      for (const file of files) {
-                        try {
-                          const reader = new FileReader();
-                          const imageData = await new Promise((resolve, reject) => {
-                            reader.onload = (ev) => resolve(ev.target.result);
-                            reader.onerror = reject;
-                            reader.readAsDataURL(file);
-                          });
-                          await tasksApi.uploadImage(currentId, {
-                            fileName: file.name,
-                            imageData,
-                            fileType: file.type,
-                            fileSize: file.size,
-                          });
-                          toast.success(`Uploaded: ${file.name}`);
-                        } catch (err) {
-                          toast.error(`Failed to upload ${file.name}`);
-                        }
-                      }
-                      setUploadingImage(false);
-                      fetchAttachments(currentId);
-                    }}
-                    onClick={() => document.getElementById(`attach-file-input-${currentId}`)?.click()}
-                  >
-                    <input
-                      id={`attach-file-input-${currentId}`}
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={async (e) => {
-                        const files = Array.from(e.target.files || []);
-                        if (files.length === 0) return;
-                        setUploadingImage(true);
-                        for (const file of files) {
-                          try {
-                            const reader = new FileReader();
-                            const imageData = await new Promise((resolve, reject) => {
-                              reader.onload = (ev) => resolve(ev.target.result);
-                              reader.onerror = reject;
-                              reader.readAsDataURL(file);
-                            });
-                            await tasksApi.uploadImage(currentId, {
-                              fileName: file.name,
-                              imageData,
-                              fileType: file.type,
-                              fileSize: file.size,
-                            });
-                            toast.success(`Uploaded: ${file.name}`);
-                          } catch (err) {
-                            toast.error(`Failed to upload ${file.name}`);
-                          }
-                        }
-                        setUploadingImage(false);
-                        fetchAttachments(currentId);
-                        e.target.value = '';
-                      }}
-                    />
-                    {uploadingImage ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="size-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
-                        <p className="text-xs font-semibold text-violet-600">Uploading images...</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex justify-center mb-3">
-                          <div className={`size-12 rounded-2xl flex items-center justify-center transition-all ${
-                            isDragOver ? 'bg-violet-100 scale-110' : 'bg-neutral-100'
-                          }`}>
-                            <Upload className={`size-5 transition-colors ${isDragOver ? 'text-violet-600' : 'text-neutral-400'}`} />
-                          </div>
-                        </div>
-                        <p className="text-xs font-bold text-neutral-700">
-                          {isDragOver ? 'Drop images here' : 'Drag & drop images, or click to browse'}
-                        </p>
-                        <p className="text-[11px] text-neutral-400 mt-1">PNG, JPG, GIF, WebP · Auto-expires in 6 days</p>
-                        <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-4 py-1.5 text-[11px] font-bold text-white shadow-xs">
-                          <Plus className="size-3" />
-                          Add Images
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Expiry Note Banner */}
-                  {attachments.length > 0 && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-700">
-                      <Timer className="size-3.5 text-amber-500 shrink-0" />
-                      Images automatically expire and are deleted 6 days after upload.
-                    </div>
-                  )}
-
-                  {/* Image Gallery Grid */}
-                  {attachments.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Image className="size-10 text-neutral-300 mx-auto mb-2" />
-                      <p className="text-xs text-neutral-400 italic">No images attached yet.</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {attachments.map((att) => {
-                        const imgSrc = att.imageData || att.image_data || att.fileUrl || att.file_url;
-                        const expiresAt = att.expiresAt || att.expires_at;
-                        const expiryDate = expiresAt ? new Date(expiresAt) : null;
-                        const msLeft = expiryDate ? expiryDate.getTime() - Date.now() : null;
-                        const daysLeft = msLeft !== null ? Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24))) : null;
-                        const isExpiringSoon = daysLeft !== null && daysLeft <= 2;
-
-                        return (
-                          <div
-                            key={att.id}
-                            className="group relative rounded-xl overflow-hidden border border-neutral-200 shadow-xs hover:shadow-md transition-all bg-neutral-100 aspect-square"
-                          >
-                            {imgSrc ? (
-                              <img
-                                src={imgSrc}
-                                alt={att.fileName || att.file_name || 'Attachment'}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                onClick={() => setLightboxSrc(imgSrc)}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Image className="size-8 text-neutral-300" />
-                              </div>
-                            )}
-
-                            {/* Hover Overlay */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                              {imgSrc && (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setLightboxSrc(imgSrc); }}
-                                  className="p-1.5 rounded-lg bg-white/90 text-neutral-700 hover:bg-white shadow transition"
-                                  title="Preview"
-                                >
-                                  <ZoomIn className="size-3.5" />
-                                </button>
-                              )}
-                              <button
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  try {
-                                    await tasksApi.deleteAttachment(currentId, att.id);
-                                    setAttachments((prev) => prev.filter((a) => a.id !== att.id));
-                                    toast.success('Image removed');
-                                  } catch (err) {
-                                    toast.error('Failed to remove image');
-                                  }
-                                }}
-                                className="p-1.5 rounded-lg bg-red-600/90 text-white hover:bg-red-700 shadow transition"
-                                title="Delete"
-                              >
-                                <Trash2 className="size-3.5" />
-                              </button>
-                            </div>
-
-                            {/* Expiry Badge */}
-                            {daysLeft !== null && (
-                              <div className={`absolute top-1.5 right-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold shadow-sm ${
-                                isExpiringSoon
-                                  ? 'bg-red-500 text-white'
-                                  : 'bg-black/50 text-white'
-                              }`}>
-                                <Timer className="size-2.5" />
-                                {daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}
-                              </div>
-                            )}
-
-                            {/* Filename label */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 translate-y-full group-hover:translate-y-0 transition-transform">
-                              <p className="text-[10px] font-semibold text-white truncate">
-                                {att.fileName || att.file_name || 'image'}
-                              </p>
-                              <p className="text-[9px] text-white/70">
-                                {att.uploaderName || att.uploader_name || 'Member'}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <LinkedTicketsSection
+                    currentTask={task}
+                    onNavigateToTicket={handleNavigateToLinkedTicket}
+                    onRefreshTask={fetchTaskDetails}
+                  />
                 </div>
               )}
-
               {/* Lightbox */}
               {lightboxSrc && (
                 <div
