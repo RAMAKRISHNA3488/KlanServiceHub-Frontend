@@ -39,46 +39,64 @@ const TYPE_ICONS = {
 };
 
 const STATUS_COLORS = {
-  BACKLOG: 'bg-neutral-100 text-neutral-700 border-neutral-300',
-  TODO: 'bg-blue-50 text-blue-700 border-blue-200',
-  IN_PROGRESS: 'bg-amber-50 text-amber-800 border-amber-200',
-  IN_REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
-  CODE_REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
-  REVIEW: 'bg-purple-50 text-purple-800 border-purple-200',
-  TESTING: 'bg-cyan-50 text-cyan-800 border-cyan-200',
-  DONE: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-  RESOLVED: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  BACKLOG: 'bg-neutral-100 text-neutral-600 border-neutral-200',
+  TODO: 'bg-slate-50 text-slate-700 border-slate-200',
+  IN_PROGRESS: 'bg-blue-50 text-blue-700 border-blue-200',
+  IN_REVIEW: 'bg-purple-50 text-purple-700 border-purple-200',
+  CODE_REVIEW: 'bg-purple-50 text-purple-700 border-purple-200',
+  REVIEW: 'bg-purple-50 text-purple-700 border-purple-200',
+  TESTING: 'bg-amber-50 text-amber-700 border-amber-200',
+  DONE: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  RESOLVED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
+
+function formatStatusLabel(status) {
+  if (!status) return 'To Do';
+  const s = String(status).trim().toUpperCase();
+  if (s === 'IN_PROGRESS') return 'In Progress';
+  if (s === 'IN_REVIEW' || s === 'CODE_REVIEW' || s === 'REVIEW') return 'In Review';
+  if (s === 'DONE' || s === 'RESOLVED') return 'Done';
+  if (s === 'TODO' || s === 'TO_DO') return 'To Do';
+  if (s === 'BACKLOG') return 'Backlog';
+  if (s === 'TESTING' || s === 'TEST') return 'Testing';
+  return s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, ' ');
+}
+
+function formatPriorityLabel(priority) {
+  if (!priority) return '';
+  const p = String(priority).trim().toUpperCase();
+  if (p === 'MEDIUM') return 'Medium';
+  if (p === 'HIGH') return 'High';
+  if (p === 'HIGHEST' || p === 'CRITICAL') return 'Critical';
+  if (p === 'LOW') return 'Low';
+  if (p === 'LOWEST') return 'Lowest';
+  return p.charAt(0) + p.slice(1).toLowerCase();
+}
 
 const GROUP_CONFIG = {
   blocks: {
     title: 'Blocks',
     description: 'Tickets prevented from progressing by this ticket',
-    badgeColor: 'bg-rose-100 text-rose-800 border-rose-200',
     icon: ShieldAlert,
   },
   isBlockedBy: {
     title: 'Is Blocked By',
     description: 'Tickets this ticket depends upon',
-    badgeColor: 'bg-amber-100 text-amber-900 border-amber-200',
     icon: AlertCircle,
   },
   relatesTo: {
     title: 'Relates To',
     description: 'Related tickets without direct blocking dependency',
-    badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
     icon: Link2,
   },
   duplicates: {
     title: 'Duplicates / Duplicated By',
     description: 'Duplicate ticket references',
-    badgeColor: 'bg-purple-100 text-purple-800 border-purple-200',
     icon: GitCommit,
   },
   clones: {
     title: 'Clones / Cloned By',
     description: 'Ticket clones and copies',
-    badgeColor: 'bg-cyan-100 text-cyan-800 border-cyan-200',
     icon: GitCommit,
   },
 };
@@ -147,11 +165,11 @@ export function LinkedTicketsSection({
   const handleSaveDescription = async (linkId) => {
     try {
       await ticketLinksApi.updateLink(linkId, { description: editDesc });
-      toast.success('Relationship description updated');
+      toast.success('Relationship note updated');
       setEditingLinkId(null);
       fetchLinksAndDependencies();
     } catch (err) {
-      toast.error('Failed to update description');
+      toast.error('Failed to update note');
     }
   };
 
@@ -174,7 +192,7 @@ export function LinkedTicketsSection({
   const unresolvedBlockers = grouped.isBlockedBy?.filter((item) => item.isUnresolvedBlocker) || [];
 
   return (
-    <div className="space-y-4 pt-2">
+    <div className="space-y-3 pt-1">
       <UnlinkDialog />
 
       {/* Prominent Dependency Blocker Banner */}
@@ -183,14 +201,14 @@ export function LinkedTicketsSection({
         onNavigateToTicket={onNavigateToTicket}
       />
 
-      {/* Section Header */}
+      {/* Refined Minimalist Section Toolbar */}
       <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
         <div className="flex items-center gap-2">
-          <Link2 className="size-4 text-blue-600" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-800">
+          <Link2 className="size-3.5 text-blue-600" />
+          <h3 className="text-[13px] font-semibold text-neutral-800">
             Linked Tickets & Dependencies
           </h3>
-          <span className="text-2xs font-extrabold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+          <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200">
             {totalLinks}
           </span>
         </div>
@@ -198,10 +216,10 @@ export function LinkedTicketsSection({
         <button
           type="button"
           onClick={() => setShowLinkModal(true)}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition border border-blue-200 cursor-pointer shadow-2xs"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-neutral-700 bg-white hover:bg-neutral-50 hover:text-neutral-900 border border-neutral-300 rounded-md shadow-2xs transition-colors cursor-pointer"
         >
-          <Plus className="size-3.5" />
-          <span>Link Ticket</span>
+          <Plus className="size-3 text-neutral-500" />
+          <span>Link ticket</span>
         </button>
       </div>
 
@@ -216,21 +234,21 @@ export function LinkedTicketsSection({
 
       {/* Grouped Links List */}
       {totalLinks === 0 ? (
-        <div className="p-6 text-center rounded-xl border border-dashed border-neutral-300 bg-neutral-50/50 space-y-2">
-          <p className="text-xs text-neutral-500">
+        <div className="p-5 text-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 space-y-2">
+          <p className="text-[12px] text-neutral-500">
             No linked tickets or dependencies yet for this ticket.
           </p>
           <button
             type="button"
             onClick={() => setShowLinkModal(true)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-white border border-neutral-300 rounded-lg hover:border-blue-400 transition shadow-2xs"
+            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 hover:text-neutral-900 transition-colors shadow-2xs cursor-pointer"
           >
-            <Plus className="size-3.5" />
-            <span>Link a Ticket</span>
+            <Plus className="size-3 text-neutral-500" />
+            <span>Link a ticket</span>
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {Object.entries(GROUP_CONFIG).map(([groupKey, config]) => {
             const items = grouped[groupKey] || [];
             if (items.length === 0) return null;
@@ -241,26 +259,26 @@ export function LinkedTicketsSection({
             return (
               <div
                 key={groupKey}
-                className="rounded-xl border border-neutral-200 bg-white overflow-hidden shadow-2xs"
+                className="rounded-lg border border-neutral-200 bg-white overflow-hidden shadow-2xs"
               >
-                {/* Group Header */}
+                {/* Clean Group Header */}
                 <div
                   onClick={() => toggleGroup(groupKey)}
-                  className="flex items-center justify-between px-3.5 py-2.5 bg-neutral-50/80 border-b border-neutral-200 cursor-pointer hover:bg-neutral-100/60 transition select-none"
+                  className="flex items-center justify-between px-3 py-2 bg-neutral-50/70 border-b border-neutral-200 cursor-pointer hover:bg-neutral-100/50 transition-colors select-none"
                 >
                   <div className="flex items-center gap-2">
-                    <GroupIcon className="size-3.5 text-neutral-600" />
-                    <span className="text-xs font-bold text-neutral-800">
+                    <GroupIcon className="size-3.5 text-neutral-500" />
+                    <span className="text-[12px] font-semibold text-neutral-800">
                       {config.title}
                     </span>
-                    <span className={`text-2xs font-extrabold px-1.5 py-0.2 rounded-full border ${config.badgeColor}`}>
+                    <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200">
                       {items.length}
                     </span>
-                    <span className="text-2xs text-neutral-400 hidden sm:inline">
+                    <span className="text-[11px] text-neutral-400 font-normal hidden sm:inline">
                       — {config.description}
                     </span>
                   </div>
-                  <button className="text-neutral-400 hover:text-neutral-700">
+                  <button type="button" className="text-neutral-400 hover:text-neutral-600">
                     {isCollapsed ? <ChevronDown className="size-3.5" /> : <ChevronUp className="size-3.5" />}
                   </button>
                 </div>
@@ -269,12 +287,13 @@ export function LinkedTicketsSection({
                 {!isCollapsed && (
                   <div className="divide-y divide-neutral-100">
                     {items.map((link) => {
-                      const t = link.ticket;
+                      const t = link.ticket || {};
                       const typeCfg = TYPE_ICONS[t.issueType || 'Task'] || TYPE_ICONS.Task;
                       const TypeIcon = typeCfg.icon;
-                      const statusClass = STATUS_COLORS[t.status] || 'bg-neutral-100 text-neutral-700 border-neutral-300';
+                      const statusClass = STATUS_COLORS[t.status] || 'bg-neutral-100 text-neutral-600 border-neutral-200';
                       const isBlocker = link.isUnresolvedBlocker;
                       const isEditing = editingLinkId === link.id;
+                      const ticketTitle = (t.title || t.name || '').trim() || '(No summary)';
 
                       const formattedDate = link.createdAt
                         ? new Date(link.createdAt).toLocaleDateString('en-US', {
@@ -287,69 +306,69 @@ export function LinkedTicketsSection({
                       return (
                         <div
                           key={link.id}
-                          className={`p-3 transition flex flex-col gap-2 ${
-                            isBlocker ? 'bg-rose-50/30 hover:bg-rose-50/50' : 'hover:bg-neutral-50/60'
+                          className={`px-3 py-2 transition-colors flex flex-col gap-1 ${
+                            isBlocker ? 'bg-rose-50/40 hover:bg-rose-50/60' : 'hover:bg-neutral-50/80'
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-3 flex-wrap">
-                            {/* Left: Key, Type, Title */}
-                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-3 min-w-0">
+                            {/* Left: Type Icon, Ticket Key, Title */}
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
                               <TypeIcon className="size-3.5 shrink-0" style={{ color: typeCfg.color }} />
                               <button
                                 type="button"
                                 onClick={() => onNavigateToTicket && onNavigateToTicket(t.id)}
-                                className="font-mono font-bold text-xs text-blue-600 hover:text-blue-800 hover:underline shrink-0"
+                                className="font-mono font-semibold text-[11px] text-blue-600 hover:text-blue-800 hover:underline shrink-0"
                                 title="Open ticket details"
                               >
                                 {t.key || 'TASK'}
                               </button>
                               <span
                                 onClick={() => onNavigateToTicket && onNavigateToTicket(t.id)}
-                                className="text-xs text-neutral-800 truncate cursor-pointer hover:text-blue-600 font-medium"
-                                title={t.title || t.name}
+                                className={`text-[12px] truncate cursor-pointer hover:text-blue-600 transition-colors ${
+                                  ticketTitle === '(No summary)' ? 'text-neutral-400 italic' : 'text-neutral-800 font-medium'
+                                }`}
+                                title={ticketTitle}
                               >
-                                {t.title || t.name}
+                                {ticketTitle}
                               </span>
                             </div>
 
-                            {/* Right: Relationship Badge, Status, Priority, Assignee, Actions */}
+                            {/* Right: Assignee, Priority, Status, Date, Trash */}
                             <div className="flex items-center gap-2 shrink-0">
-                              {/* Relationship Type Badge */}
-                              <span className="text-2xs font-semibold px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 border border-neutral-200">
-                                {link.relationshipType}
-                              </span>
-
-                              {/* Status Badge */}
-                              <span className={`text-2xs font-bold px-2 py-0.5 rounded-md border uppercase ${statusClass}`}>
-                                {t.status}
-                              </span>
-
-                              {/* Priority */}
-                              {t.priority && (
-                                <span className="text-2xs font-semibold text-neutral-500 uppercase px-1.5 py-0.5 rounded bg-neutral-50 border border-neutral-200">
-                                  {t.priority}
-                                </span>
-                              )}
-
                               {/* Assignee */}
                               {t.assignee ? (
-                                <div className="flex items-center gap-1 text-2xs text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-200" title={t.assignee.name}>
+                                <div
+                                  className="flex items-center gap-1.5 text-[11px] text-neutral-600 bg-neutral-50 hover:bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-200/60 transition-colors"
+                                  title={t.assignee.name}
+                                >
                                   {t.assignee.avatarUrl ? (
                                     <img src={t.assignee.avatarUrl} alt="" className="size-3.5 rounded-full object-cover" />
                                   ) : (
-                                    <div className="size-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-3xs font-bold">
+                                    <div className="size-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">
                                       {t.assignee.name.charAt(0)}
                                     </div>
                                   )}
-                                  <span className="max-w-[80px] truncate">{t.assignee.name}</span>
+                                  <span className="max-w-[85px] truncate font-normal">{t.assignee.name}</span>
                                 </div>
                               ) : (
-                                <span className="text-2xs text-neutral-400 italic">Unassigned</span>
+                                <span className="text-[10px] text-neutral-400 italic hidden sm:inline">Unassigned</span>
                               )}
+
+                              {/* Priority */}
+                              {t.priority && (
+                                <span className="text-[10px] font-medium text-neutral-600 bg-neutral-50 px-1.5 py-0.5 rounded border border-neutral-200/80">
+                                  {formatPriorityLabel(t.priority)}
+                                </span>
+                              )}
+
+                              {/* Status Badge */}
+                              <span className={`text-[10px] font-medium uppercase px-2 py-0.5 rounded-[4px] border tracking-wide ${statusClass}`}>
+                                {formatStatusLabel(t.status)}
+                              </span>
 
                               {/* Creation Date */}
                               {formattedDate && (
-                                <span className="text-3xs text-neutral-400 hidden sm:inline">
+                                <span className="text-[10px] text-neutral-400 font-normal hidden md:inline-block">
                                   {formattedDate}
                                 </span>
                               )}
@@ -358,7 +377,7 @@ export function LinkedTicketsSection({
                               <button
                                 type="button"
                                 onClick={() => handleUnlink(link.id, t.key)}
-                                className="p-1 rounded-md text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                                className="p-1 rounded text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                                 title="Remove relationship"
                               >
                                 <Trash2 className="size-3.5" />
@@ -366,46 +385,49 @@ export function LinkedTicketsSection({
                             </div>
                           </div>
 
-                          {/* Optional Description / Notes */}
+                          {/* Optional Note / Description or inline editor */}
                           {isEditing ? (
-                            <div className="flex items-center gap-2 pt-1">
+                            <div className="flex items-center gap-2 pt-1 pl-6">
                               <input
                                 type="text"
                                 value={editDesc}
                                 onChange={(e) => setEditDesc(e.target.value)}
                                 placeholder="Add note or description..."
-                                className="flex-1 text-xs px-2.5 py-1 bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="flex-1 text-[11px] px-2 py-0.5 bg-white border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                               />
                               <button
+                                type="button"
                                 onClick={() => handleSaveDescription(link.id)}
-                                className="p-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                                className="p-1 rounded bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                                title="Save note"
                               >
-                                <Check className="size-3.5" />
+                                <Check className="size-3" />
                               </button>
                               <button
+                                type="button"
                                 onClick={() => setEditingLinkId(null)}
-                                className="p-1 rounded bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
+                                className="p-1 rounded bg-neutral-100 text-neutral-700 hover:bg-neutral-200 cursor-pointer"
+                                title="Cancel"
                               >
-                                <X className="size-3.5" />
+                                <X className="size-3" />
                               </button>
                             </div>
-                          ) : (
-                            link.description ? (
-                              <div className="flex items-center justify-between text-2xs text-neutral-500 bg-neutral-50 px-2.5 py-1 rounded-md border border-neutral-100">
-                                <span className="italic">"{link.description}"</span>
-                                <button
-                                  onClick={() => {
-                                    setEditingLinkId(link.id);
-                                    setEditDesc(link.description || '');
-                                  }}
-                                  className="text-neutral-400 hover:text-blue-600 ml-2"
-                                  title="Edit note"
-                                >
-                                  <Edit2 className="size-2.5" />
-                                </button>
-                              </div>
-                            ) : null
-                          )}
+                          ) : link.description ? (
+                            <div className="flex items-center justify-between text-[11px] text-neutral-500 pl-6">
+                              <span className="italic truncate">"{link.description}"</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingLinkId(link.id);
+                                  setEditDesc(link.description || '');
+                                }}
+                                className="text-neutral-400 hover:text-blue-600 ml-2 cursor-pointer p-0.5"
+                                title="Edit note"
+                              >
+                                <Edit2 className="size-2.5" />
+                              </button>
+                            </div>
+                          ) : null}
                         </div>
                       );
                     })}
