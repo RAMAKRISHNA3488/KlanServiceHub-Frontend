@@ -168,14 +168,14 @@ export function LinkTicketModal({ isOpen, onClose, currentTask, onLinkCreated })
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 bg-neutral-50/60">
+        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-neutral-200 bg-neutral-50/60">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100">
-              <Link2 className="size-4" />
+            <div className="p-1 rounded bg-blue-50 text-blue-600 border border-blue-100">
+              <Link2 className="size-3.5" />
             </div>
             <div>
-              <h3 className="text-[14px] font-semibold text-neutral-900">Link Tickets</h3>
-              <p className="text-[11px] text-neutral-500">
+              <h3 className="text-[12px] font-semibold text-neutral-900">Link Tickets</h3>
+              <p className="text-[10px] text-neutral-500">
                 Connect <span className="font-semibold text-neutral-700">{currentTask?.key || 'current ticket'}</span> with another ticket
               </p>
             </div>
@@ -183,23 +183,23 @@ export function LinkTicketModal({ isOpen, onClose, currentTask, onLinkCreated })
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+            className="p-1 rounded text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
           >
-            <X className="size-4" />
+            <X className="size-3.5" />
           </button>
         </div>
 
         {/* Content Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 space-y-4">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-3.5 space-y-3">
           {/* Relationship Selection */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-neutral-700">
+            <label className="text-[10px] font-semibold text-neutral-700">
               Relationship Type <span className="text-red-500">*</span>
             </label>
             <select
               value={relationshipType}
               onChange={(e) => setRelationshipType(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-[12px] font-medium bg-white border border-neutral-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer"
+              className="w-full px-2 py-1 text-[11px] font-medium bg-white border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer"
             >
               {RELATIONSHIP_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -210,37 +210,37 @@ export function LinkTicketModal({ isOpen, onClose, currentTask, onLinkCreated })
           </div>
 
           {/* Search & Select Target Ticket */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-semibold text-neutral-700">
+              <label className="text-[10px] font-semibold text-neutral-700">
                 Select Ticket in Same Project <span className="text-red-500">*</span>
               </label>
-              <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-full bg-neutral-100 text-neutral-500 border border-neutral-200">
+              <span className="text-[9px] font-medium px-1.5 py-0.2 rounded-full bg-neutral-100 text-neutral-500 border border-neutral-200">
                 Same project
               </span>
             </div>
 
             {/* Search Input */}
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-neutral-400" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-neutral-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by key (e.g. PROJ-12) or summary..."
-                className="w-full pl-8 pr-3 py-1.5 text-[12px] bg-neutral-50/50 border border-neutral-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+                className="w-full pl-7 pr-2.5 py-1 text-[11px] bg-neutral-50/50 border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
               />
             </div>
 
             {/* Ticket Selection List */}
-            <div className="border border-neutral-200 rounded-lg max-h-44 overflow-y-auto divide-y divide-neutral-100 bg-white">
+            <div className="border border-neutral-200 rounded max-h-40 overflow-y-auto divide-y divide-neutral-100 bg-white">
               {loadingTasks ? (
-                <div className="p-4 flex items-center justify-center gap-2 text-[11px] text-neutral-500">
-                  <Loader2 className="size-3.5 animate-spin text-blue-600" />
+                <div className="p-3 flex items-center justify-center gap-1.5 text-[10px] text-neutral-500">
+                  <Loader2 className="size-3 animate-spin text-blue-600" />
                   Loading project tickets...
                 </div>
               ) : filteredTasks.length === 0 ? (
-                <div className="p-4 text-center text-[11px] text-neutral-500">
+                <div className="p-3 text-center text-[10px] text-neutral-500">
                   {searchQuery ? 'No matching tickets found.' : 'No other tickets found in this project.'}
                 </div>
               ) : (
@@ -254,24 +254,24 @@ export function LinkTicketModal({ isOpen, onClose, currentTask, onLinkCreated })
                     <div
                       key={tId}
                       onClick={() => setSelectedTicketId(tId)}
-                      className={`flex items-center justify-between px-3 py-2 cursor-pointer text-[12px] transition-colors ${
+                      className={`flex items-center justify-between px-2.5 py-1.5 cursor-pointer text-[11px] transition-colors ${
                         isSelected
                           ? 'bg-blue-50/80 text-blue-900 font-medium'
                           : 'hover:bg-neutral-50 text-neutral-800'
                       }`}
                     >
-                      <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
-                        <TypeIcon className="size-3.5 shrink-0" style={{ color: typeCfg.color }} />
-                        <span className="font-mono font-semibold text-[11px] text-neutral-700 shrink-0">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1 pr-2">
+                        <TypeIcon className="size-3 shrink-0" style={{ color: typeCfg.color }} />
+                        <span className="font-mono font-semibold text-[10px] text-neutral-700 shrink-0">
                           {t.key || 'TASK'}
                         </span>
-                        <span className="truncate text-neutral-800 text-[12px]">{t.name}</span>
+                        <span className="truncate text-neutral-800 text-[11px]">{t.name}</span>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">
+                        <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">
                           {t.status}
                         </span>
-                        {isSelected && <CheckCircle2 className="size-3.5 text-blue-600 shrink-0" />}
+                        {isSelected && <CheckCircle2 className="size-3 text-blue-600 shrink-0" />}
                       </div>
                     </div>
                   );
@@ -279,8 +279,8 @@ export function LinkTicketModal({ isOpen, onClose, currentTask, onLinkCreated })
               )}
             </div>
             {selectedTicket && (
-              <div className="text-[11px] text-emerald-700 bg-emerald-50/80 px-2.5 py-1 rounded-md border border-emerald-200 flex items-center gap-1.5">
-                <CheckCircle2 className="size-3.5 shrink-0" />
+              <div className="text-[10px] text-emerald-700 bg-emerald-50/80 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1.5">
+                <CheckCircle2 className="size-3 shrink-0" />
                 <span className="truncate">
                   Selected: <strong className="font-semibold">{selectedTicket.key}</strong> — {selectedTicket.name}
                 </span>
@@ -290,7 +290,7 @@ export function LinkTicketModal({ isOpen, onClose, currentTask, onLinkCreated })
 
           {/* Optional Description / Comment */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-neutral-700">
+            <label className="text-[10px] font-semibold text-neutral-700">
               Optional Note or Description
             </label>
             <textarea
@@ -298,26 +298,26 @@ export function LinkTicketModal({ isOpen, onClose, currentTask, onLinkCreated })
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g. Depends on backend schema migration before UI work can begin..."
-              className="w-full px-2.5 py-1.5 text-[12px] bg-white border border-neutral-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
+              className="w-full px-2 py-1 text-[11px] bg-white border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-200">
+          <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-neutral-200">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-3 py-1.5 text-[11px] font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-md transition-colors cursor-pointer"
+              className="px-2.5 py-1 text-[10px] font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || !selectedTicketId}
-              className="px-3 py-1.5 text-[11px] font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer"
+              className="px-2.5 py-1 text-[10px] font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors shadow-2xs flex items-center gap-1 cursor-pointer"
             >
-              {submitting && <Loader2 className="size-3 animate-spin" />}
+              {submitting && <Loader2 className="size-2.5 animate-spin" />}
               <span>Link ticket</span>
             </button>
           </div>
