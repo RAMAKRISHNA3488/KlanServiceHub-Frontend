@@ -574,6 +574,20 @@ export const RoadmapTaskModal = ({
                     No description provided for this work item. Click "Edit Task" to add details.
                   </div>
                 )}
+                {(currentTask?.description_images?.length > 0 || currentTask?.descriptionImages?.length > 0) && (
+                  <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-xl border border-neutral-200">
+                    {(currentTask?.description_images || currentTask?.descriptionImages || []).map((img) => (
+                      <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0 shadow-2xs">
+                        <img
+                          src={img.dataUrl}
+                          alt={img.name || 'Description attachment'}
+                          className="w-full h-full object-cover cursor-pointer hover:scale-105 transition"
+                          onClick={() => window.open(img.dataUrl, '_blank')}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Comments Section */}

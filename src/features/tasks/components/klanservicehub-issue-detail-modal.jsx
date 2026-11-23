@@ -149,6 +149,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   );
   const [newComment, setNewComment] = useState('');
   const [commentImages, setCommentImages] = useState([]);
+  const [descriptionImages, setDescriptionImages] = useState([]);
   const [addingComment, setAddingComment] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState('');
@@ -255,6 +256,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       const res = await tasksApi.getTask(targetId);
       if (res?.data && (res.data.$id === targetId || res.data.id === targetId)) {
         setTask(res.data);
+        setDescriptionImages(res.data.descriptionImages || res.data.description_images || []);
         setComments(Array.isArray(res.data.comments) ? res.data.comments : []);
       }
     } catch (e) {
@@ -280,6 +282,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       setAttachments([]);
       setNewComment('');
       setCommentImages([]);
+      setDescriptionImages([]);
       setEditingCommentId(null);
       setEditingContent('');
       setSubtaskTitle('');
@@ -306,6 +309,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       setAttachments([]);
       setNewComment('');
       setCommentImages([]);
+      setDescriptionImages([]);
       setEditingCommentId(null);
       setEditingContent('');
       setSubtaskTitle('');
@@ -403,6 +407,81 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       toast.error(err.message || 'Failed to update issue');
       fetchTaskDetails(currentId);
     }
+  };
+
+  const handleDescriptionImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const newImgs = [];
+    let processed = 0;
+    files.forEach((file) => {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Only image files are allowed');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        newImgs.push({
+          id: String(Date.now()) + Math.random().toString(36).substring(2, 7),
+          name: file.name,
+          size: file.size,
+          fileType: file.type,
+          dataUrl: loadEvt.target.result,
+        });
+        processed++;
+        if (processed === files.length) {
+          setDescriptionImages((prev) => {
+            const updated = [...prev, ...newImgs];
+            handleUpdateProperty({ descriptionImages: updated });
+            return updated;
+          });
+          toast.success(`${newImgs.length} image${newImgs.length > 1 ? 's' : ''} attached to description`);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const handleDescriptionPaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (loadEvt) => {
+            const newImg = {
+              id: String(Date.now()) + Math.random().toString(36).substring(2, 7),
+              name: file.name || 'screenshot.png',
+              size: file.size,
+              fileType: file.type,
+              dataUrl: loadEvt.target.result,
+            };
+            setDescriptionImages((prev) => {
+              const updated = [...prev, newImg];
+              handleUpdateProperty({ descriptionImages: updated });
+              return updated;
+            });
+            toast.success('Screenshot attached to description');
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+  };
+
+  const handleRemoveDescriptionImage = (imgId) => {
+    setDescriptionImages((prev) => {
+      const updated = prev.filter((img) => img.id !== imgId);
+      handleUpdateProperty({ descriptionImages: updated });
+      return updated;
+    });
   };
 
   const handleCommentImageUpload = (e) => {
@@ -804,15 +883,76 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Description */}
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 block">Description</span>
-              <textarea
-                rows={5}
-                value={task?.description || ''}
-                onChange={(e) => setTask({ ...task, description: e.target.value })}
-                onBlur={(e) => handleUpdateProperty({ description: e.target.value })}
-                placeholder="Add a detailed description, acceptance criteria, or technical design notes..."
-                className="w-full rounded-xl border border-neutral-200 bg-neutral-50/50 p-3.5 text-xs text-neutral-800 focus:border-blue-600 focus:bg-white focus:outline-none shadow-inner transition"
-              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 block">Description</span>
+                {descriptionImages.length > 0 && (
+                  <span className="text-[11px] text-neutral-400 font-medium">
+                    {descriptionImages.length} image{descriptionImages.length > 1 ? 's' : ''} attached
+                  </span>
+                )}
+              </div>
+
+              <div className="relative rounded-xl border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs overflow-hidden">
+                <textarea
+                  rows={5}
+                  value={task?.description || ''}
+                  onChange={(e) => setTask({ ...task, description: e.target.value })}
+                  onBlur={(e) => handleUpdateProperty({ description: e.target.value })}
+                  onPaste={handleDescriptionPaste}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const files = Array.from(e.dataTransfer?.files || []);
+                    if (files.length) handleDescriptionImageUpload({ target: { files, value: '' } });
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  placeholder="Add a detailed description, acceptance criteria, or technical design notes... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
+                  className="w-full bg-transparent p-3 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
+                />
+
+                <div className="flex items-center justify-between border-t border-neutral-100 px-3 py-2 bg-neutral-50/70">
+                  <label
+                    title="Attach images to description"
+                    className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
+                  >
+                    <Image className="size-3.5 text-blue-600" />
+                    <span>Attach Image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleDescriptionImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  <span className="text-[10px] text-neutral-400 italic hidden sm:inline">
+                    Paste screenshot with Ctrl+V or drag & drop
+                  </span>
+                </div>
+              </div>
+
+              {/* Attached Images Gallery */}
+              {descriptionImages.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-2.5 bg-neutral-50/80 rounded-xl border border-neutral-200">
+                  {descriptionImages.map((img) => (
+                    <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0 shadow-2xs">
+                      <img
+                        src={img.dataUrl}
+                        alt={img.name || 'Description attachment'}
+                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition"
+                        onClick={() => setLightboxSrc(img.dataUrl)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDescriptionImage(img.id)}
+                        className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition opacity-0 group-hover:opacity-100 cursor-pointer"
+                        title="Remove image"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Activity & Comments Tabs */}
