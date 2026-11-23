@@ -195,6 +195,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
         status: form.status,
         priority: form.priority,
         issueType: form.issueType,
+        parentTaskId: form.parentTaskId || null,
         assigneeId: selectedAssigneeIds[0] || null,
         assigneeIds: selectedAssigneeIds,
         sprintId: form.sprintId || null,

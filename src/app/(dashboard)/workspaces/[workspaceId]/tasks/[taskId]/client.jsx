@@ -512,9 +512,11 @@ export const TaskIdClient = () => {
     e.preventDefault();
     if (!subtaskTitle.trim()) return;
     try {
+      const targetWorkspaceId = workspaceId || task?.workspaceId || task?.workspace_id;
+      const targetProjectId = task?.project?.$id || task?.project?.id || task?.projectId || task?.project_id;
       await tasksApi.createTask({
-        workspaceId,
-        projectId: task.project?.$id || task.project_id,
+        workspaceId: targetWorkspaceId,
+        projectId: targetProjectId,
         name: subtaskTitle.trim(),
         issueType: 'Sub-task',
         parentTaskId: taskId,
