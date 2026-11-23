@@ -36,8 +36,11 @@ import {
   Heart,
   Star,
   Share2,
+  Link2,
 } from 'lucide-react';
 import { TaskShareModal } from './task-share-modal';
+import { LinkedTicketsSection } from './linked-tickets-section';
+import { LinkTicketModal } from './link-ticket-modal';
 
 const TYPE_ICONS = {
   Story: { icon: Bookmark, color: '#36B37E' },
@@ -166,6 +169,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const [logHoursInput, setLogHoursInput] = useState(1);
   const [storyPointsInput, setStoryPointsInput] = useState('1');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isFavoriting, setIsFavoriting] = useState(false);
 
@@ -323,6 +327,19 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     ]);
     setActiveTaskId(subId);
     setActiveTab('COMMENTS');
+  };
+
+  const handleNavigateToLinkedTicket = (targetId) => {
+    if (!targetId || targetId === currentId) return;
+    setHistoryStack((prev) => [
+      ...prev,
+      {
+        id: currentId,
+        key: task?.key || (task?.project?.key ? `${task.project.key}-1` : 'TASK'),
+        name: task?.name || 'Task',
+      },
+    ]);
+    setActiveTaskId(targetId);
   };
 
   const handleBackToParent = (parentItem) => {
@@ -675,6 +692,16 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 <Share2 className="size-3.5" />
                 <span>Share</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setShowLinkModal(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-white transition"
+                title="Link this ticket to another ticket"
+              >
+                <Link2 className="size-3.5" />
+                <span>Link</span>
+              </button>
             </div>
 
             {/* Status Dropdown */}
@@ -787,6 +814,15 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 className="w-full rounded-xl border border-neutral-200 bg-neutral-50/50 p-3.5 text-xs text-neutral-800 focus:border-blue-600 focus:bg-white focus:outline-none shadow-inner transition"
               />
             </div>
+
+            {/* Dedicated Linked Tickets & Dependencies Section */}
+            {task && (
+              <LinkedTicketsSection
+                currentTask={task}
+                onNavigateToTicket={handleNavigateToLinkedTicket}
+                onRefreshTask={fetchTaskDetails}
+              />
+            )}
 
             {/* Activity & Comments Tabs */}
             <div className="space-y-4 pt-2">
@@ -1651,6 +1687,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         onClose={() => setShowShareModal(false)}
         task={task}
         workspaceId={workspaceId}
+      />
+      <LinkTicketModal
+        isOpen={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
+        currentTask={task}
+        onLinkCreated={fetchTaskDetails}
       />
       <DeleteCommentDialog />
     </div>

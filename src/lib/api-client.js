@@ -401,6 +401,14 @@ export const dependenciesApi = {
   createDependency: (data) => apiFetch('/api/dependencies', { method: 'POST', body: JSON.stringify(data) }),
 };
 
+export const ticketLinksApi = {
+  getLinks: (ticketId) => apiFetch(`/api/tickets/${ticketId}/links`),
+  getDependencies: (ticketId) => apiFetch(`/api/tickets/${ticketId}/dependencies`),
+  createLink: (data) => apiFetch('/api/ticket-links', { method: 'POST', body: JSON.stringify(data) }),
+  updateLink: (linkId, data) => apiFetch(`/api/ticket-links/${linkId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteLink: (linkId) => apiFetch(`/api/ticket-links/${linkId}`, { method: 'DELETE' }),
+};
+
 export const capacityApi = {
   getCapacities: (workspaceId) => apiFetch(`/api/capacity/${workspaceId}`),
   setCapacity: (workspaceId, data) => apiFetch(`/api/capacity/${workspaceId}`, { method: 'POST', body: JSON.stringify(data) }),

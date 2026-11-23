@@ -36,8 +36,11 @@ import {
   Heart,
   Star,
   Share2,
+  Link2,
 } from 'lucide-react';
 import { TaskShareModal } from '@/features/tasks/components/task-share-modal';
+import { LinkedTicketsSection } from '@/features/tasks/components/linked-tickets-section';
+import { LinkTicketModal } from '@/features/tasks/components/link-ticket-modal';
 
 const TYPE_ICONS = {
   Story: { icon: Bookmark, color: '#36B37E' },
@@ -140,6 +143,7 @@ export const TaskIdClient = () => {
   const [activeTab, setActiveTab] = useState('COMMENTS');
   const [storyPointsInput, setStoryPointsInput] = useState('1');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isFavoriting, setIsFavoriting] = useState(false);
 
@@ -264,6 +268,11 @@ export const TaskIdClient = () => {
       }
     }
   }, [taskId, workspaceId]);
+
+  const handleNavigateToLinkedTicket = (targetId) => {
+    if (!targetId || targetId === taskId) return;
+    router.push(`/workspaces/${workspaceId}/tasks/${targetId}`);
+  };
 
   const handleUpdate = async (fields) => {
     try {
@@ -553,6 +562,16 @@ export const TaskIdClient = () => {
               <Share2 className="size-3.5" />
               <span>Share</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => setShowLinkModal(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-white transition"
+              title="Link this ticket to another ticket"
+            >
+              <Link2 className="size-3.5" />
+              <span>Link</span>
+            </button>
           </div>
 
           {/* Status Dropdown */}
@@ -634,6 +653,15 @@ export const TaskIdClient = () => {
               className="w-full rounded-xl border border-neutral-200 bg-neutral-50/50 p-4 text-xs text-neutral-800 focus:border-blue-600 focus:bg-white focus:outline-none shadow-inner"
             />
           </div>
+
+          {/* Dedicated Linked Tickets & Dependencies Section */}
+          {task && (
+            <LinkedTicketsSection
+              currentTask={task}
+              onNavigateToTicket={handleNavigateToLinkedTicket}
+              onRefreshTask={fetchTask}
+            />
+          )}
 
           {/* Activity Section */}
           <div className="space-y-4 pt-4 border-t border-neutral-100">
@@ -1217,6 +1245,15 @@ export const TaskIdClient = () => {
           onClose={() => setShowShareModal(false)}
           task={task}
           workspaceId={workspaceId}
+        />
+      )}
+
+      {task && (
+        <LinkTicketModal
+          isOpen={showLinkModal}
+          onClose={() => setShowLinkModal(false)}
+          currentTask={task}
+          onLinkCreated={fetchTask}
         />
       )}
     </div>
