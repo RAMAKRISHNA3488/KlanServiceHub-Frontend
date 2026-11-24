@@ -386,24 +386,31 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
 
             {/* Attached Images Gallery */}
             {descriptionImages.length > 0 && (
-              <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-lg border border-neutral-200">
-                {descriptionImages.map((img) => (
-                  <div key={img.id} className="relative group rounded-md overflow-hidden border border-neutral-300 bg-white size-14 shrink-0 shadow-2xs">
-                    <img
-                      src={img.dataUrl}
-                      alt={img.name || 'Description attachment'}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveDescriptionImage(img.id)}
-                      className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition opacity-0 group-hover:opacity-100 cursor-pointer"
-                      title="Remove image"
-                    >
-                      <X className="size-3" />
-                    </button>
-                  </div>
-                ))}
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-lg border border-neutral-200">
+                  {descriptionImages.map((img) => (
+                    <div key={img.id} className="relative group rounded-md overflow-hidden border border-neutral-300 bg-white size-14 shrink-0 shadow-2xs">
+                      <img
+                        src={img.dataUrl}
+                        alt={img.name || 'Description attachment'}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDescriptionImage(img.id)}
+                        className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition opacity-0 group-hover:opacity-100 cursor-pointer"
+                        title="Remove image"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {/* Expiration hint */}
+                <div className="flex items-center gap-1.5 text-[10px] text-amber-700 font-medium bg-amber-50/80 border border-amber-200/60 rounded px-2 py-0.5 w-fit">
+                  <Clock className="size-3" />
+                  <span>Active (expires 6 days after ticket is completed)</span>
+                </div>
               </div>
             )}
           </div>

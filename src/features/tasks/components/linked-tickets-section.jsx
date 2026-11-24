@@ -298,7 +298,7 @@ export function LinkedTicketsSection({
                             isBlocker ? 'bg-rose-50/40 hover:bg-rose-50/60' : 'hover:bg-neutral-50/70'
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-2.5 min-w-0">
+                          <div className="flex items-center justify-between gap-2 min-w-0">
                             {/* Left: Type Icon, Ticket Key, Title */}
                             <div className="flex items-center gap-1.5 min-w-0 flex-1">
                               <TypeIcon className="size-3 shrink-0" style={{ color: typeCfg.color }} />
@@ -312,7 +312,7 @@ export function LinkedTicketsSection({
                               </button>
                               <span
                                 onClick={() => onNavigateToTicket && onNavigateToTicket(t.id)}
-                                className={`text-[11px] truncate cursor-pointer hover:text-blue-600 transition-colors ${
+                                className={`text-[11px] truncate cursor-pointer hover:text-blue-600 transition-colors min-w-[120px] ${
                                   ticketTitle === '(No summary)' ? 'text-neutral-400 italic' : 'text-neutral-800 font-medium'
                                 }`}
                                 title={ticketTitle}
@@ -322,7 +322,7 @@ export function LinkedTicketsSection({
                             </div>
 
                             {/* Right: Assignee, Priority, Status, Date, Trash */}
-                            <div className="flex items-center gap-1.5 shrink-0">
+                            <div className="flex items-center gap-1 shrink-0">
                               {/* Assignee */}
                               {t.assignee ? (
                                 <div
@@ -330,16 +330,16 @@ export function LinkedTicketsSection({
                                   title={t.assignee.name}
                                 >
                                   {t.assignee.avatarUrl ? (
-                                    <img src={t.assignee.avatarUrl} alt="" className="size-3 rounded-full object-cover" />
+                                    <img src={t.assignee.avatarUrl} alt="" className="size-3 rounded-full object-cover shrink-0" />
                                   ) : (
-                                    <div className="size-3 rounded-full bg-blue-600 text-white flex items-center justify-center text-[8px] font-bold">
+                                    <div className="size-3 rounded-full bg-blue-600 text-white flex items-center justify-center text-[8px] font-bold shrink-0">
                                       {t.assignee.name.charAt(0)}
                                     </div>
                                   )}
-                                  <span className="max-w-[70px] truncate font-normal">{t.assignee.name}</span>
+                                  <span className="max-w-[65px] truncate font-normal hidden sm:inline">{t.assignee.name}</span>
                                 </div>
                               ) : (
-                                <span className="text-[9px] text-neutral-400 italic hidden sm:inline">Unassigned</span>
+                                <span className="text-[9px] text-neutral-400 italic hidden md:inline">Unassigned</span>
                               )}
 
                               {/* Priority */}
@@ -354,9 +354,9 @@ export function LinkedTicketsSection({
                                 {formatStatusLabel(t.status)}
                               </span>
 
-                              {/* Creation Date */}
+                              {/* Creation Date (shown only on wide viewports to preserve title width) */}
                               {formattedDate && (
-                                <span className="text-[9px] text-neutral-400 font-normal hidden lg:inline-block">
+                                <span className="text-[9px] text-neutral-400 font-normal hidden xl:inline-block">
                                   {formattedDate}
                                 </span>
                               )}

@@ -575,17 +575,31 @@ export const RoadmapTaskModal = ({
                   </div>
                 )}
                 {(currentTask?.description_images?.length > 0 || currentTask?.descriptionImages?.length > 0) && (
-                  <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-xl border border-neutral-200">
-                    {(currentTask?.description_images || currentTask?.descriptionImages || []).map((img) => (
-                      <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0 shadow-2xs">
-                        <img
-                          src={img.dataUrl}
-                          alt={img.name || 'Description attachment'}
-                          className="w-full h-full object-cover cursor-pointer hover:scale-105 transition"
-                          onClick={() => window.open(img.dataUrl, '_blank')}
-                        />
-                      </div>
-                    ))}
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-xl border border-neutral-200">
+                      {(currentTask?.description_images || currentTask?.descriptionImages || []).map((img) => (
+                        <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0 shadow-2xs">
+                          <img
+                            src={img.dataUrl}
+                            alt={img.name || 'Description attachment'}
+                            className="w-full h-full object-cover cursor-pointer hover:scale-105 transition"
+                            onClick={() => window.open(img.dataUrl, '_blank')}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    {/* Expiration badge */}
+                    <div className="flex items-center gap-1.5 text-[10px] text-amber-700 font-medium bg-amber-50/80 border border-amber-200/60 rounded px-2 py-0.5 w-fit">
+                      <Clock className="size-3" />
+                      <span>{currentTask?.descriptionImagesStatus || (currentTask?.status === 'DONE' ? 'Expires 6 days after ticket done' : 'Active (expires 6 days after ticket is completed)')}</span>
+                    </div>
+                  </div>
+                )}
+
+                {currentTask?.descriptionImagesExpired && (
+                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 italic bg-neutral-100 px-2 py-0.5 rounded w-fit">
+                    <Clock className="size-3 text-neutral-400" />
+                    <span>Description image attachments expired 6 days after ticket completion.</span>
                   </div>
                 )}
               </div>
