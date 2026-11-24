@@ -130,29 +130,29 @@ export const CfdSummaryCards = ({
               card.onClick ? 'cursor-pointer hover:border-blue-400' : ''
             }`}
           >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 truncate" title={card.label}>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 truncate" title={card.label}>
                 {card.label}
               </span>
-              <div className={`p-1 rounded-md ${card.bgColor} ${card.color}`}>
-                <Icon className="size-3.5" />
+              <div className={`p-1 rounded ${card.bgColor} ${card.color}`}>
+                <Icon className="size-3" />
               </div>
             </div>
 
             <div className="flex items-baseline gap-1">
               {loading ? (
-                <div className="h-6 w-16 bg-neutral-200 animate-pulse rounded my-0.5" />
+                <div className="h-5 w-14 bg-neutral-200 animate-pulse rounded my-0.5" />
               ) : (
-                <span className={`text-base font-extrabold truncate ${card.isAlert ? 'text-rose-700' : 'text-neutral-900'}`}>
+                <span className={`text-[13px] font-extrabold truncate ${card.isAlert ? 'text-rose-700' : 'text-neutral-900'}`}>
                   {card.value}
                 </span>
               )}
             </div>
 
-            <div className="flex items-center justify-between text-[10px] text-neutral-400 mt-0.5">
+            <div className="flex items-center justify-between text-[9px] text-neutral-400 mt-0.5">
               <span className="truncate">{card.subtext}</span>
               <span className="group-hover:opacity-100 opacity-0 transition-opacity text-neutral-400 ml-1" title={card.tooltip}>
-                <HelpCircle className="size-2.5" />
+                <HelpCircle className="size-2" />
               </span>
             </div>
           </div>

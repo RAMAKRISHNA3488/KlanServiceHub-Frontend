@@ -130,9 +130,9 @@ export const TeamsAdminView = () => {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-16">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold text-neutral-900">Teams Management</h1>
+          <h1 className="text-[13px] font-bold text-neutral-900">Teams Management</h1>
           <p className="text-[11px] text-neutral-500 mt-0.5">
             Organize engineering, QA, design, and product units with assigned team leads and cross-project tracking.
           </p>
@@ -145,30 +145,30 @@ export const TeamsAdminView = () => {
               setTeamForm({ name: '', description: '', leadId: '', memberIds: [] });
               setModalOpen(true);
             }}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-700"
+            className="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white shadow-2xs transition hover:bg-blue-700 cursor-pointer"
           >
-            <Plus className="size-3.5" />
-            Create Team
+            <Plus className="size-2.5" />
+            <span>Create Team</span>
           </button>
         </div>
       </div>
 
       {/* Teams Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {teams.map((t) => (
           <div
             key={t.id}
-            className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:shadow-md flex flex-col justify-between"
+            className="rounded-xl border border-neutral-200 bg-white p-4 shadow-2xs transition hover:shadow-xs flex flex-col justify-between"
           >
             <div>
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="size-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                <div className="flex items-center gap-2">
+                  <div className="size-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-[11px] shadow-2xs">
                     {t.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-neutral-900">{t.name}</h3>
-                    <span className="text-[11px] text-neutral-400">{t.members?.length || 0} members</span>
+                    <h3 className="text-[11px] font-semibold text-neutral-900">{t.name}</h3>
+                    <span className="text-[9px] text-neutral-400">{t.members?.length || 0} members</span>
                   </div>
                 </div>
 
@@ -177,18 +177,18 @@ export const TeamsAdminView = () => {
                     onClick={() => handleOpenEdit(t)}
                     className="p-1 text-neutral-400 hover:text-neutral-700 rounded transition"
                   >
-                    <Edit2 className="size-3.5" />
+                    <Edit2 className="size-3" />
                   </button>
                   <button
                     onClick={() => handleDeleteTeam(t.id, t.name)}
                     className="p-1 text-neutral-400 hover:text-red-600 rounded transition"
                   >
-                    <Trash2 className="size-3.5" />
+                    <Trash2 className="size-3" />
                   </button>
                 </div>
               </div>
 
-              <p className="text-xs text-neutral-600 mt-3 line-clamp-2">{t.description || 'No description provided.'}</p>
+              <p className="text-[11px] text-neutral-500 mt-2 line-clamp-2">{t.description || 'No description provided.'}</p>
 
               {/* Lead Information */}
               <div className="mt-4 flex items-center justify-between">

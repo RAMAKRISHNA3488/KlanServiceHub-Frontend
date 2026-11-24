@@ -153,10 +153,10 @@ export const CfdTicketDrilldownModal = ({
           <button
             onClick={exportToCSV}
             disabled={filteredTickets.length === 0}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition shrink-0 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs hover:bg-neutral-50 transition shrink-0 disabled:opacity-50 cursor-pointer"
           >
-            <Download className="size-3.5" />
-            Export CSV
+            <Download className="size-2.5" />
+            <span>Export CSV</span>
           </button>
         </div>
 
@@ -164,11 +164,11 @@ export const CfdTicketDrilldownModal = ({
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5 divide-y divide-neutral-100">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-64 space-y-2 text-neutral-400">
-              <RefreshCw className="size-6 animate-spin text-blue-600" />
-              <span className="text-xs">Reconstructing historical tickets from audit history...</span>
+              <RefreshCw className="size-5 animate-spin text-blue-600" />
+              <span className="text-[11px]">Reconstructing historical tickets from audit history...</span>
             </div>
           ) : filteredTickets.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-neutral-400 text-xs">
+            <div className="flex flex-col items-center justify-center h-64 text-neutral-400 text-[11px]">
               <Layers className="size-8 text-neutral-300 mb-2" />
               <span>No tickets were in this status on {meta.date}.</span>
             </div>
@@ -205,7 +205,7 @@ export const CfdTicketDrilldownModal = ({
                     </span>
                   </div>
 
-                  <h4 className="text-xs font-bold text-neutral-900 group-hover:text-blue-600 transition truncate">
+                  <h4 className="text-[11px] font-semibold text-neutral-900 group-hover:text-blue-600 transition truncate">
                     {t.name}
                   </h4>
 
@@ -225,7 +225,7 @@ export const CfdTicketDrilldownModal = ({
                 </div>
 
                 <div className="flex items-center gap-1 text-neutral-400 group-hover:text-blue-600 transition shrink-0 pt-2">
-                  <ExternalLink className="size-3.5" />
+                  <ExternalLink className="size-3" />
                 </div>
               </div>
             ))
@@ -233,11 +233,11 @@ export const CfdTicketDrilldownModal = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3.5 border-t border-neutral-200 bg-neutral-50/70 flex items-center justify-between text-xs text-neutral-500">
+        <div className="p-3 border-t border-neutral-200 bg-neutral-50/70 flex items-center justify-between text-[11px] text-neutral-500">
           <span>Showing {filteredTickets.length} of {meta.count} tickets</span>
           <button
             onClick={onClose}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-50 shadow-xs"
+            className="rounded border border-neutral-300 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-700 hover:bg-neutral-50 shadow-2xs cursor-pointer"
           >
             Close
           </button>

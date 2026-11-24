@@ -144,17 +144,17 @@ export const ProjectIdClient = () => {
     if (!project && !isLoadingProject)
         return <PageError message="Project not found."/>;
     return (<div className="flex flex-col gap-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
         <div className="flex items-center gap-x-2">
-          <ProjectAvatar name={project.name} image={project.imageUrl} className="size-8"/>
+          <ProjectAvatar name={project.name} image={project.imageUrl} className="size-7"/>
 
-          <p className="text-lg font-semibold">{project.name}</p>
+          <p className="text-[13px] font-bold text-neutral-900">{project.name}</p>
         </div>
 
         <div>
           <Button variant="secondary" size="sm" asChild>
             <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/settings`}>
-              <Pencil className="mr-2 size-4"/>
+              <Pencil className="mr-1 size-2.5"/>
               Edit Project
             </Link>
           </Button>

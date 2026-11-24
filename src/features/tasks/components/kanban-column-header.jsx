@@ -5,11 +5,11 @@ import { TaskStatus } from '@/features/tasks/types';
 import { snakeCaseToTitleCase } from '@/lib/utils';
 
 const statusIconMap = {
-    [TaskStatus.BACKLOG]: <CircleDashed className="size-[18px] text-pink-400"/>,
-    [TaskStatus.TODO]: <Circle className="size-[18px] text-red-400"/>,
-    [TaskStatus.IN_PROGRESS]: <CircleDotDashed className="size-[18px] text-yellow-400"/>,
-    [TaskStatus.IN_REVIEW]: <CircleDot className="size-[18px] text-blue-400"/>,
-    [TaskStatus.DONE]: <CircleCheck className="size-[18px] text-emerald-400"/>,
+    [TaskStatus.BACKLOG]: <CircleDashed className="size-3.5 text-pink-400"/>,
+    [TaskStatus.TODO]: <Circle className="size-3.5 text-red-400"/>,
+    [TaskStatus.IN_PROGRESS]: <CircleDotDashed className="size-3.5 text-yellow-400"/>,
+    [TaskStatus.IN_REVIEW]: <CircleDot className="size-3.5 text-blue-400"/>,
+    [TaskStatus.DONE]: <CircleCheck className="size-3.5 text-emerald-400"/>,
 };
 
 export const KanbanColumnHeader = ({ board, label, color, category, taskCount, maxTasks = 5, overloadColor = '#EF4444' }) => {

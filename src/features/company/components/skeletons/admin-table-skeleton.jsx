@@ -5,23 +5,23 @@ export const AdminTableSkeleton = ({ title = 'Administration', subtitle = 'Manag
   return (
     <div className="space-y-5 select-none animate-in fade-in duration-150">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200">
-        <div className="space-y-1">
-          <h2 className="text-base font-bold text-neutral-900">{title}</h2>
-          <p className="text-xs text-neutral-500">{subtitle}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-neutral-200">
+        <div className="space-y-0.5">
+          <h2 className="text-[13px] font-bold text-neutral-900">{title}</h2>
+          <p className="text-[11px] text-neutral-500">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-8 w-24 rounded-lg" />
-          <Skeleton className="h-8 w-28 rounded-lg" />
+        <div className="flex items-center gap-1.5">
+          <Skeleton className="h-6 w-20 rounded" />
+          <Skeleton className="h-6 w-24 rounded" />
         </div>
       </div>
 
       {/* Search & Actions Bar */}
-      <div className="rounded-xl border border-neutral-200 bg-white p-3.5 flex items-center justify-between gap-3 shadow-2xs">
-        <Skeleton className="h-8 w-64 rounded-lg" />
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-8 w-28 rounded-lg" />
-          <Skeleton className="h-8 w-20 rounded-lg" />
+      <div className="rounded-xl border border-neutral-200 bg-white p-2.5 flex items-center justify-between gap-2.5 shadow-2xs">
+        <Skeleton className="h-7 w-64 rounded" />
+        <div className="flex items-center gap-1.5">
+          <Skeleton className="h-6 w-24 rounded" />
+          <Skeleton className="h-6 w-16 rounded" />
         </div>
       </div>
 

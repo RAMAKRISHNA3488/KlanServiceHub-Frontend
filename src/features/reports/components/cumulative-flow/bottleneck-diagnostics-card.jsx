@@ -88,10 +88,10 @@ export const BottleneckDiagnosticsCard = ({
 
           <button
             onClick={() => onDrillDown({ status: primary.stage })}
-            className="rounded-lg bg-rose-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 transition shrink-0 flex items-center gap-1.5 self-end sm:self-auto"
+            className="rounded bg-rose-600 px-2 py-0.5 text-[10px] font-medium text-white shadow-2xs hover:bg-rose-700 transition shrink-0 flex items-center gap-1 self-end sm:self-auto cursor-pointer"
           >
             <span>Inspect Affected Tickets</span>
-            <ArrowRight className="size-3.5" />
+            <ArrowRight className="size-2.5" />
           </button>
         </div>
       )}

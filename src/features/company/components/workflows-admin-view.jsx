@@ -414,52 +414,52 @@ export const WorkflowsAdminView = () => {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-16">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-            <GitBranch className="size-5 text-blue-600" />
-            Workflows & Issue Types
+          <h1 className="text-[13px] font-bold text-neutral-900 flex items-center gap-1.5">
+            <GitBranch className="size-4 text-blue-600" />
+            <span>Workflows & Issue Types</span>
           </h1>
           <p className="text-[11px] text-neutral-500 mt-0.5">
             Manage lifecycle pipelines, statuses, and issue categories.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => navigate(`/workspaces/${workspaceId}/boards`)}
-            className="flex items-center gap-1.5 rounded-lg bg-neutral-900 text-white px-3.5 py-1.5 text-xs font-bold shadow-xs hover:bg-neutral-800 transition"
+            className="inline-flex items-center gap-1 rounded bg-neutral-900 text-white px-2 py-0.5 text-[10px] font-medium shadow-2xs hover:bg-neutral-800 transition cursor-pointer"
             title="Open Engineering Kanban Board to view active workflow columns and task cards"
           >
-            <Columns3 className="size-3.5 text-blue-400" />
+            <Columns3 className="size-2.5 text-blue-400" />
             <span>Engineering Kanban Board ➔</span>
           </button>
 
           {activeTab === 'WORKFLOWS' ? (
             <button
               onClick={() => setAddStatusModal(true)}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-700"
+              className="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white shadow-2xs transition hover:bg-blue-700 cursor-pointer"
             >
-              <Plus className="size-3.5" />
-              Add Status
+              <Plus className="size-2.5" />
+              <span>Add Status</span>
             </button>
           ) : (
             <button
               onClick={() => setAddTypeModal(true)}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-700"
+              className="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white shadow-2xs transition hover:bg-blue-700 cursor-pointer"
             >
-              <Plus className="size-3.5" />
-              Add Issue Type
+              <Plus className="size-2.5" />
+              <span>Add Issue Type</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-neutral-200 gap-2">
+      <div className="flex border-b border-neutral-200 gap-1.5">
         <button
           onClick={() => setActiveTab('WORKFLOWS')}
-          className={`border-b-2 px-4 py-2.5 text-xs font-bold transition ${
+          className={`border-b-2 px-3 py-1.5 text-[11px] font-semibold transition ${
             activeTab === 'WORKFLOWS'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-neutral-500 hover:text-neutral-900'
@@ -469,7 +469,7 @@ export const WorkflowsAdminView = () => {
         </button>
         <button
           onClick={() => setActiveTab('ISSUE_TYPES')}
-          className={`border-b-2 px-4 py-2.5 text-xs font-bold transition ${
+          className={`border-b-2 px-3 py-1.5 text-[11px] font-semibold transition ${
             activeTab === 'ISSUE_TYPES'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-neutral-500 hover:text-neutral-900'

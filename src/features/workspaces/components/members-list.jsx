@@ -148,36 +148,36 @@ export const MembersList = () => {
         ) : (
           members.documents.map((member, i) => (
           <Fragment key={member.$id || member.id}>
-            <div className="flex items-center gap-3">
-              <MemberAvatar name={member.name} className="size-10" fallbackClassName="text-lg" />
+            <div className="flex items-center gap-2.5">
+              <MemberAvatar name={member.name} className="size-8" fallbackClassName="text-[10px]" />
 
               <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-neutral-900">{member.name || member.email}</p>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${member.role === 'ADMIN' ? 'bg-amber-100 text-amber-800' : 'bg-neutral-100 text-neutral-700'}`}>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[11px] font-semibold text-neutral-900">{member.name || member.email}</p>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${member.role === 'ADMIN' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-neutral-100 text-neutral-700 border-neutral-200'}`}>
                     {member.role}
                   </span>
                 </div>
-                <p className="text-xs text-neutral-500">{member.email}</p>
+                <p className="text-[10px] text-neutral-500">{member.email}</p>
               </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger disabled={isPending} asChild>
                   <Button title="View options" className="ml-auto" variant="secondary" size="icon">
-                    <MoreVertical className="size-4 text-muted-foreground" />
+                    <MoreVertical className="size-3 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent side="bottom" align="end">
-                  <DropdownMenuItem className="font-medium" onClick={() => handleUpdateMember(member.$id, MemberRole.ADMIN)} disabled={isPending}>
+                  <DropdownMenuItem className="text-[10px] font-medium" onClick={() => handleUpdateMember(member.$id, MemberRole.ADMIN)} disabled={isPending}>
                     Set as Administrator
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="font-medium" onClick={() => handleUpdateMember(member.$id, MemberRole.MEMBER)} disabled={isPending}>
+                  <DropdownMenuItem className="text-[10px] font-medium" onClick={() => handleUpdateMember(member.$id, MemberRole.MEMBER)} disabled={isPending}>
                     Set as Member
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="font-medium text-amber-700" onClick={() => handleDeleteMember(member.$id, member.name || member.email)} disabled={isPending}>
+                  <DropdownMenuItem className="text-[10px] font-medium text-amber-700" onClick={() => handleDeleteMember(member.$id, member.name || member.email)} disabled={isPending}>
                     Remove {member.name}
                   </DropdownMenuItem>
                 </DropdownMenuContent>

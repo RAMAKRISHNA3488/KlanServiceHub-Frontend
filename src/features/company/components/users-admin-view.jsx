@@ -184,29 +184,29 @@ export const UsersAdminView = () => {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-16">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold text-neutral-900">User Directory & Team Members</h1>
+          <h1 className="text-[13px] font-bold text-neutral-900">User Directory & Team Members</h1>
           <p className="text-[11px] text-neutral-500 mt-0.5">
             Manage organization members, assign granular RBAC roles, invite new collaborators, and transfer ownership.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setTransferModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 shadow-xs hover:bg-amber-100 transition"
+            className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800 shadow-2xs hover:bg-amber-100 transition cursor-pointer"
           >
-            <Crown className="size-3.5 text-amber-600" />
-            Transfer Ownership
+            <Crown className="size-2.5 text-amber-600" />
+            <span>Transfer Ownership</span>
           </button>
 
           <button
             onClick={() => setInviteModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-700"
+            className="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white shadow-2xs transition hover:bg-blue-700 cursor-pointer"
           >
-            <UserPlus className="size-3.5" />
-            Invite User
+            <UserPlus className="size-2.5" />
+            <span>Invite User</span>
           </button>
         </div>
       </div>

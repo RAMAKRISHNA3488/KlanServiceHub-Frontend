@@ -13,20 +13,20 @@ export const ReportsAnalyticsSkeleton = () => {
           </div>
           <Skeleton className="h-3 w-96 max-w-full rounded" />
         </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-8 w-28 rounded-lg" />
-          <Skeleton className="h-8 w-24 rounded-lg" />
-          <Skeleton className="h-8 w-32 rounded-lg" />
+        <div className="flex items-center gap-1.5">
+          <Skeleton className="h-6 w-24 rounded" />
+          <Skeleton className="h-6 w-20 rounded" />
+          <Skeleton className="h-6 w-28 rounded" />
         </div>
       </div>
 
       {/* Filter Bar Skeleton */}
-      <div className="rounded-xl border border-neutral-200 bg-white p-3.5 space-y-3 shadow-2xs">
-        <div className="flex flex-wrap items-center gap-2">
-          <Skeleton className="h-8 w-32 rounded-lg" />
-          <Skeleton className="h-8 w-32 rounded-lg" />
-          <Skeleton className="h-8 w-32 rounded-lg" />
-          <Skeleton className="h-8 w-28 rounded-lg" />
+      <div className="rounded-xl border border-neutral-200 bg-white p-2.5 space-y-2 shadow-2xs">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Skeleton className="h-6 w-24 rounded" />
+          <Skeleton className="h-6 w-24 rounded" />
+          <Skeleton className="h-6 w-24 rounded" />
+          <Skeleton className="h-6 w-20 rounded" />
         </div>
       </div>
 

@@ -202,50 +202,50 @@ export const CumulativeFlowSection = ({
           </div>
 
           {/* Action Buttons: Refresh, CSV Export, PDF Export */}
-          <div className="flex items-center gap-2 self-start lg:self-auto shrink-0">
+          <div className="flex items-center gap-1.5 self-start lg:self-auto shrink-0">
             <button
               onClick={fetchCFD}
               disabled={loading}
-              className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition"
+              className="inline-flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs hover:bg-neutral-50 transition cursor-pointer"
               title="Refresh CFD data"
             >
-              <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`size-2.5 ${loading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </button>
 
             <button
               onClick={exportCfdCsv}
               disabled={loading || cfdData.timeline?.length === 0}
-              className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs hover:bg-neutral-50 transition disabled:opacity-50 cursor-pointer"
               title="Export Cumulative Flow data to CSV"
             >
-              <Download className="size-3.5" />
+              <Download className="size-2.5" />
               <span>Export CSV</span>
             </button>
 
             <button
               onClick={handlePrintPdf}
-              className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition"
+              className="inline-flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs hover:bg-neutral-50 transition cursor-pointer"
               title="Print or save as PDF"
             >
-              <Printer className="size-3.5" />
+              <Printer className="size-2.5" />
               <span>Export PDF</span>
             </button>
           </div>
         </div>
 
         {/* Filters Controls Row */}
-        <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3">
+        <div className="pt-2.5 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-2.5">
           {/* Quick Date Range Pills */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mr-1">Time Range:</span>
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider mr-1">Time Range:</span>
             {dateRangePills.map((p) => (
               <button
                 key={p.id}
                 onClick={() => handleFilterChange('dateRange', p.id)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                className={`rounded px-2 py-0.5 text-[10px] font-medium transition cursor-pointer ${
                   filters.dateRange === p.id
-                    ? 'bg-blue-600 text-white shadow-xs'
+                    ? 'bg-blue-600 text-white shadow-2xs'
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }`}
               >
@@ -255,32 +255,32 @@ export const CumulativeFlowSection = ({
 
             {/* Custom Date Inputs */}
             {filters.dateRange === 'custom' && (
-              <div className="flex items-center gap-1.5 ml-2">
+              <div className="flex items-center gap-1 ml-1.5">
                 <input
                   type="date"
                   value={filters.startDate}
                   onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                  className="rounded-lg border border-neutral-300 px-2 py-1 text-xs text-neutral-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="rounded border border-neutral-300 px-1.5 py-0.5 text-[10px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
-                <span className="text-xs text-neutral-400">to</span>
+                <span className="text-[10px] text-neutral-400">to</span>
                 <input
                   type="date"
                   value={filters.endDate}
                   onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                  className="rounded-lg border border-neutral-300 px-2 py-1 text-xs text-neutral-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="rounded border border-neutral-300 px-1.5 py-0.5 text-[10px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             )}
           </div>
 
           {/* Project, Team, and Sprint Dropdown Selectors */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             {/* Project Selector */}
             <div className="relative">
               <select
                 value={filters.projectId}
                 onChange={(e) => handleFilterChange('projectId', e.target.value)}
-                className="appearance-none rounded-lg border border-neutral-300 bg-white pl-2.5 pr-7 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="appearance-none rounded border border-neutral-300 bg-white pl-2 pr-6 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="ALL">All Projects</option>
                 {projects.map((p) => (
@@ -289,7 +289,7 @@ export const CumulativeFlowSection = ({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2 top-2 size-3 text-neutral-400" />
+              <ChevronDown className="pointer-events-none absolute right-1.5 top-1.5 size-2.5 text-neutral-400" />
             </div>
 
             {/* Team Selector */}
@@ -297,7 +297,7 @@ export const CumulativeFlowSection = ({
               <select
                 value={filters.teamId}
                 onChange={(e) => handleFilterChange('teamId', e.target.value)}
-                className="appearance-none rounded-lg border border-neutral-300 bg-white pl-2.5 pr-7 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="appearance-none rounded border border-neutral-300 bg-white pl-2 pr-6 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="ALL">All Teams</option>
                 {teams.map((t) => (
@@ -306,7 +306,7 @@ export const CumulativeFlowSection = ({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2 top-2 size-3 text-neutral-400" />
+              <ChevronDown className="pointer-events-none absolute right-1.5 top-1.5 size-2.5 text-neutral-400" />
             </div>
 
             {/* Sprint Selector */}
@@ -315,7 +315,7 @@ export const CumulativeFlowSection = ({
                 <select
                   value={filters.sprintId}
                   onChange={(e) => handleFilterChange('sprintId', e.target.value)}
-                  className="appearance-none rounded-lg border border-neutral-300 bg-white pl-2.5 pr-7 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="appearance-none rounded border border-neutral-300 bg-white pl-2 pr-6 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="ALL">All Sprints</option>
                   {sprints.map((s) => (
@@ -324,7 +324,7 @@ export const CumulativeFlowSection = ({
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2 top-2 size-3 text-neutral-400" />
+                <ChevronDown className="pointer-events-none absolute right-1.5 top-1.5 size-2.5 text-neutral-400" />
               </div>
             )}
           </div>

@@ -239,11 +239,11 @@ export const OrganizationAnalyticsPage = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-20">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold text-neutral-900">Reports & Organization Analytics</h1>
-            <span className="rounded-full bg-blue-100 text-blue-800 px-2 py-0.2 text-[9px] font-bold">
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-[13px] font-bold text-neutral-900">Reports & Organization Analytics</h1>
+            <span className="rounded-full bg-blue-100 text-blue-800 px-1.5 py-0.2 text-[9px] font-bold">
               Live Telemetry
             </span>
           </div>
@@ -253,30 +253,30 @@ export const OrganizationAnalyticsPage = () => {
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setExportModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition"
+            className="inline-flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs hover:bg-neutral-50 transition cursor-pointer"
           >
-            <Download className="size-3.5" />
-            Export Report
+            <Download className="size-2.5" />
+            <span>Export Report</span>
           </button>
 
           <button
             onClick={fetchAllAnalytics}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition"
+            className="inline-flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-700 shadow-2xs hover:bg-neutral-50 transition cursor-pointer"
           >
-            <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            <RefreshCw className={`size-2.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
           </button>
 
           <button
             onClick={openCreateTaskModal}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition"
+            className="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white shadow-2xs hover:bg-blue-700 transition cursor-pointer"
           >
-            <Plus className="size-3.5" />
-            Create Work Item
+            <Plus className="size-2.5" />
+            <span>Create Work Item</span>
           </button>
         </div>
       </div>

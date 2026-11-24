@@ -306,24 +306,24 @@ export const WorkspaceIdClient = () => {
       {/* Top Header with Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-neutral-200">
         <div>
-          <h1 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+          <h1 className="text-[13px] font-bold text-neutral-900 flex items-center gap-1.5">
             <span>Workspace Planning Summary</span>
-            <span className="rounded-full bg-blue-100 px-2 py-0.2 text-[10px] font-bold text-blue-700">Live</span>
+            <span className="rounded-full bg-blue-100 px-1.5 py-0.2 text-[9px] font-bold text-blue-700">Live</span>
           </h1>
           <p className="text-[11px] text-neutral-500">
             Real-time delivery progress, active sprints, projects, and workload across your workspace.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-          <Button size="sm" variant="outline" onClick={() => setInviteModalOpen(true)} className="text-[11px] h-7 px-2 sm:px-2.5 font-semibold flex-1 sm:flex-none">
-            <UserPlus className="mr-1 size-3 text-blue-600" /> Invite
+        <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+          <Button size="sm" variant="outline" onClick={() => setInviteModalOpen(true)} className="text-[10px] h-6 px-2 font-medium flex-1 sm:flex-none">
+            <UserPlus className="mr-1 size-2.5 text-blue-600" /> Invite
           </Button>
-          <Button size="sm" variant="secondary" onClick={() => createProject()} className="text-[11px] h-7 px-2 sm:px-2.5 font-semibold flex-1 sm:flex-none">
-            <PlusIcon className="mr-1 size-3" /> Project
+          <Button size="sm" variant="secondary" onClick={() => createProject()} className="text-[10px] h-6 px-2 font-medium flex-1 sm:flex-none">
+            <PlusIcon className="mr-1 size-2.5" /> Project
           </Button>
-          <Button size="sm" onClick={() => createTask()} className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] h-7 px-2 sm:px-2.5 font-semibold flex-1 sm:flex-none">
-            <PlusIcon className="mr-1 size-3" /> Issue
+          <Button size="sm" onClick={() => createTask()} className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] h-6 px-2 font-medium flex-1 sm:flex-none">
+            <PlusIcon className="mr-1 size-2.5" /> Issue
           </Button>
         </div>
       </div>
