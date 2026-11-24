@@ -61,6 +61,7 @@ export const CumulativeFlowChart = ({
 
     let calculatedMax = 0;
     const processed = timeline.map((bucket) => {
+      if (!bucket) return { visibleCumulative: {}, visibleTotal: 0 };
       let cumulativeSum = 0;
       const visibleCumulative = {};
 
