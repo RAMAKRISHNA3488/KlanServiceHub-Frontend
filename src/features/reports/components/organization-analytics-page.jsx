@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { reportsApi, tasksApi } from '@/lib/api-client';
 import { toast } from 'sonner';
@@ -43,17 +43,19 @@ import { OverdueAnalyticsCard } from './overdue-analytics-card';
 import { ActivityFeedCard } from './activity-feed-card';
 import { DrillDownModal } from './drill-down-modal';
 import { ExportReportModal } from './export-report-modal';
+import { CumulativeFlowSection } from './cumulative-flow/cumulative-flow-section';
 
 // Task creation modal hook if available
 import { useCreateTaskModal } from '@/features/tasks/hooks/use-create-task-modal';
 
 export const OrganizationAnalyticsPage = () => {
   const workspaceId = useWorkspaceId();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { open: openCreateTaskModal } = useCreateTaskModal();
 
   // Active Tab View
-  const [activeTab, setActiveTab] = useState('executive'); // 'executive' | 'workload' | 'projects' | 'quality' | 'activity'
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'executive'); // 'executive' | 'cfd' | 'workload' | 'projects' | 'quality' | 'activity'
 
   // Global Filter State (Initialized from URL query params)
   const [filters, setFilters] = useState({
@@ -221,6 +223,7 @@ export const OrganizationAnalyticsPage = () => {
 
   const tabs = [
     { id: 'executive', label: 'Executive Dashboard', icon: BarChart3 },
+    { id: 'cfd', label: 'Cumulative Flow (CFD)', icon: Layers },
     { id: 'workload', label: 'Teams & Workload', icon: Users },
     { id: 'employee', label: 'Employee-Wise Report', icon: UserCheck },
     { id: 'projects', label: 'Projects & Epics', icon: Briefcase },
@@ -392,6 +395,19 @@ export const OrganizationAnalyticsPage = () => {
             />
           </div>
         </div>
+      )}
+
+      {/* Tab: Cumulative Flow Diagram (CFD) */}
+      {activeTab === 'cfd' && (
+        <CumulativeFlowSection
+          workspaceId={workspaceId}
+          projects={projectsData}
+          teams={teamsData}
+          sprints={sprintsData?.sprints || []}
+          onOpenTask={(taskId) => {
+            navigate(`/workspaces/${workspaceId}/tasks/${taskId}`);
+          }}
+        />
       )}
 
       {/* Tab 2: Teams & Workload */}

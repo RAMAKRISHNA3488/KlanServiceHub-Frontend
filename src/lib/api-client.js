@@ -305,6 +305,34 @@ export const reportsApi = {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/reports/${workspaceId}/drilldown${q ? `?${q}` : ''}`);
   },
+  getCumulativeFlow: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow${q ? `?${q}` : ''}`);
+  },
+  getCumulativeFlowSummary: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/summary${q ? `?${q}` : ''}`);
+  },
+  getCumulativeFlowBottlenecks: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/bottlenecks${q ? `?${q}` : ''}`);
+  },
+  getCumulativeFlowTickets: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/tickets${q ? `?${q}` : ''}`);
+  },
+  getCumulativeFlowThroughput: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/throughput${q ? `?${q}` : ''}`);
+  },
+  getCumulativeFlowCycleTime: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/cycle-time${q ? `?${q}` : ''}`);
+  },
+  getCumulativeFlowLeadTime: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/lead-time${q ? `?${q}` : ''}`);
+  },
   exportReport: async (workspaceId, params = {}, format = 'comprehensive') => {
     const q = new URLSearchParams({ ...params, format }).toString();
     const res = await fetch(`/api/reports/${workspaceId}/export?${q}`, {
@@ -513,6 +541,25 @@ export const platformAdminApi = {
   getAuditLogs: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return apiFetch(`/api/platform-admin/audit-logs${query ? `?${query}` : ''}`);
+  },
+};
+
+export const analyticsApi = {
+  getCumulativeFlow: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/analytics/cumulative-flow${q ? `?${q}` : ''}`);
+  },
+  getSummary: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/analytics/cumulative-flow/summary${q ? `?${q}` : ''}`);
+  },
+  getBottlenecks: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/analytics/cumulative-flow/bottlenecks${q ? `?${q}` : ''}`);
+  },
+  getTickets: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/analytics/cumulative-flow/tickets${q ? `?${q}` : ''}`);
   },
 };
 
