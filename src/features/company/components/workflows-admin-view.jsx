@@ -7,6 +7,7 @@ import { workflowsAdminApi } from '@/lib/api-client';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
 import { useUpdateProject } from '@/features/projects/api/use-update-project';
 import { toast } from 'sonner';
+import { AdminTableSkeleton } from './skeletons/admin-table-skeleton';
 import {
   GitBranch,
   ArrowRight,
@@ -401,8 +402,11 @@ export const WorkflowsAdminView = () => {
 
   if (loading && workflows.length === 0) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <RefreshCw className="size-8 animate-spin text-neutral-400" />
+      <div className="max-w-6xl mx-auto pb-16">
+        <AdminTableSkeleton
+          title="Workflows & Issue Types"
+          subtitle="Manage lifecycle pipelines, stages, and issue categories."
+        />
       </div>
     );
   }

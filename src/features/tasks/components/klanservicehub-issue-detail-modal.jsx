@@ -41,6 +41,7 @@ import {
 import { TaskShareModal } from './task-share-modal';
 import { LinkedTicketsSection } from './linked-tickets-section';
 import { LinkTicketModal } from './link-ticket-modal';
+import { TaskDetailSkeleton } from './skeletons/task-detail-skeleton';
 
 const TYPE_ICONS = {
   Story: { icon: Bookmark, color: '#36B37E' },
@@ -657,6 +658,16 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   );
 
   const matchedColor = matchedType?.color || TYPE_ICONS[currentTypeName]?.color || '#0052CC';
+  if (loading && !task) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+        <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden p-6">
+          <TaskDetailSkeleton isModal />
+        </div>
+      </div>
+    );
+  }
+
   const rawIcon = matchedType?.icon || TYPE_ICONS[currentTypeName]?.icon;
   const TypeIcon = typeof rawIcon === 'function' ? rawIcon : (
     rawIcon === 'bookmark' ? Bookmark :

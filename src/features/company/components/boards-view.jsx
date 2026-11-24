@@ -10,6 +10,7 @@ import { BoardFilters } from './board-filters';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { toast } from 'sonner';
+import { KanbanBoardSkeleton } from '@/features/tasks/components/skeletons/kanban-board-skeleton';
 import {
   Kanban,
   Plus,
@@ -756,8 +757,8 @@ export const BoardsView = () => {
 
   if (loading && !boardsData && boards.length === 0) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <RefreshCw className="size-8 animate-spin text-neutral-400" />
+      <div className="space-y-4 pt-4">
+        <KanbanBoardSkeleton />
       </div>
     );
   }

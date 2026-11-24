@@ -44,6 +44,7 @@ import { ActivityFeedCard } from './activity-feed-card';
 import { DrillDownModal } from './drill-down-modal';
 import { ExportReportModal } from './export-report-modal';
 import { CumulativeFlowSection } from './cumulative-flow/cumulative-flow-section';
+import { ReportsAnalyticsSkeleton } from './skeletons/reports-analytics-skeleton';
 
 // Task creation modal hook if available
 import { useCreateTaskModal } from '@/features/tasks/hooks/use-create-task-modal';
@@ -230,6 +231,10 @@ export const OrganizationAnalyticsPage = () => {
     { id: 'quality', label: 'Quality & Velocity', icon: Bug },
     { id: 'activity', label: 'Activity Audit', icon: Activity },
   ];
+
+  if (loading && !overview) {
+    return <ReportsAnalyticsSkeleton />;
+  }
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-20">

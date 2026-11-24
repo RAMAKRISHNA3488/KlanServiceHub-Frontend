@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { usersAdminApi, rolesAdminApi, companyApi } from '@/lib/api-client';
 import { toast } from 'sonner';
+import { AdminTableSkeleton } from './skeletons/admin-table-skeleton';
 import {
   Users,
   UserPlus,
@@ -168,6 +169,17 @@ export const UsersAdminView = () => {
     const matchesStatus = statusFilter === 'ALL' || u.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  if (loading && users.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto pb-16">
+        <AdminTableSkeleton
+          title="User Directory & Access Control"
+          subtitle="Manage members, assign RBAC roles, and regulate workspace security permissions."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-16">

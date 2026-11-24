@@ -6,6 +6,7 @@ import { useCurrent } from '@/features/auth/api/use-current';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
 import { dashboardsApi } from '@/lib/api-client';
 import { KlanserviceHubIssueDetailModal } from '@/features/tasks/components/klanservicehub-issue-detail-modal';
+import { WorkspaceDashboardSkeleton } from '@/features/workspaces/components/skeletons/workspace-dashboard-skeleton';
 import { toast } from 'sonner';
 import {
   LayoutDashboard,
@@ -836,8 +837,8 @@ export const DashboardsView = () => {
 
   if (loading && !data) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <RefreshCw className="size-8 animate-spin text-neutral-400" />
+      <div className="space-y-4 pt-4">
+        <WorkspaceDashboardSkeleton />
       </div>
     );
   }

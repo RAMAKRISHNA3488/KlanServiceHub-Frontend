@@ -22,6 +22,8 @@ import { DataFilters } from './data-filters';
 import { DataKanban } from './data-kanban';
 import { DataSearch } from './data-search';
 import { DataTable } from './data-table';
+import { KanbanBoardSkeleton } from './skeletons/kanban-board-skeleton';
+import { TaskTableSkeleton } from './skeletons/task-table-skeleton';
 
 const isWithinDateRange = (taskDateStr, range, startDate, endDate) => {
   if (!range || range === 'ALL') return true;
@@ -329,9 +331,13 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
           </>
         )}
 
-        {isLoadingTasks ? (<div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border">
-            <Loader2 className="size-5 animate-spin text-muted-foreground"/>
-          </div>) : (<>
+        {isLoadingTasks ? (
+          view === 'table' ? (
+            <TaskTableSkeleton />
+          ) : (
+            <KanbanBoardSkeleton />
+          )
+        ) : (<>
             <TabsContent value="table" className="mt-0 w-full min-w-0">
               <DataTable columns={columns} data={tasks?.documents ?? []}/>
             </TabsContent>

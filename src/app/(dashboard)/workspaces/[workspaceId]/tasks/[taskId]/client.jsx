@@ -41,6 +41,7 @@ import {
 import { TaskShareModal } from '@/features/tasks/components/task-share-modal';
 import { LinkedTicketsSection } from '@/features/tasks/components/linked-tickets-section';
 import { LinkTicketModal } from '@/features/tasks/components/link-ticket-modal';
+import { TaskDetailSkeleton } from '@/features/tasks/components/skeletons/task-detail-skeleton';
 
 const TYPE_ICONS = {
   Story: { icon: Bookmark, color: '#36B37E' },
@@ -548,7 +549,7 @@ export const TaskIdClient = () => {
     }
   };
 
-  if (loading && !task) return <PageLoader />;
+  if (loading && !task) return <TaskDetailSkeleton />;
   if (!task && !loading) return <PageError message="Issue not found." />;
 
   const typeConfig = TYPE_ICONS[task.issueType || task.issue_type] || TYPE_ICONS.Task;

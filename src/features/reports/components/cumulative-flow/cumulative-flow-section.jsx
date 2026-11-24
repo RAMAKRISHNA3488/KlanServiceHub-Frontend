@@ -20,6 +20,7 @@ import { CfdSummaryCards } from './cfd-summary-cards';
 import { CumulativeFlowChart } from './cumulative-flow-chart';
 import { BottleneckDiagnosticsCard } from './bottleneck-diagnostics-card';
 import { CfdTicketDrilldownModal } from './cfd-ticket-drilldown-modal';
+import { CfdSkeleton } from './cfd-skeleton';
 
 export const CumulativeFlowSection = ({
   workspaceId,
@@ -177,6 +178,10 @@ export const CumulativeFlowSection = ({
     { id: '90d', label: 'Last 90 days' },
     { id: 'custom', label: 'Custom' },
   ];
+
+  if (loading && (!cfdData.timeline || cfdData.timeline.length === 0)) {
+    return <CfdSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

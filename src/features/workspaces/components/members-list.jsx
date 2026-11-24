@@ -3,6 +3,7 @@ import React, { useState, Fragment } from 'react';
 import { ArrowLeft, MoreVertical, UserPlus, Mail, X, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { DottedSeparator } from '@/components/dotted-separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -129,7 +130,23 @@ export const MembersList = () => {
       </div>
 
       <CardContent className="p-7">
-        {members?.documents?.map((member, i) => (
+        {!members?.documents ? (
+          <div className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="size-10 rounded-full" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-4 w-32 rounded" />
+                    <Skeleton className="h-3 w-48 rounded" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-20 rounded-md" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          members.documents.map((member, i) => (
           <Fragment key={member.$id || member.id}>
             <div className="flex items-center gap-3">
               <MemberAvatar name={member.name} className="size-10" fallbackClassName="text-lg" />
@@ -169,9 +186,9 @@ export const MembersList = () => {
 
             {i < members.documents.length - 1 && <Separator className="my-3" />}
           </Fragment>
-        ))}
+        )))}
 
-        {(!members?.documents || members.documents.length === 0) && (
+        {members?.documents && members.documents.length === 0 && (
           <p className="py-8 text-center text-xs text-neutral-400">No members found in this workspace.</p>
         )}
       </CardContent>

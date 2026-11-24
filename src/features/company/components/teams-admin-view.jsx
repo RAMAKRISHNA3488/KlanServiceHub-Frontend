@@ -4,6 +4,7 @@ import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { teamsAdminApi, usersAdminApi } from '@/lib/api-client';
 import { toast } from 'sonner';
+import { AdminTableSkeleton } from './skeletons/admin-table-skeleton';
 import {
   Users,
   Plus,
@@ -117,8 +118,11 @@ export const TeamsAdminView = () => {
 
   if (loading && teams.length === 0) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <RefreshCw className="size-8 animate-spin text-neutral-400" />
+      <div className="max-w-6xl mx-auto pb-16">
+        <AdminTableSkeleton
+          title="Teams & Squads"
+          subtitle="Organize engineers and contributors into squads and cross-functional teams."
+        />
       </div>
     );
   }

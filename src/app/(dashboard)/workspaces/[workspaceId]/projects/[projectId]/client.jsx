@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Analytics } from '@/components/analytics';
 import { PageError } from '@/components/page-error';
 import { PageLoader } from '@/components/page-loader';
+import { ProjectViewSkeleton } from '@/features/projects/components/skeletons/project-view-skeleton';
 import { Button } from '@/components/ui/button';
 import { useGetProject } from '@/features/projects/api/use-get-project';
 import { useGetProjectAnalytics } from '@/features/projects/api/use-get-project-analytics';
@@ -139,7 +140,7 @@ export const ProjectIdClient = () => {
 
     const isLoading = isLoadingProject && !project;
     if (isLoading)
-        return <PageLoader />;
+        return <ProjectViewSkeleton />;
     if (!project && !isLoadingProject)
         return <PageError message="Project not found."/>;
     return (<div className="flex flex-col gap-y-4">

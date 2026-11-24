@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { Analytics } from '@/components/analytics';
 import { DottedSeparator } from '@/components/dotted-separator';
 import { PageLoader } from '@/components/page-loader';
+import { WorkspaceDashboardSkeleton } from '@/features/workspaces/components/skeletons/workspace-dashboard-skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useGetMembers } from '@/features/members/api/use-get-members';
@@ -293,7 +294,7 @@ export const WorkspaceIdClient = () => {
   }, [workspaceAnalytics, tasks, workflowStatuses]);
 
   if (isLoading) {
-    return <PageLoader />;
+    return <WorkspaceDashboardSkeleton />;
   }
 
   const taskDocs = tasks?.documents || [];
