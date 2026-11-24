@@ -682,17 +682,17 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
       <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden">
         {/* Top Header & Breadcrumbs */}
-        <div className="flex items-center justify-between px-6 py-3 border-b border-neutral-200 bg-neutral-50/70 select-none">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-200 bg-neutral-50/70 select-none">
           <div className="flex items-center gap-2 flex-wrap">
             {/* If we have navigated into a subtask, show Back button */}
             {(historyStack.length > 0 || task?.parentTask || task?.parent_task_id) && (
               <button
                 type="button"
                 onClick={() => handleBackToParent()}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 transition mr-1 shadow-2xs cursor-pointer"
+                className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 transition mr-1 shadow-2xs cursor-pointer"
                 title="Go back to parent ticket"
               >
-                <ArrowLeft className="size-3.5" />
+                <ArrowLeft className="size-3" />
                 <span>Back</span>
               </button>
             )}
@@ -703,7 +703,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 <button
                   type="button"
                   onClick={() => handleBackToParent(hist)}
-                  className="font-mono text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="font-mono text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
                   title={`Back to ${hist.name}`}
                 >
                   {hist.key}
@@ -717,7 +717,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 <button
                   type="button"
                   onClick={() => setActiveTaskId(task.parentTask.id || task.parentTask.$id)}
-                  className="font-mono text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="font-mono text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
                   title={`Parent: ${task.parentTask.name}`}
                 >
                   {task.parentTask.key || 'PARENT'}
@@ -726,15 +726,15 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               </>
             )}
 
-            <TypeIcon className="size-4 shrink-0" style={{ color: matchedColor }} />
-            <span className="font-mono text-xs font-bold text-neutral-500 hover:underline cursor-pointer">
+            <TypeIcon className="size-3.5 shrink-0" style={{ color: matchedColor }} />
+            <span className="font-mono text-[11px] font-semibold text-neutral-500 hover:underline cursor-pointer">
               {task?.key || (task?.project?.key ? `${task.project.key}-1` : 'TASK-1')}
             </span>
             <span className="text-neutral-300">/</span>
-            <span className="text-xs font-bold text-neutral-700 truncate max-w-[200px]">{task?.project?.name || 'Project'}</span>
+            <span className="text-[11px] font-semibold text-neutral-700 truncate max-w-[200px]">{task?.project?.name || 'Project'}</span>
             {matchedType && (
               <span
-                className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold text-white shadow-2xs ml-1"
+                className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-medium text-white shadow-2xs ml-1"
                 style={{ backgroundColor: matchedColor }}
               >
                 {matchedType.name}
@@ -744,19 +744,19 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
           <div className="flex items-center gap-2">
             {/* Quick Actions: Like, Favorite, Share */}
-            <div className="flex items-center gap-1 bg-neutral-100/80 p-0.5 rounded-xl border border-neutral-200/80 shadow-2xs">
+            <div className="flex items-center gap-1 bg-neutral-100/80 p-0.5 rounded-lg border border-neutral-200/80 shadow-2xs">
               <button
                 type="button"
                 onClick={handleToggleLike}
                 disabled={isLiking}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${
                   task?.hasLiked
                     ? 'bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs font-bold'
                     : 'text-neutral-600 hover:text-rose-600 hover:bg-white'
                 }`}
                 title={task?.hasLiked ? 'Unlike this issue' : 'Like this issue'}
               >
-                <Heart className={`size-3.5 ${task?.hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+                <Heart className={`size-3 ${task?.hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
                 <span>{task?.likesCount || 0}</span>
               </button>
 
@@ -764,34 +764,34 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 type="button"
                 onClick={handleToggleFavorite}
                 disabled={isFavoriting}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${
                   task?.isFavorite
                     ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs font-bold'
                     : 'text-neutral-600 hover:text-amber-600 hover:bg-white'
                 }`}
                 title={task?.isFavorite ? 'Remove from favorites' : 'Save to favorites'}
               >
-                <Star className={`size-3.5 ${task?.isFavorite ? 'fill-amber-400 text-amber-500' : ''}`} />
+                <Star className={`size-3 ${task?.isFavorite ? 'fill-amber-400 text-amber-500' : ''}`} />
                 <span>{task?.isFavorite ? 'Saved' : 'Save'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowShareModal(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-white transition"
+                className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-600 hover:text-blue-600 hover:bg-white transition"
                 title="Share this ticket"
               >
-                <Share2 className="size-3.5" />
+                <Share2 className="size-3" />
                 <span>Share</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowLinkModal(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-white transition"
+                className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-600 hover:text-blue-600 hover:bg-white transition"
                 title="Link this ticket to another ticket"
               >
-                <Link2 className="size-3.5" />
+                <Link2 className="size-3" />
                 <span>Link</span>
               </button>
             </div>
@@ -822,7 +822,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 <select
                   value={currentStatus}
                   onChange={(e) => handleUpdateProperty({ status: e.target.value })}
-                  className="rounded-lg px-3 py-1 text-xs font-bold border border-neutral-300 bg-white text-neutral-800 cursor-pointer focus:outline-none"
+                  className="rounded px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 bg-white text-neutral-800 cursor-pointer focus:outline-none h-6 shadow-2xs"
                 >
                   {uniqueWorkflowStatuses.length > 0 ? (
                     uniqueWorkflowStatuses.map((st) => (
@@ -846,9 +846,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
+              className="rounded p-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
             >
-              <X className="size-5" />
+              <X className="size-4" />
             </button>
           </div>
         </div>
@@ -856,7 +856,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
         {/* Modal Main Content: 2 Columns */}
         <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-y-auto lg:overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-neutral-200">
           {/* Left Main Details Column */}
-          <div className="lg:col-span-8 p-6 space-y-6 min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full">
+          <div className="lg:col-span-8 p-4 sm:p-5 space-y-4 min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full">
             {/* Issue Title Input & Timestamp Metadata */}
             <div className="space-y-1">
               <input
@@ -864,10 +864,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 value={task?.name || ''}
                 onChange={(e) => setTask({ ...task, name: e.target.value })}
                 onBlur={(e) => handleUpdateProperty({ name: e.target.value })}
-                className="w-full text-lg font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none py-1 transition"
+                className="w-full text-[13px] sm:text-[14px] font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none py-0.5 transition"
                 placeholder="Issue summary..."
               />
-              <div className="flex items-center gap-3 text-[11px] text-neutral-400 font-medium">
+              <div className="flex items-center gap-2.5 text-[10px] text-neutral-400 font-normal">
                 <span
                   className="flex items-center gap-1"
                   title={
@@ -876,7 +876,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                       : ''
                   }
                 >
-                  <Calendar className="size-3 text-neutral-400" />
+                  <Calendar className="size-2.5 text-neutral-400" />
                   Created: {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
                 </span>
                 {(task?.updated_at || task?.$updatedAt) && (
@@ -886,7 +886,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                       className="flex items-center gap-1"
                       title={new Date(task.updated_at || task.$updatedAt).toLocaleString()}
                     >
-                      <Clock className="size-3 text-neutral-400" />
+                      <Clock className="size-2.5 text-neutral-400" />
                       Updated: {formatCommentDate(task.updated_at || task.$updatedAt)}
                     </span>
                   </>
@@ -895,19 +895,19 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 block">Description</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 block">Description</span>
                 {descriptionImages.length > 0 && (
-                  <span className="text-[11px] text-neutral-400 font-medium">
+                  <span className="text-[10px] text-neutral-400 font-medium">
                     {descriptionImages.length} image{descriptionImages.length > 1 ? 's' : ''} attached
                   </span>
                 )}
               </div>
 
-              <div className="relative rounded-xl border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs overflow-hidden">
+              <div className="relative rounded-lg border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs overflow-hidden">
                 <textarea
-                  rows={5}
+                  rows={4}
                   value={task?.description || ''}
                   onChange={(e) => setTask({ ...task, description: e.target.value })}
                   onBlur={(e) => handleUpdateProperty({ description: e.target.value })}
@@ -919,15 +919,15 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   }}
                   onDragOver={(e) => e.preventDefault()}
                   placeholder="Add a detailed description, acceptance criteria, or technical design notes... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
-                  className="w-full bg-transparent p-3 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
+                  className="w-full bg-transparent p-2.5 text-[11px] text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none leading-relaxed"
                 />
 
-                <div className="flex items-center justify-between border-t border-neutral-100 px-3 py-2 bg-neutral-50/70">
+                <div className="flex items-center justify-between border-t border-neutral-100 px-2.5 py-1.5 bg-neutral-50/70">
                   <label
                     title="Attach images to description"
-                    className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
+                    className="cursor-pointer inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
                   >
-                    <Image className="size-3.5 text-blue-600" />
+                    <Image className="size-3 text-blue-600" />
                     <span>Attach Image</span>
                     <input
                       type="file"
@@ -937,7 +937,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                       className="hidden"
                     />
                   </label>
-                  <span className="text-[10px] text-neutral-400 italic hidden sm:inline">
+                  <span className="text-[9px] text-neutral-400 italic hidden sm:inline">
                     Paste screenshot with Ctrl+V or drag & drop
                   </span>
                 </div>
@@ -946,9 +946,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               {/* Attached Images Gallery */}
               {descriptionImages.length > 0 && (
                 <div className="space-y-1.5">
-                  <div className="flex flex-wrap gap-2 p-2.5 bg-neutral-50/80 rounded-xl border border-neutral-200">
+                  <div className="flex flex-wrap gap-2 p-2 bg-neutral-50/80 rounded-lg border border-neutral-200">
                     {descriptionImages.map((img) => (
-                      <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0 shadow-2xs">
+                      <div key={img.id} className="relative group rounded-md overflow-hidden border border-neutral-300 bg-white size-14 shrink-0 shadow-2xs">
                         <img
                           src={img.dataUrl}
                           alt={img.name || 'Description attachment'}
@@ -961,81 +961,81 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                           className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition opacity-0 group-hover:opacity-100 cursor-pointer"
                           title="Remove image"
                         >
-                          <X className="size-3" />
+                          <X className="size-2.5" />
                         </button>
                       </div>
                     ))}
                   </div>
                   {/* Expiration badge */}
-                  <div className="flex items-center gap-1.5 text-[10px] text-amber-700 font-medium bg-amber-50/80 border border-amber-200/60 rounded px-2 py-0.5 w-fit">
-                    <Clock className="size-3" />
+                  <div className="flex items-center gap-1 text-[9px] text-amber-700 font-medium bg-amber-50/80 border border-amber-200/60 rounded px-1.5 py-0.2 w-fit">
+                    <Clock className="size-2.5" />
                     <span>{task?.descriptionImagesStatus || (task?.status === 'DONE' ? 'Expires 6 days after ticket done' : 'Active (expires 6 days after ticket is completed)')}</span>
                   </div>
                 </div>
               )}
 
               {task?.descriptionImagesExpired && (
-                <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 italic bg-neutral-100 px-2 py-0.5 rounded w-fit">
-                  <Clock className="size-3 text-neutral-400" />
+                <div className="flex items-center gap-1 text-[9px] text-neutral-400 italic bg-neutral-100 px-1.5 py-0.2 rounded w-fit">
+                  <Clock className="size-2.5 text-neutral-400" />
                   <span>Description image attachments expired 6 days after ticket completion.</span>
                 </div>
               )}
             </div>
 
             {/* Activity & Comments Tabs */}
-            <div className="space-y-4 pt-2">
-              <div className="flex items-center gap-4 border-b border-neutral-200 pb-2 flex-wrap">
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center gap-3.5 border-b border-neutral-200 pb-1.5 flex-wrap">
                 <button
                   onClick={() => setActiveTab('COMMENTS')}
-                  className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
                     activeTab === 'COMMENTS'
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
-                  <MessageSquare className="size-3.5" />
+                  <MessageSquare className="size-3" />
                   Comments ({comments.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('SUBTASKS')}
-                  className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
                     activeTab === 'SUBTASKS'
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
-                  <List className="size-3.5" />
+                  <List className="size-3" />
                   Sub-tasks ({task?.subtasks?.length || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('WORKLOG')}
-                  className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
                     activeTab === 'WORKLOG'
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
-                  <Clock className="size-3.5" />
+                  <Clock className="size-3" />
                   Time Tracking ({task?.logged_hours || 0}h logged)
                 </button>
                 <button
                   onClick={() => setActiveTab('LINKED_TICKETS')}
-                  className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
                     activeTab === 'LINKED_TICKETS'
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
-                  <Link2 className="size-3.5" />
+                  <Link2 className="size-3" />
                   Linked Tickets & Dependencies
                 </button>
               </div>
 
               {/* Tab: Comments */}
               {activeTab === 'COMMENTS' && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <form onSubmit={handleAddComment} className="space-y-2">
-                    <div className="relative rounded-xl border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs">
+                    <div className="relative rounded-lg border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs">
                       <textarea
                         rows={2}
                         value={newComment}
@@ -1048,14 +1048,14 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                         }}
                         onDragOver={(e) => e.preventDefault()}
                         placeholder="Add a comment... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
-                        className="w-full bg-transparent p-3 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
+                        className="w-full bg-transparent p-2.5 text-[11px] text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
                       />
-                      <div className="flex items-center justify-between border-t border-neutral-100 px-3 py-2 bg-neutral-50/70 rounded-b-xl">
+                      <div className="flex items-center justify-between border-t border-neutral-100 px-2.5 py-1.5 bg-neutral-50/70 rounded-b-lg">
                         <label
                           title="Attach images"
-                          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
+                          className="cursor-pointer inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
                         >
-                          <Image className="size-3.5 text-blue-600" />
+                          <Image className="size-3 text-blue-600" />
                           <span>Attach Image</span>
                           <input
                             type="file"
@@ -1068,7 +1068,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                         <button
                           type="submit"
                           disabled={addingComment || (!newComment.trim() && commentImages.length === 0)}
-                          className="rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition"
+                          className="rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-2xs hover:bg-blue-700 disabled:opacity-50 transition"
                         >
                           {addingComment ? 'Saving...' : 'Save Comment'}
                         </button>
@@ -1077,29 +1077,29 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
                     {/* Pre-post image previews */}
                     {commentImages.length > 0 && (
-                      <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-xl border border-neutral-200">
+                      <div className="flex flex-wrap gap-2 p-1.5 bg-neutral-50 rounded-lg border border-neutral-200">
                         {commentImages.map((img) => (
-                          <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0">
+                          <div key={img.id} className="relative group rounded-md overflow-hidden border border-neutral-300 bg-white size-14 shrink-0">
                             <img src={img.dataUrl} alt={img.name} className="w-full h-full object-cover" />
                             <button
                               type="button"
                               onClick={() => handleRemoveCommentImage(img.id)}
                               className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition"
                             >
-                              <X className="size-3" />
+                              <X className="size-2.5" />
                             </button>
                           </div>
                         ))}
-                        <span className="text-[10px] text-neutral-400 self-center pl-1 italic">
+                        <span className="text-[9px] text-neutral-400 self-center pl-1 italic">
                           {commentImages.length} image{commentImages.length > 1 ? 's' : ''} attached (will expire 6 days after ticket is completed)
                         </span>
                       </div>
                     )}
                   </form>
 
-                  <div className="space-y-3 pt-2">
+                  <div className="space-y-2.5 pt-1">
                     {comments.length === 0 ? (
-                      <p className="text-xs text-neutral-400 italic py-2">No comments yet.</p>
+                      <p className="text-[11px] text-neutral-400 italic py-1.5">No comments yet.</p>
                     ) : (
                       comments.map((c) => {
                         const isAuthor =
@@ -1110,16 +1110,16 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                         return (
                           <div
                             key={c.id}
-                            className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3 border border-neutral-100 hover:border-neutral-200 transition min-w-0 max-w-full overflow-hidden"
+                            className="group relative flex items-start gap-2.5 rounded-lg bg-neutral-50 p-2.5 border border-neutral-100 hover:border-neutral-200 transition min-w-0 max-w-full overflow-hidden"
                           >
                             {c.user_avatar ? (
                               <img
                                 src={c.user_avatar}
                                 alt={c.user_name || 'Member'}
-                                className="size-7 rounded-full object-cover shrink-0"
+                                className="size-6 rounded-full object-cover shrink-0"
                               />
                             ) : (
-                              <div className="size-7 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                              <div className="size-6 rounded-full bg-blue-600 text-white font-bold text-[9px] flex items-center justify-center shrink-0">
                                 {c.user_name?.substring(0, 2).toUpperCase() ||
                                   c.userName?.substring(0, 2).toUpperCase() ||
                                   'U'}
@@ -1127,12 +1127,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                             )}
                             <div className="flex-1 min-w-0 overflow-hidden">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-xs text-neutral-900">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-semibold text-[11px] text-neutral-900">
                                     {c.user_name || c.userName || 'Member'}
                                   </span>
                                   <span
-                                    className="text-[10px] text-neutral-400"
+                                    className="text-[9px] text-neutral-400"
                                     title={
                                       c.created_at || c.createdAt || c.$createdAt
                                         ? new Date(
@@ -1160,37 +1160,37 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                       type="button"
                                       onClick={() => handleStartEditComment(c)}
                                       title="Edit comment"
-                                      className="p-1 rounded-md text-neutral-400 hover:text-blue-600 hover:bg-neutral-200/60 transition"
+                                      className="p-1 rounded text-neutral-400 hover:text-blue-600 hover:bg-neutral-200/60 transition"
                                     >
-                                      <Pencil className="size-3" />
+                                      <Pencil className="size-2.5" />
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteComment(c.id)}
                                       title="Delete comment"
-                                      className="p-1 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                      className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                                     >
-                                      <Trash2 className="size-3" />
+                                      <Trash2 className="size-2.5" />
                                     </button>
                                   </div>
                                 )}
                               </div>
 
                               {editingCommentId === c.id ? (
-                                <div className="mt-2 space-y-2">
+                                <div className="mt-1.5 space-y-1.5">
                                   <textarea
                                     rows={2}
                                     value={editingContent}
                                     onChange={(e) => setEditingContent(e.target.value)}
-                                    className="w-full rounded-lg border border-blue-400 bg-white p-2 text-xs text-neutral-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm break-words break-all [overflow-wrap:anywhere]"
+                                    className="w-full rounded border border-blue-400 bg-white p-2 text-[11px] text-neutral-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xs break-words break-all [overflow-wrap:anywhere]"
                                   />
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1.5">
                                     <button
                                       type="button"
                                       onClick={() => handleSaveEditComment(c.id)}
-                                      className="flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 transition"
+                                      className="flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-blue-700 transition"
                                     >
-                                      <Check className="size-3" />
+                                      <Check className="size-2.5" />
                                       Save
                                     </button>
                                     <button
@@ -1199,9 +1199,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                         setEditingCommentId(null);
                                         setEditingContent('');
                                       }}
-                                      className="flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-600 hover:bg-neutral-50 transition"
+                                      className="flex items-center gap-1 rounded border border-neutral-200 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-600 hover:bg-neutral-50 transition"
                                     >
-                                      <X className="size-3" />
+                                      <X className="size-2.5" />
                                       Cancel
                                     </button>
                                   </div>
@@ -1209,14 +1209,14 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                               ) : (
                                 <div className="min-w-0 max-w-full overflow-hidden">
                                   {c.content && (
-                                    <p className="text-xs text-neutral-700 mt-1 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] leading-relaxed">
+                                    <p className="text-[11px] text-neutral-700 mt-1 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] leading-normal">
                                       {renderCommentContent(c.content)}
                                     </p>
                                   )}
 
                                   {/* Comment Images */}
                                   {c.images && Array.isArray(c.images) && c.images.length > 0 && (
-                                    <div className="mt-2 space-y-1.5">
+                                    <div className="mt-1.5 space-y-1.5">
                                       <div className="flex flex-wrap gap-2">
                                         {c.images.map((img, imgIdx) => {
                                           const imgSrc = img.dataUrl || img.url || img.fileUrl;
@@ -1224,7 +1224,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                             <div
                                               key={img.id || imgIdx}
                                               onClick={() => setLightboxSrc(imgSrc)}
-                                              className="group/img relative rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 size-20 cursor-pointer shadow-2xs hover:shadow transition"
+                                              className="group/img relative rounded-md overflow-hidden border border-neutral-200 bg-neutral-100 size-16 cursor-pointer shadow-2xs hover:shadow transition"
                                             >
                                               <img
                                                 src={imgSrc}
@@ -1232,23 +1232,23 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                                 className="w-full h-full object-cover group-hover/img:scale-105 transition"
                                               />
                                               <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/25 flex items-center justify-center transition">
-                                                <ZoomIn className="size-4 text-white opacity-0 group-hover/img:opacity-100 drop-shadow" />
+                                                <ZoomIn className="size-3.5 text-white opacity-0 group-hover/img:opacity-100 drop-shadow" />
                                               </div>
                                             </div>
                                           );
                                         })}
                                       </div>
                                       {/* Expiration badge */}
-                                      <div className="flex items-center gap-1.5 text-[10px] text-amber-700 font-medium bg-amber-50/80 border border-amber-200/60 rounded-md px-2 py-0.5 w-fit">
-                                        <Clock className="size-3" />
+                                      <div className="flex items-center gap-1 text-[9px] text-amber-700 font-medium bg-amber-50/80 border border-amber-200/60 rounded px-1.5 py-0.2 w-fit">
+                                        <Clock className="size-2.5" />
                                         <span>{c.imagesStatus || (task?.status === 'DONE' ? 'Expires 6 days after ticket done' : 'Active (expires 6 days after ticket is completed)')}</span>
                                       </div>
                                     </div>
                                   )}
 
                                   {c.imagesExpired && (
-                                    <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-neutral-400 italic bg-neutral-100 px-2 py-0.5 rounded-md w-fit">
-                                      <Clock className="size-3 text-neutral-400" />
+                                    <div className="mt-1 flex items-center gap-1 text-[9px] text-neutral-400 italic bg-neutral-100 px-1.5 py-0.2 rounded w-fit">
+                                      <Clock className="size-2.5 text-neutral-400" />
                                       <span>Image attachments expired 6 days after ticket completion.</span>
                                     </div>
                                   )}
@@ -1394,27 +1394,27 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           </div>
 
           {/* Right Properties Column (KlanserviceHub Style Box) */}
-          <div className="lg:col-span-4 p-6 bg-neutral-50/50 space-y-5 text-xs min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">Details</h3>
+          <div className="lg:col-span-4 p-4 sm:p-5 bg-neutral-50/50 space-y-3.5 text-[11px] min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full">
+            <h3 className="font-bold text-[9px] uppercase tracking-wider text-neutral-400">Details</h3>
 
             {/* Parent Ticket card if this is a subtask */}
             {(task?.parentTask || (historyStack.length > 0 && historyStack[historyStack.length - 1])) && (
-              <div className="rounded-xl border border-blue-200/80 bg-blue-50/60 p-3 space-y-1.5 shadow-2xs">
+              <div className="rounded-lg border border-blue-200/80 bg-blue-50/60 p-2.5 space-y-1 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Parent Ticket</span>
-                  <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-100/80 px-1.5 py-0.5 rounded">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-blue-700">Parent Ticket</span>
+                  <span className="text-[9px] font-mono font-bold text-blue-700 bg-blue-100/80 px-1.5 py-0.2 rounded">
                     {task?.parentTask?.key || historyStack[historyStack.length - 1]?.key}
                   </span>
                 </div>
-                <p className="text-xs font-semibold text-neutral-800 line-clamp-1">
+                <p className="text-[11px] font-semibold text-neutral-800 line-clamp-1">
                   {task?.parentTask?.name || historyStack[historyStack.length - 1]?.name}
                 </p>
                 <button
                   type="button"
                   onClick={() => handleBackToParent(task?.parentTask ? { id: task.parentTask.id } : null)}
-                  className="w-full mt-1 flex items-center justify-center gap-1.5 rounded-lg bg-white border border-blue-200 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100/70 transition shadow-2xs cursor-pointer"
+                  className="w-full mt-0.5 flex items-center justify-center gap-1 rounded bg-white border border-blue-200 py-1 text-[10px] font-semibold text-blue-700 hover:bg-blue-100/70 transition shadow-2xs cursor-pointer"
                 >
-                  <ArrowLeft className="size-3" />
+                  <ArrowLeft className="size-2.5" />
                   Open Parent Ticket
                 </button>
               </div>
@@ -1422,23 +1422,23 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Assignees (Multi-assignee support) */}
             <div>
-              <label className="block text-[11px] font-bold text-neutral-500 mb-1.5">
+              <label className="block text-[10px] font-semibold text-neutral-500 mb-1">
                 Assignees ({((task?.assignees && task.assignees.length > 0) ? task.assignees.length : (task?.assignee_id ? 1 : 0))})
               </label>
 
               {/* Current Assignees List */}
-              <div className="space-y-1.5 mb-2">
+              <div className="space-y-1 mb-1.5">
                 {task?.assignees && task.assignees.length > 0 ? (
                   task.assignees.map((a) => (
                     <div
                       key={a.$id || a.id}
-                      className="flex items-center justify-between bg-white px-2 py-1.5 rounded-lg border border-neutral-200 shadow-2xs"
+                      className="flex items-center justify-between bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="size-5 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center">
+                      <div className="flex items-center gap-1.5">
+                        <div className="size-4 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">
                           {a.name?.substring(0, 1).toUpperCase() || 'M'}
                         </div>
-                        <span className="text-xs font-semibold text-neutral-800">{a.name}</span>
+                        <span className="text-[10px] font-medium text-neutral-800">{a.name}</span>
                       </div>
                       <button
                         type="button"
@@ -1447,7 +1447,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                           const nextIds = currentIds.filter((x) => x !== (a.$id || a.id));
                           handleUpdateProperty({ assigneeIds: nextIds });
                         }}
-                        className="text-neutral-400 hover:text-red-500 text-xs px-1"
+                        className="text-neutral-400 hover:text-red-500 text-[11px] px-1"
                         title="Remove assignee"
                       >
                         &times;
@@ -1455,7 +1455,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                     </div>
                   ))
                 ) : (
-                  <div className="text-xs text-neutral-400 italic py-0.5">Unassigned</div>
+                  <div className="text-[10px] text-neutral-400 italic py-0.5">Unassigned</div>
                 )}
               </div>
 
@@ -1472,7 +1472,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                       handleUpdateProperty({ assigneeIds: nextIds });
                     }
                   }}
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+                  className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
                 >
                   <option value="">+ Assign another member...</option>
                   {members
@@ -1488,9 +1488,9 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Reporter */}
             <div>
-              <label className="block text-[11px] font-bold text-neutral-500 mb-1">Reporter</label>
-              <div className="flex items-center gap-2 font-semibold text-neutral-800 px-1 py-0.5">
-                <div className="size-5 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center">
+              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Reporter</label>
+              <div className="flex items-center gap-1.5 font-medium text-[10px] text-neutral-800 px-1 py-0.5">
+                <div className="size-4 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center">
                   {task?.reporter?.name?.substring(0, 1) || 'R'}
                 </div>
                 <span>{task?.reporter?.name || 'System User'}</span>
@@ -1499,11 +1499,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Issue Type */}
             <div>
-              <label className="block text-[11px] font-bold text-neutral-500 mb-1">Issue Type</label>
+              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Issue Type</label>
               <select
                 value={task?.issueType || 'Task'}
                 onChange={(e) => handleUpdateProperty({ issueType: e.target.value })}
-                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
               >
                 {workspaceIssueTypes.length > 0 ? (
                   workspaceIssueTypes.map((t) => (
@@ -1526,11 +1526,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Priority */}
             <div>
-              <label className="block text-[11px] font-bold text-neutral-500 mb-1">Priority</label>
+              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Priority</label>
               <select
                 value={task?.priority || 'MEDIUM'}
                 onChange={(e) => handleUpdateProperty({ priority: e.target.value })}
-                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
               >
                 <option value="CRITICAL">P0 - Critical (🔥)</option>
                 <option value="HIGH">P1 - High (⬆️)</option>
@@ -1542,7 +1542,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Story Points */}
             <div>
-              <label className="block text-[11px] font-bold text-neutral-500 mb-1">Story Points Estimate</label>
+              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Story Points Estimate</label>
               <input
                 type="number"
                 min={0}
@@ -1563,28 +1563,28 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                     e.currentTarget.blur();
                   }
                 }}
-                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
               />
             </div>
 
             {/* Due Date */}
             <div>
-              <label className="block text-[11px] font-bold text-neutral-500 mb-1">Due Date</label>
+              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Due Date</label>
               <input
                 type="date"
                 value={task?.dueDate ? task.dueDate.split('T')[0] : ''}
                 onChange={(e) => handleUpdateProperty({ dueDate: e.target.value })}
-                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
               />
             </div>
 
             {/* Sprint */}
             <div>
-              <label className="block text-[11px] font-bold text-neutral-500 mb-1">Sprint</label>
+              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Sprint</label>
               <select
                 value={task?.sprintId || task?.sprint_id || ''}
                 onChange={(e) => handleUpdateProperty({ sprintId: e.target.value || null })}
-                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
               >
                 <option value="">Backlog (No Sprint)</option>
                 {sprints.map((s) => (
@@ -1596,16 +1596,16 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
             </div>
 
             {/* Dates & Timestamps */}
-            <div className="pt-3 border-t border-neutral-200/80 space-y-2 text-[11px]">
-              <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
+            <div className="pt-2.5 border-t border-neutral-200/80 space-y-1.5 text-[10px]">
+              <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider">
                 Dates & Timestamps
               </label>
-              <div className="flex items-center justify-between text-neutral-600 bg-white p-2 rounded-lg border border-neutral-200 shadow-2xs">
-                <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
-                  <Calendar className="size-3 text-neutral-400" /> Created
+              <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
+                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                  <Calendar className="size-2.5 text-neutral-400" /> Created
                 </span>
                 <span
-                  className="font-semibold text-neutral-800"
+                  className="font-medium text-neutral-700 text-[10px] truncate ml-2"
                   title={
                     task?.created_at || task?.$createdAt
                       ? new Date(task.created_at || task.$createdAt).toLocaleString()
@@ -1615,12 +1615,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-neutral-600 bg-white p-2 rounded-lg border border-neutral-200 shadow-2xs">
-                <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
-                  <Clock className="size-3 text-neutral-400" /> Updated
+              <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
+                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                  <Clock className="size-2.5 text-neutral-400" /> Updated
                 </span>
                 <span
-                  className="font-semibold text-neutral-800"
+                  className="font-medium text-neutral-700 text-[10px] truncate ml-2"
                   title={
                     task?.updated_at || task?.$updatedAt
                       ? new Date(task.updated_at || task.$updatedAt).toLocaleString()
@@ -1631,11 +1631,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 </span>
               </div>
               {task?.dueDate && (
-                <div className="flex items-center justify-between text-neutral-600 bg-white p-2 rounded-lg border border-neutral-200 shadow-2xs">
-                  <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
-                    <Clock className="size-3 text-neutral-400" /> Due Date
+                <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
+                  <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                    <Clock className="size-2.5 text-neutral-400" /> Due Date
                   </span>
-                  <span className="font-semibold text-neutral-800">
+                  <span className="font-medium text-neutral-700 text-[10px] truncate ml-2">
                     {new Date(task.dueDate).toLocaleDateString([], {
                       month: 'short',
                       day: 'numeric',

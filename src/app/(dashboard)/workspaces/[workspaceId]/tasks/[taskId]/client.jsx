@@ -602,19 +602,19 @@ export const TaskIdClient = () => {
 
         <div className="flex items-center gap-2">
           {/* Quick Actions: Like, Favorite, Share */}
-          <div className="flex items-center gap-1 bg-neutral-100/80 p-0.5 rounded-xl border border-neutral-200/80 shadow-2xs">
+          <div className="flex items-center gap-1 bg-neutral-100/80 p-0.5 rounded-lg border border-neutral-200/80 shadow-2xs">
             <button
               type="button"
               onClick={handleToggleLike}
               disabled={isLiking}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${
                 task?.hasLiked
                   ? 'bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs font-bold'
                   : 'text-neutral-600 hover:text-rose-600 hover:bg-white'
               }`}
               title={task?.hasLiked ? 'Unlike this issue' : 'Like this issue'}
             >
-              <Heart className={`size-3.5 ${task?.hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+              <Heart className={`size-3 ${task?.hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
               <span>{task?.likesCount || 0}</span>
             </button>
 
@@ -622,34 +622,34 @@ export const TaskIdClient = () => {
               type="button"
               onClick={handleToggleFavorite}
               disabled={isFavoriting}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${
                 task?.isFavorite
                   ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs font-bold'
                   : 'text-neutral-600 hover:text-amber-600 hover:bg-white'
               }`}
               title={task?.isFavorite ? 'Remove from favorites' : 'Save to favorites'}
             >
-              <Star className={`size-3.5 ${task?.isFavorite ? 'fill-amber-400 text-amber-500' : ''}`} />
+              <Star className={`size-3 ${task?.isFavorite ? 'fill-amber-400 text-amber-500' : ''}`} />
               <span>{task?.isFavorite ? 'Saved' : 'Save'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowShareModal(true)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-white transition"
+              className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-600 hover:text-blue-600 hover:bg-white transition"
               title="Share this ticket"
             >
-              <Share2 className="size-3.5" />
+              <Share2 className="size-3" />
               <span>Share</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowLinkModal(true)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-white transition"
+              className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-600 hover:text-blue-600 hover:bg-white transition"
               title="Link this ticket to another ticket"
             >
-              <Link2 className="size-3.5" />
+              <Link2 className="size-3" />
               <span>Link</span>
             </button>
           </div>
@@ -662,7 +662,7 @@ export const TaskIdClient = () => {
                 : task.status || 'TODO'
             }
             onChange={(e) => handleUpdate({ status: e.target.value })}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold border cursor-pointer focus:outline-none shadow-xs ${
+            className={`rounded px-2 py-0.5 text-[10px] font-semibold border cursor-pointer focus:outline-none h-6 shadow-2xs ${
               STATUS_COLORS[task.status] ||
               (task.status === 'CODE_REVIEW' || task.status === 'REVIEW' ? STATUS_COLORS.IN_REVIEW : STATUS_COLORS.TODO)
             }`}
@@ -678,21 +678,21 @@ export const TaskIdClient = () => {
       </div>
 
       {/* Main Grid: Details + KlanserviceHub Properties Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left Side: Summary, Description, Comments, Subtasks */}
-        <div className="lg:col-span-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-6 min-w-0 overflow-x-hidden">
+        <div className="lg:col-span-8 rounded-xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-2xs space-y-4 min-w-0 overflow-x-hidden">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <TypeIcon className="size-5 shrink-0" style={{ color: typeConfig.color }} />
+              <TypeIcon className="size-4 shrink-0" style={{ color: typeConfig.color }} />
               <input
                 type="text"
                 value={task.name || ''}
                 onChange={(e) => setTask({ ...task, name: e.target.value })}
                 onBlur={(e) => handleUpdate({ name: e.target.value })}
-                className="text-xl font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none w-full py-1 transition"
+                className="text-[13px] sm:text-[14px] font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none w-full py-0.5 transition"
               />
             </div>
-            <div className="flex items-center gap-3 text-xs text-neutral-400 font-medium pl-7">
+            <div className="flex items-center gap-2.5 text-[10px] text-neutral-400 font-normal pl-6">
               <span
                 className="flex items-center gap-1"
                 title={
@@ -701,7 +701,7 @@ export const TaskIdClient = () => {
                     : ''
                 }
               >
-                <Calendar className="size-3.5 text-neutral-400" />
+                <Calendar className="size-2.5 text-neutral-400" />
                 Created: {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
               </span>
               {(task?.updated_at || task?.$updatedAt) && (
@@ -711,7 +711,7 @@ export const TaskIdClient = () => {
                     className="flex items-center gap-1"
                     title={new Date(task.updated_at || task.$updatedAt).toLocaleString()}
                   >
-                    <Clock className="size-3.5 text-neutral-400" />
+                    <Clock className="size-2.5 text-neutral-400" />
                     Updated: {formatCommentDate(task.updated_at || task.$updatedAt)}
                   </span>
                 </>
@@ -720,21 +720,21 @@ export const TaskIdClient = () => {
           </div>
 
           {/* Description */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400">
                 Description
               </span>
               {descriptionImages.length > 0 && (
-                <span className="text-[11px] text-neutral-400 font-medium">
+                <span className="text-[10px] text-neutral-400 font-medium">
                   {descriptionImages.length} image{descriptionImages.length > 1 ? 's' : ''} attached
                 </span>
               )}
             </div>
 
-            <div className="relative rounded-xl border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs overflow-hidden">
+            <div className="relative rounded-lg border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs overflow-hidden">
               <textarea
-                rows={5}
+                rows={4}
                 value={task.description || ''}
                 onChange={(e) => setTask({ ...task, description: e.target.value })}
                 onBlur={(e) => handleUpdate({ description: e.target.value })}
@@ -746,15 +746,15 @@ export const TaskIdClient = () => {
                 }}
                 onDragOver={(e) => e.preventDefault()}
                 placeholder="Add acceptance criteria, technical requirements, or steps to reproduce... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
-                className="w-full bg-transparent p-3.5 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
+                className="w-full bg-transparent p-2.5 text-[11px] text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none leading-relaxed"
               />
 
-              <div className="flex items-center justify-between border-t border-neutral-100 px-3 py-2 bg-neutral-50/70">
+              <div className="flex items-center justify-between border-t border-neutral-100 px-2.5 py-1.5 bg-neutral-50/70">
                 <label
                   title="Attach images to description"
-                  className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
+                  className="cursor-pointer inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
                 >
-                  <Image className="size-3.5 text-blue-600" />
+                  <ImageIcon className="size-3 text-blue-600" />
                   <span>Attach Image</span>
                   <input
                     type="file"
@@ -814,55 +814,55 @@ export const TaskIdClient = () => {
             <div className="flex items-center gap-5 border-b border-neutral-200 pb-2">
               <button
                 onClick={() => setActiveTab('COMMENTS')}
-                className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
                   activeTab === 'COMMENTS'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-neutral-500 hover:text-neutral-900'
                 }`}
               >
-                <MessageSquare className="size-3.5" />
+                <MessageSquare className="size-3" />
                 Comments ({comments.length})
               </button>
               <button
                 onClick={() => setActiveTab('SUBTASKS')}
-                className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
                   activeTab === 'SUBTASKS'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-neutral-500 hover:text-neutral-900'
                 }`}
               >
-                <List className="size-3.5" />
+                <List className="size-3" />
                 Sub-tasks ({task.subtasks?.length || 0})
               </button>
               <button
                 onClick={() => setActiveTab('WORKLOG')}
-                className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
                   activeTab === 'WORKLOG'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-neutral-500 hover:text-neutral-900'
                 }`}
               >
-                <Clock className="size-3.5" />
+                <Clock className="size-3" />
                 Time Tracking ({task.logged_hours || 0}h logged)
               </button>
               <button
                 onClick={() => setActiveTab('LINKED_TICKETS')}
-                className={`text-xs font-bold flex items-center gap-1.5 pb-2 -mb-2.5 transition border-b-2 ${
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
                   activeTab === 'LINKED_TICKETS'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-neutral-500 hover:text-neutral-900'
                 }`}
               >
-                <Link2 className="size-3.5" />
+                <Link2 className="size-3" />
                 Linked Tickets & Dependencies
               </button>
             </div>
 
             {/* Tab: Comments */}
             {activeTab === 'COMMENTS' && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <form onSubmit={handleAddComment} className="space-y-2">
-                  <div className="relative rounded-xl border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs">
+                  <div className="relative rounded-lg border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs">
                     <textarea
                       rows={2}
                       value={newComment}
@@ -875,14 +875,14 @@ export const TaskIdClient = () => {
                       }}
                       onDragOver={(e) => e.preventDefault()}
                       placeholder="Add a comment... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
-                      className="w-full bg-transparent p-3 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
+                      className="w-full bg-transparent p-2.5 text-[11px] text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none"
                     />
-                    <div className="flex items-center justify-between border-t border-neutral-100 px-3 py-2 bg-neutral-50/70 rounded-b-xl">
+                    <div className="flex items-center justify-between border-t border-neutral-100 px-2.5 py-1.5 bg-neutral-50/70 rounded-b-lg">
                       <label
                         title="Attach images"
-                        className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
+                        className="cursor-pointer inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100 hover:text-blue-600 shadow-2xs transition"
                       >
-                        <ImageIcon className="size-3.5 text-blue-600" />
+                        <ImageIcon className="size-3 text-blue-600" />
                         <span>Attach Image</span>
                         <input
                           type="file"
@@ -895,7 +895,7 @@ export const TaskIdClient = () => {
                       <button
                         type="submit"
                         disabled={!newComment.trim() && commentImages.length === 0}
-                        className="rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition"
+                        className="rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-2xs hover:bg-blue-700 disabled:opacity-50 transition"
                       >
                         Save Comment
                       </button>
@@ -904,29 +904,29 @@ export const TaskIdClient = () => {
 
                   {/* Pre-post image previews */}
                   {commentImages.length > 0 && (
-                    <div className="flex flex-wrap gap-2 p-2 bg-neutral-50 rounded-xl border border-neutral-200">
+                    <div className="flex flex-wrap gap-2 p-1.5 bg-neutral-50 rounded-lg border border-neutral-200">
                       {commentImages.map((img) => (
-                        <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-300 bg-white size-16 shrink-0">
+                        <div key={img.id} className="relative group rounded-md overflow-hidden border border-neutral-300 bg-white size-14 shrink-0">
                           <img src={img.dataUrl} alt={img.name} className="w-full h-full object-cover" />
                           <button
                             type="button"
                             onClick={() => handleRemoveCommentImage(img.id)}
                             className="absolute top-0.5 right-0.5 bg-black/70 hover:bg-red-600 text-white rounded-full p-0.5 transition"
                           >
-                            <X className="size-3" />
+                            <X className="size-2.5" />
                           </button>
                         </div>
                       ))}
-                      <span className="text-[10px] text-neutral-400 self-center pl-1 italic">
+                      <span className="text-[9px] text-neutral-400 self-center pl-1 italic">
                         {commentImages.length} image{commentImages.length > 1 ? 's' : ''} attached (expires 6 days after ticket is completed)
                       </span>
                     </div>
                   )}
                 </form>
 
-                <div className="space-y-3 pt-2">
+                <div className="space-y-2.5 pt-1">
                   {comments.length === 0 ? (
-                    <p className="text-xs text-neutral-400 italic py-2">No comments yet.</p>
+                    <p className="text-[11px] text-neutral-400 italic py-1.5">No comments yet.</p>
                   ) : (
                     comments.map((c) => {
                       const isAuthor =
@@ -937,16 +937,16 @@ export const TaskIdClient = () => {
                       return (
                         <div
                           key={c.id}
-                          className="group relative flex items-start gap-3 rounded-xl bg-neutral-50 p-3.5 border border-neutral-100 hover:border-neutral-200 transition min-w-0 max-w-full overflow-hidden"
+                          className="group relative flex items-start gap-2.5 rounded-lg bg-neutral-50 p-2.5 border border-neutral-100 hover:border-neutral-200 transition min-w-0 max-w-full overflow-hidden"
                         >
                           {c.user_avatar ? (
                             <img
                               src={c.user_avatar}
                               alt={c.user_name || 'Member'}
-                              className="size-7 rounded-full object-cover shrink-0"
+                              className="size-6 rounded-full object-cover shrink-0"
                             />
                           ) : (
-                            <div className="size-7 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                            <div className="size-6 rounded-full bg-blue-600 text-white font-bold text-[9px] flex items-center justify-center shrink-0">
                               {c.user_name?.substring(0, 2).toUpperCase() ||
                                 c.userName?.substring(0, 2).toUpperCase() ||
                                 'U'}
@@ -954,12 +954,12 @@ export const TaskIdClient = () => {
                           )}
                           <div className="flex-1 min-w-0 overflow-hidden">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-xs text-neutral-900">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-semibold text-[11px] text-neutral-900">
                                   {c.user_name || c.userName || 'Member'}
                                 </span>
                                 <span
-                                  className="text-[10px] text-neutral-400"
+                                  className="text-[9px] text-neutral-400"
                                   title={
                                     c.created_at || c.createdAt || c.$createdAt
                                       ? new Date(
@@ -988,15 +988,15 @@ export const TaskIdClient = () => {
                                     type="button"
                                     onClick={() => handleStartEditComment(c)}
                                     title="Edit comment"
-                                    className="p-1 rounded-md text-neutral-400 hover:text-blue-600 hover:bg-neutral-200/60 transition"
+                                    className="p-1 rounded text-neutral-400 hover:text-blue-600 hover:bg-neutral-200/60 transition"
                                   >
-                                    <Pencil className="size-3" />
+                                    <Pencil className="size-2.5" />
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteComment(c.id)}
                                     title="Delete comment"
-                                    className="p-1 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                    className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                                   >
                                     <Trash2 className="size-3" />
                                   </button>
@@ -1203,28 +1203,28 @@ export const TaskIdClient = () => {
         </div>
 
         {/* Right Side: Properties Panel (ISSUE DETAILS) */}
-        <div className="lg:col-span-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5 text-xs min-w-0">
-          <h3 className="font-bold text-xs uppercase tracking-wider text-neutral-500">
+        <div className="lg:col-span-4 rounded-xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-2xs space-y-3.5 text-[11px] min-w-0">
+          <h3 className="font-bold text-[9px] uppercase tracking-wider text-neutral-400">
             Issue Details
           </h3>
 
           {/* Parent Ticket card if this is a subtask */}
           {(task.parentTask || task.parentTaskId) && (
-            <div className="rounded-xl border border-blue-200/80 bg-blue-50/60 p-3.5 space-y-2 shadow-2xs">
+            <div className="rounded-lg border border-blue-200/80 bg-blue-50/60 p-2.5 space-y-1 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Parent Ticket</span>
-                <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-100/80 px-1.5 py-0.5 rounded">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-blue-700">Parent Ticket</span>
+                <span className="text-[9px] font-mono font-bold text-blue-700 bg-blue-100/80 px-1.5 py-0.2 rounded">
                   {task.parentTask?.key || 'PARENT'}
                 </span>
               </div>
-              <p className="text-xs font-semibold text-neutral-800 line-clamp-1">
+              <p className="text-[11px] font-semibold text-neutral-800 line-clamp-1">
                 {task.parentTask?.name || 'Parent Ticket'}
               </p>
               <Link
                 href={`/workspaces/${workspaceId}/tasks/${task.parentTask?.id || task.parentTaskId}`}
-                className="w-full mt-1 flex items-center justify-center gap-1.5 rounded-lg bg-white border border-blue-200 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100/70 transition shadow-2xs"
+                className="w-full mt-0.5 flex items-center justify-center gap-1 rounded bg-white border border-blue-200 py-1 text-[10px] font-semibold text-blue-700 hover:bg-blue-100/70 transition shadow-2xs"
               >
-                <ArrowLeft className="size-3" />
+                <ArrowLeft className="size-2.5" />
                 Open Parent Ticket
               </Link>
             </div>
@@ -1232,11 +1232,11 @@ export const TaskIdClient = () => {
 
           {/* Assignee */}
           <div>
-            <label className="block text-[11px] font-bold text-neutral-500 mb-1">Assignee</label>
+            <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Assignee</label>
             <select
               value={currentAssigneeId}
               onChange={(e) => handleUpdate({ assigneeId: e.target.value || null })}
-              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
             >
               <option value="">Unassigned</option>
               {members.map((m) => (
@@ -1249,9 +1249,9 @@ export const TaskIdClient = () => {
 
           {/* Reporter */}
           <div>
-            <label className="block text-[11px] font-bold text-neutral-500 mb-1">Reporter</label>
-            <div className="flex items-center gap-2 font-semibold text-neutral-800 p-2 rounded-lg bg-neutral-50 border border-neutral-100">
-              <div className="size-5 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center">
+            <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Reporter</label>
+            <div className="flex items-center gap-1.5 font-medium text-[10px] text-neutral-800 px-1 py-0.5">
+              <div className="size-4 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center">
                 {task.reporter?.name?.substring(0, 1) || 'R'}
               </div>
               <span>{task.reporter?.name || 'System User'}</span>
@@ -1260,11 +1260,11 @@ export const TaskIdClient = () => {
 
           {/* Priority */}
           <div>
-            <label className="block text-[11px] font-bold text-neutral-500 mb-1">Priority</label>
+            <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Priority</label>
             <select
               value={task.priority || 'MEDIUM'}
               onChange={(e) => handleUpdate({ priority: e.target.value })}
-              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
             >
               <option value="CRITICAL">Critical (P0)</option>
               <option value="HIGH">High (P1)</option>
@@ -1276,7 +1276,7 @@ export const TaskIdClient = () => {
 
           {/* Story Points */}
           <div>
-            <label className="block text-[11px] font-bold text-neutral-500 mb-1">
+            <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">
               Story Points Estimate
             </label>
             <input
@@ -1299,28 +1299,28 @@ export const TaskIdClient = () => {
                   e.currentTarget.blur();
                 }
               }}
-              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
             />
           </div>
 
           {/* Due Date */}
           <div>
-            <label className="block text-[11px] font-bold text-neutral-500 mb-1">Due Date</label>
+            <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Due Date</label>
             <input
               type="date"
               value={dueDateFormatted}
               onChange={(e) => handleUpdate({ dueDate: e.target.value || null })}
-              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
             />
           </div>
 
           {/* Sprint */}
           <div>
-            <label className="block text-[11px] font-bold text-neutral-500 mb-1">Sprint</label>
+            <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Sprint</label>
             <select
               value={currentSprintId}
               onChange={(e) => handleUpdate({ sprintId: e.target.value || null })}
-              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
             >
               <option value="">Backlog (No Sprint)</option>
               {sprints.map((s) => (
@@ -1332,16 +1332,16 @@ export const TaskIdClient = () => {
           </div>
 
           {/* Dates & Timestamps */}
-          <div className="pt-3 border-t border-neutral-200 space-y-2 text-xs">
-            <h4 className="font-bold text-[10px] uppercase tracking-wider text-neutral-400">
+          <div className="pt-2.5 border-t border-neutral-200/80 space-y-1.5 text-[10px]">
+            <h4 className="font-bold text-[9px] uppercase tracking-wider text-neutral-400">
               Dates & Timestamps
             </h4>
-            <div className="flex items-center justify-between text-neutral-600 bg-neutral-50 p-2.5 rounded-lg border border-neutral-100">
-              <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
-                <Calendar className="size-3.5 text-neutral-400" /> Created
+            <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
+              <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                <Calendar className="size-2.5 text-neutral-400" /> Created
               </span>
               <span
-                className="font-semibold text-neutral-800"
+                className="font-medium text-neutral-700 text-[10px] truncate ml-2"
                 title={
                   task?.created_at || task?.$createdAt
                     ? new Date(task.created_at || task.$createdAt).toLocaleString()
@@ -1351,12 +1351,12 @@ export const TaskIdClient = () => {
                 {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
               </span>
             </div>
-            <div className="flex items-center justify-between text-neutral-600 bg-neutral-50 p-2.5 rounded-lg border border-neutral-100">
-              <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
-                <Clock className="size-3.5 text-neutral-400" /> Updated
+            <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
+              <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                <Clock className="size-2.5 text-neutral-400" /> Updated
               </span>
               <span
-                className="font-semibold text-neutral-800"
+                className="font-medium text-neutral-700 text-[10px] truncate ml-2"
                 title={
                   task?.updated_at || task?.$updatedAt
                     ? new Date(task.updated_at || task.$updatedAt).toLocaleString()
@@ -1367,11 +1367,11 @@ export const TaskIdClient = () => {
               </span>
             </div>
             {task?.dueDate && (
-              <div className="flex items-center justify-between text-neutral-600 bg-neutral-50 p-2.5 rounded-lg border border-neutral-100">
-                <span className="flex items-center gap-1.5 text-neutral-500 font-medium">
-                  <Clock className="size-3.5 text-neutral-400" /> Due Date
+              <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
+                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                  <Clock className="size-2.5 text-neutral-400" /> Due Date
                 </span>
-                <span className="font-semibold text-neutral-800">
+                <span className="font-medium text-neutral-700 text-[10px] truncate ml-2">
                   {new Date(task.dueDate).toLocaleDateString([], {
                     month: 'short',
                     day: 'numeric',
