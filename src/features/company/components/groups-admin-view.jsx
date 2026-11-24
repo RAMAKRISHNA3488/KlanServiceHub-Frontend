@@ -413,7 +413,7 @@ export const GroupsAdminView = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20 select-none">
+    <div className="w-full space-y-6 pb-20 select-none">
       {/* Top Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-neutral-200 pb-5">
         <div>

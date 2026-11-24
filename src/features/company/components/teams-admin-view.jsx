@@ -118,7 +118,7 @@ export const TeamsAdminView = () => {
 
   if (loading && teams.length === 0) {
     return (
-      <div className="max-w-6xl mx-auto pb-16">
+      <div className="w-full pb-16">
         <AdminTableSkeleton
           title="Teams & Squads"
           subtitle="Organize engineers and contributors into squads and cross-functional teams."
@@ -128,7 +128,7 @@ export const TeamsAdminView = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16">
+    <div className="space-y-5 w-full pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>

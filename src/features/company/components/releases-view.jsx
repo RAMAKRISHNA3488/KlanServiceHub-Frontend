@@ -102,7 +102,7 @@ export const ReleasesView = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -146,11 +146,10 @@ export const ReleasesView = () => {
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-bold text-neutral-900">{rel.name}</h3>
                       <span
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                          rel.status === 'RELEASED'
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${rel.status === 'RELEASED'
                             ? 'bg-emerald-100 text-emerald-800'
                             : 'bg-blue-100 text-blue-800'
-                        }`}
+                          }`}
                       >
                         {rel.status}
                       </span>
@@ -169,11 +168,10 @@ export const ReleasesView = () => {
 
                   <button
                     onClick={() => handleMarkReleased(rel.id, rel.status)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                      rel.status === 'RELEASED'
+                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${rel.status === 'RELEASED'
                         ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                         : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs'
-                    }`}
+                      }`}
                   >
                     {rel.status === 'RELEASED' ? 'Unrelease' : 'Release Version'}
                   </button>

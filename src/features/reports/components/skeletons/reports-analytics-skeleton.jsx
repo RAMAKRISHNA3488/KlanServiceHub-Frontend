@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export const ReportsAnalyticsSkeleton = () => {
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-20 select-none animate-in fade-in duration-150">
+    <div className="space-y-5 w-full pb-16 select-none animate-in fade-in duration-150">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-neutral-200">
         <div className="space-y-1.5">

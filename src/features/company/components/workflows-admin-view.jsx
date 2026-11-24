@@ -402,7 +402,7 @@ export const WorkflowsAdminView = () => {
 
   if (loading && workflows.length === 0) {
     return (
-      <div className="max-w-6xl mx-auto pb-16">
+      <div className="w-full pb-16">
         <AdminTableSkeleton
           title="Workflows & Issue Types"
           subtitle="Manage lifecycle pipelines, stages, and issue categories."
@@ -412,7 +412,7 @@ export const WorkflowsAdminView = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16">
+    <div className="space-y-5 w-full pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>

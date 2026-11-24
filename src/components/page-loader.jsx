@@ -49,7 +49,7 @@ export const PageLoader = () => {
         </aside>
 
         {/* Main Canvas Viewport Skeleton */}
-        <div className="flex-1 min-w-0 flex flex-col h-full overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 max-w-[1400px] w-full mx-auto">
+        <div className="flex-1 min-w-0 flex flex-col h-full overflow-y-auto p-3 sm:p-4 md:p-5 lg:p-6 space-y-4 w-full">
           {/* Header Skeleton */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200">
             <div className="space-y-1.5">

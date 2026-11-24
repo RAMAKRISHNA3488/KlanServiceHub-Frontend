@@ -154,7 +154,7 @@ export const CompanyProfileView = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Header Banner */}
       <div className="rounded-2xl border border-neutral-200 bg-gradient-to-r from-blue-900 via-indigo-900 to-neutral-900 p-8 text-white shadow-md relative overflow-hidden">
         <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 size-64 rounded-full bg-blue-500/10 blur-3xl" />

@@ -126,9 +126,8 @@ export const CfdSummaryCards = ({
           <div
             key={card.id}
             onClick={card.onClick}
-            className={`rounded-xl border ${card.borderColor} bg-white p-3 shadow-2xs transition-all hover:shadow-xs relative group ${
-              card.onClick ? 'cursor-pointer hover:border-blue-400' : ''
-            }`}
+            className={`rounded-xl border ${card.borderColor} bg-white p-3 shadow-2xs transition-all hover:shadow-xs relative group ${card.onClick ? 'cursor-pointer hover:border-blue-400' : ''
+              }`}
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 truncate" title={card.label}>

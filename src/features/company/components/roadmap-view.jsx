@@ -358,7 +358,7 @@ export const RoadmapView = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-140px)] flex flex-col space-y-3.5 max-w-7xl mx-auto select-none overflow-hidden">
+    <div className="h-[calc(100vh-140px)] flex flex-col space-y-3.5 w-full select-none overflow-hidden">
       {/* 1. Header Toolbar */}
       <div className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>

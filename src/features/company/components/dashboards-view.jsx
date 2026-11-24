@@ -844,7 +844,7 @@ export const DashboardsView = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-20">
+    <div className="space-y-6 w-full pb-20">
       {/* Top Controls Header */}
       <div className="bg-white rounded-2xl border border-neutral-200/90 p-5 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

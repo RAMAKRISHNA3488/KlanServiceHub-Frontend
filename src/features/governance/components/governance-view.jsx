@@ -424,7 +424,7 @@ export const GovernanceView = () => {
   const criticalBugs = healthData?.criticalBugs ?? 0;
 
   return (
-    <div className="flex flex-col gap-y-5 max-w-7xl mx-auto pb-16 p-3 sm:p-6 transition-all">
+    <div className="flex flex-col gap-y-5 w-full pb-16 p-3 sm:p-6 transition-all">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 border-b border-neutral-200 pb-3 sm:pb-4">
         <div>
