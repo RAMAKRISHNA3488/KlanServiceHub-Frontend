@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   Layers,
   HelpCircle,
@@ -89,6 +89,13 @@ export const CumulativeFlowChart = ({
     return { maxVal: roundedMax, processedTimeline: processed };
   }, [timeline, visibleStatuses]);
 
+  // Reset hovered index if it exceeds processed timeline bounds
+  useEffect(() => {
+    if (hoveredIndex !== null && (!processedTimeline[hoveredIndex] || hoveredIndex >= processedTimeline.length)) {
+      setHoveredIndex(null);
+    }
+  }, [processedTimeline, hoveredIndex]);
+
   // Coordinates mapping
   const numPoints = processedTimeline.length;
   const getX = (index) => {
@@ -117,8 +124,8 @@ export const CumulativeFlowChart = ({
 
       processedTimeline.forEach((bucket, pIdx) => {
         const x = getX(pIdx);
-        const topVal = bucket.visibleCumulative[currentStatus.key] || 0;
-        const bottomVal = prevStatus ? bucket.visibleCumulative[prevStatus.key] || 0 : 0;
+        const topVal = bucket?.visibleCumulative?.[currentStatus.key] || 0;
+        const bottomVal = prevStatus ? (bucket?.visibleCumulative?.[prevStatus.key] || 0) : 0;
 
         topPoints.push({ x, y: getY(topVal) });
         bottomPoints.push({ x, y: getY(bottomVal) });
@@ -405,7 +412,7 @@ export const CumulativeFlowChart = ({
               ))}
 
               {/* Hover Crosshair Guide Line and Status Intersection Dots */}
-              {hoveredIndex !== null && (
+              {hoveredIndex !== null && processedTimeline[hoveredIndex] && (
                 <g>
                   {/* Vertical Crosshair Line */}
                   <line
@@ -421,6 +428,7 @@ export const CumulativeFlowChart = ({
                   {/* Intersection points on each status line */}
                   {visibleStatuses.map((st) => {
                     const bucket = processedTimeline[hoveredIndex];
+                    if (!bucket || !bucket.visibleCumulative) return null;
                     const val = bucket.visibleCumulative[st.key] || 0;
                     const cx = getX(hoveredIndex);
                     const cy = getY(val);
@@ -443,7 +451,7 @@ export const CumulativeFlowChart = ({
             </svg>
 
             {/* Floating Interactive Tooltip */}
-            {hoveredBucket && (
+            {hoveredBucket && hoveredBucket.visibleCumulative && (
               <div
                 className="absolute z-30 pointer-events-auto rounded-xl border border-neutral-200 bg-white/95 p-3.5 shadow-xl backdrop-blur-md w-64 text-xs transition-all duration-75"
                 style={{
@@ -469,7 +477,7 @@ export const CumulativeFlowChart = ({
                     .reverse() // show Backlog at top, Done at bottom
                     .map((st) => {
                       const count = hoveredBucket.statuses?.[st.key] || 0;
-                      const cumVal = hoveredBucket.visibleCumulative[st.key] || 0;
+                      const cumVal = hoveredBucket.visibleCumulative?.[st.key] || 0;
                       const pct = hoveredBucket.visibleTotal > 0
                         ? Math.round((count / hoveredBucket.visibleTotal) * 100)
                         : 0;
