@@ -50,6 +50,7 @@ export const BillingView = () => {
   const [billing, setBilling] = useState(null);
   const [workspaceProfile, setWorkspaceProfile] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
   const [updatingMemberId, setUpdatingMemberId] = useState(null);
@@ -66,6 +67,7 @@ export const BillingView = () => {
     try {
       if (isManual) setRefreshing(true);
       else setLoading(true);
+      setError(null);
 
       const [res, wsRes] = await Promise.all([
         billingApi.getBilling(workspaceId),
@@ -82,6 +84,7 @@ export const BillingView = () => {
         setWorkspaceProfile(wsRes.data);
       }
     } catch (e) {
+      setError(e.message || 'Failed to load billing and seat license data');
       toast.error('Failed to load billing and seat license data');
     } finally {
       setLoading(false);
@@ -208,7 +211,28 @@ export const BillingView = () => {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-3">
         <RefreshCw className="size-8 animate-spin text-blue-600" />
-        <p className="text-xs font-semibold text-neutral-500">Loading Billing, Plans & Seat Licenses...</p>
+        <p className="text-[11px] font-semibold text-neutral-500">Loading Billing, Plans & Seat Licenses...</p>
+      </div>
+    );
+  }
+
+  if (error && !billing) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-3 rounded-2xl border border-neutral-200/80 bg-white p-8 text-center shadow-xs">
+        <div className="size-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+          <CreditCard className="size-5" />
+        </div>
+        <h3 className="text-sm font-bold text-neutral-900">Unable to Load Billing & Seat Licenses</h3>
+        <p className="max-w-md text-[11px] text-neutral-500">
+          We encountered an issue fetching your organization's subscription and seat license allocation. Please check your connection and try again.
+        </p>
+        <button
+          onClick={() => fetchBilling()}
+          className="mt-2 flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-[11px] font-bold text-white shadow-xs hover:bg-blue-700 transition active:scale-95"
+        >
+          <RefreshCw className="size-3.5" />
+          <span>Retry Loading</span>
+        </button>
       </div>
     );
   }
