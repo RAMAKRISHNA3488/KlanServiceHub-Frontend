@@ -34,11 +34,11 @@ const ISSUE_TYPES = [
 ];
 
 const PRIORITIES = [
-  { id: 'CRITICAL', name: 'P0 - Critical', color: '#E11D48', icon: '🔥' },
-  { id: 'HIGH', name: 'P1 - High', color: '#FF7452', icon: '⬆️' },
-  { id: 'MEDIUM', name: 'P2 - Medium', color: '#FFAB00', icon: '🟰' },
-  { id: 'LOW', name: 'P3 - Low', color: '#36B37E', icon: '⬇️' },
-  { id: 'LOWEST', name: 'P4 - Lowest', color: '#00B8D9', icon: '⬇️⬇️' },
+  { id: 'CRITICAL', name: 'P0 - Critical', color: '#E11D48' },
+  { id: 'HIGH', name: 'P1 - High', color: '#FF7452' },
+  { id: 'MEDIUM', name: 'P2 - Medium', color: '#FFAB00' },
+  { id: 'LOW', name: 'P3 - Low', color: '#36B37E' },
+  { id: 'LOWEST', name: 'P4 - Lowest', color: '#00B8D9' },
 ];
 
 export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defaultProjectId = null, defaultSprintId = null }) => {

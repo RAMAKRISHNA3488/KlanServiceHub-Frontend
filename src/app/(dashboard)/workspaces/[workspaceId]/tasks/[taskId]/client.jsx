@@ -1266,11 +1266,11 @@ export const TaskIdClient = () => {
               onChange={(e) => handleUpdate({ priority: e.target.value })}
               className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
             >
-              <option value="CRITICAL">Critical (P0)</option>
-              <option value="HIGH">High (P1)</option>
-              <option value="MEDIUM">Medium (P2)</option>
-              <option value="LOW">Low (P3)</option>
-              <option value="LOWEST">Lowest (P4)</option>
+              <option value="CRITICAL">P0 - Critical</option>
+              <option value="HIGH">P1 - High</option>
+              <option value="MEDIUM">P2 - Medium</option>
+              <option value="LOW">P3 - Low</option>
+              <option value="LOWEST">P4 - Lowest</option>
             </select>
           </div>
 
