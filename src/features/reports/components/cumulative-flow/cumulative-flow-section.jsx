@@ -85,10 +85,14 @@ export const CumulativeFlowSection = ({
         ...filters,
       };
 
+      const getCfdFn = reportsApi.getCFD || reportsApi.getCumulativeFlow;
+      const getSummaryFn = reportsApi.getCFDSummary || reportsApi.getCumulativeFlowSummary;
+      const getBottlenecksFn = reportsApi.getCFDBottlenecks || reportsApi.getCumulativeFlowBottlenecks;
+
       const [chartRes, summaryRes, bottleneckRes] = await Promise.allSettled([
-        reportsApi.getCFD(workspaceId, params),
-        reportsApi.getCFDSummary(workspaceId, params),
-        reportsApi.getCFDBottlenecks(workspaceId, params),
+        getCfdFn ? getCfdFn(workspaceId, params) : Promise.reject('API not available'),
+        getSummaryFn ? getSummaryFn(workspaceId, params) : Promise.reject('API not available'),
+        getBottlenecksFn ? getBottlenecksFn(workspaceId, params) : Promise.reject('API not available'),
       ]);
 
       if (chartRes.status === 'fulfilled' && chartRes.value?.data) {

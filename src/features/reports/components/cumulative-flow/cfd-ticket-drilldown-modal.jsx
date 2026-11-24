@@ -37,7 +37,8 @@ export const CfdTicketDrilldownModal = ({
   const fetchDrilldown = async () => {
     try {
       setLoading(true);
-      const res = await reportsApi.getCFDTickets(workspaceId, drillParams);
+      const getTicketsFn = reportsApi.getCFDTickets || reportsApi.getCumulativeFlowTickets;
+      const res = getTicketsFn ? await getTicketsFn(workspaceId, drillParams) : null;
       if (res?.data) {
         setTickets(res.data.tickets || []);
         setMeta({

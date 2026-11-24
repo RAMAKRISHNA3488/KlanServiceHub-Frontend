@@ -309,7 +309,15 @@ export const reportsApi = {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/reports/${workspaceId}/cumulative-flow${q ? `?${q}` : ''}`);
   },
+  getCFD: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow${q ? `?${q}` : ''}`);
+  },
   getCumulativeFlowSummary: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/summary${q ? `?${q}` : ''}`);
+  },
+  getCFDSummary: (workspaceId, params = {}) => {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/summary${q ? `?${q}` : ''}`);
   },
@@ -317,7 +325,15 @@ export const reportsApi = {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/bottlenecks${q ? `?${q}` : ''}`);
   },
+  getCFDBottlenecks: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/bottlenecks${q ? `?${q}` : ''}`);
+  },
   getCumulativeFlowTickets: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/tickets${q ? `?${q}` : ''}`);
+  },
+  getCFDTickets: (workspaceId, params = {}) => {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/tickets${q ? `?${q}` : ''}`);
   },
@@ -325,11 +341,23 @@ export const reportsApi = {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/throughput${q ? `?${q}` : ''}`);
   },
+  getCFDThroughput: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/throughput${q ? `?${q}` : ''}`);
+  },
   getCumulativeFlowCycleTime: (workspaceId, params = {}) => {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/cycle-time${q ? `?${q}` : ''}`);
   },
+  getCFDCycleTime: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/cycle-time${q ? `?${q}` : ''}`);
+  },
   getCumulativeFlowLeadTime: (workspaceId, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/lead-time${q ? `?${q}` : ''}`);
+  },
+  getCFDLeadTime: (workspaceId, params = {}) => {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/reports/${workspaceId}/cumulative-flow/lead-time${q ? `?${q}` : ''}`);
   },
@@ -549,7 +577,15 @@ export const analyticsApi = {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/analytics/cumulative-flow${q ? `?${q}` : ''}`);
   },
+  getCFD: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/analytics/cumulative-flow${q ? `?${q}` : ''}`);
+  },
   getSummary: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/analytics/cumulative-flow/summary${q ? `?${q}` : ''}`);
+  },
+  getCFDSummary: (params = {}) => {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/analytics/cumulative-flow/summary${q ? `?${q}` : ''}`);
   },
@@ -557,7 +593,15 @@ export const analyticsApi = {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/analytics/cumulative-flow/bottlenecks${q ? `?${q}` : ''}`);
   },
+  getCFDBottlenecks: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/analytics/cumulative-flow/bottlenecks${q ? `?${q}` : ''}`);
+  },
   getTickets: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/api/analytics/cumulative-flow/tickets${q ? `?${q}` : ''}`);
+  },
+  getCFDTickets: (params = {}) => {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/api/analytics/cumulative-flow/tickets${q ? `?${q}` : ''}`);
   },
