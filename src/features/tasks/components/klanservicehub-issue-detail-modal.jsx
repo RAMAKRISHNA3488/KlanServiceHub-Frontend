@@ -1486,38 +1486,119 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               </div>
             </div>
 
-            {/* Reporter */}
+            {/* Reporters (Multiple) */}
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Reporter</label>
-              <select
-                value={task?.reporter?.id || task?.reporter_id || ''}
-                onChange={(e) => {
-                  const newReporterId = e.target.value;
-                  const newReporterMember = members.find((m) => (m.user_id || m.userId || m.$id || m.id) === newReporterId);
-                  setTask((prev) => ({
-                    ...prev,
-                    reporter_id: newReporterId,
-                    reporter: newReporterMember ? {
-                      id: newReporterId,
-                      name: newReporterMember.name,
-                      email: newReporterMember.email,
-                      avatarUrl: newReporterMember.avatar_url,
-                    } : prev.reporter,
-                  }));
-                  handleUpdateProperty({ reporterId: newReporterId });
-                }}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
-              >
-                {members.map((m) => {
-                  const uId = m.user_id || m.userId || m.$id || m.id;
-                  const isCurrent = currentUser?.$id === uId;
-                  return (
-                    <option key={m.$id || m.id} value={uId}>
-                      {m.name || m.email} {isCurrent ? '(You)' : ''}
-                    </option>
-                  );
-                })}
-              </select>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[10px] font-semibold text-neutral-500">
+                  Reporters {((task?.reporters || (task?.reporter ? [task.reporter] : [])).length > 0) && `(${(task?.reporters || (task?.reporter ? [task.reporter] : [])).length})`}
+                </label>
+              </div>
+
+              {/* Reporter Chips List */}
+              <div className="space-y-1 mb-1.5">
+                {(() => {
+                  const currentReporters = task?.reporters && task.reporters.length > 0
+                    ? task.reporters
+                    : (task?.reporter ? [task.reporter] : []);
+                  
+                  if (currentReporters.length === 0) {
+                    return <div className="text-[10px] text-neutral-400 italic py-0.5">No reporter specified</div>;
+                  }
+
+                  return currentReporters.map((rep) => {
+                    const rId = rep.id || rep.$id;
+                    const isSelf = currentUser?.$id === rId;
+                    return (
+                      <div
+                        key={rId}
+                        className="flex items-center justify-between bg-white border border-neutral-200 rounded-md px-2 py-1 shadow-2xs"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <div className="size-4 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center">
+                            {rep.name?.substring(0, 1).toUpperCase() || 'R'}
+                          </div>
+                          <span className="text-[10px] font-medium text-neutral-800">
+                            {rep.name || rep.email || 'Reporter'} {isSelf ? '(You)' : ''}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextReporters = currentReporters.filter((x) => (x.id || x.$id) !== rId);
+                            const nextIds = nextReporters.map((x) => x.id || x.$id);
+                            setTask((prev) => ({
+                              ...prev,
+                              reporters: nextReporters,
+                              reporterIds: nextIds,
+                              reporter: nextReporters[0] || null,
+                              reporter_id: nextIds[0] || null,
+                            }));
+                            handleUpdateProperty({ reporterIds: nextIds });
+                          }}
+                          className="text-neutral-400 hover:text-red-500 text-[11px] px-1"
+                          title="Remove reporter"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+
+              {/* Add / Toggle Reporter Dropdown */}
+              <div className="relative">
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const memberUserId = e.target.value;
+                    if (!memberUserId) return;
+                    const currentReporters = task?.reporters && task.reporters.length > 0
+                      ? task.reporters
+                      : (task?.reporter ? [task.reporter] : []);
+                    const currentIds = currentReporters.map((x) => x.id || x.$id);
+                    if (!currentIds.includes(memberUserId)) {
+                      const nextIds = [...currentIds, memberUserId];
+                      const addedMember = members.find((m) => (m.user_id || m.userId || m.$id || m.id) === memberUserId);
+                      const newReporterObj = addedMember ? {
+                        id: memberUserId,
+                        name: addedMember.name,
+                        email: addedMember.email,
+                        avatarUrl: addedMember.avatar_url,
+                      } : { id: memberUserId, name: 'Team Member' };
+                      const nextReporters = [...currentReporters, newReporterObj];
+                      setTask((prev) => ({
+                        ...prev,
+                        reporters: nextReporters,
+                        reporterIds: nextIds,
+                        reporter: nextReporters[0] || null,
+                        reporter_id: nextIds[0] || null,
+                      }));
+                      handleUpdateProperty({ reporterIds: nextIds });
+                    }
+                  }}
+                  className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                >
+                  <option value="">+ Add another reporter...</option>
+                  {members
+                    .filter((m) => {
+                      const uId = m.user_id || m.userId || m.$id || m.id;
+                      const currentReporters = task?.reporters && task.reporters.length > 0
+                        ? task.reporters
+                        : (task?.reporter ? [task.reporter] : []);
+                      return !currentReporters.some((r) => (r.id || r.$id) === uId || (r.id || r.$id) === (m.$id || m.id));
+                    })
+                    .map((m) => {
+                      const uId = m.user_id || m.userId || m.$id || m.id;
+                      const isCurrent = currentUser?.$id === uId;
+                      return (
+                        <option key={m.$id || m.id} value={uId}>
+                          {m.name || m.email} {isCurrent ? '(You)' : ''}
+                        </option>
+                      );
+                    })}
+                </select>
+              </div>
             </div>
 
             {/* Issue Type */}
@@ -1624,11 +1705,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 Dates & Timestamps
               </label>
               <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
-                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px] shrink-0">
                   <Calendar className="size-2.5 text-neutral-400" /> Created
                 </span>
                 <span
-                  className="font-medium text-neutral-700 text-[10px] truncate ml-2"
+                  className="font-medium text-neutral-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis ml-2 text-right"
                   title={
                     task?.created_at || task?.$createdAt
                       ? new Date(task.created_at || task.$createdAt).toLocaleString()
@@ -1639,11 +1720,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 </span>
               </div>
               <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
-                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px] shrink-0">
                   <Clock className="size-2.5 text-neutral-400" /> Updated
                 </span>
                 <span
-                  className="font-medium text-neutral-700 text-[10px] truncate ml-2"
+                  className="font-medium text-neutral-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis ml-2 text-right"
                   title={
                     task?.updated_at || task?.$updatedAt
                       ? new Date(task.updated_at || task.$updatedAt).toLocaleString()
@@ -1655,10 +1736,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               </div>
               {task?.dueDate && (
                 <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
-                  <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
+                  <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px] shrink-0">
                     <Clock className="size-2.5 text-neutral-400" /> Due Date
                   </span>
-                  <span className="font-medium text-neutral-700 text-[10px] truncate ml-2">
+                  <span className="font-medium text-neutral-700 text-[10px] whitespace-nowrap ml-2 text-right">
                     {new Date(task.dueDate).toLocaleDateString([], {
                       month: 'short',
                       day: 'numeric',

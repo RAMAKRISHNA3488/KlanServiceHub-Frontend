@@ -145,6 +145,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
     assigneeId: '',
     assigneeIds: [],
     reporterId: '',
+    reporterIds: [],
     sprintId: defaultSprintId || '',
     storyPoints: 1,
     dueDate: '',
@@ -153,10 +154,14 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
   });
 
   useEffect(() => {
-    if (currentUser?.$id && !form.reporterId) {
-      setForm((prev) => ({ ...prev, reporterId: currentUser.$id }));
+    if (currentUser?.$id && (!form.reporterIds || form.reporterIds.length === 0)) {
+      setForm((prev) => ({
+        ...prev,
+        reporterId: currentUser.$id,
+        reporterIds: [currentUser.$id],
+      }));
     }
-  }, [currentUser, form.reporterId]);
+  }, [currentUser, form.reporterIds]);
 
   useEffect(() => {
     if (projects.length > 0 && !form.projectId) {
@@ -195,6 +200,10 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
         ? form.assigneeIds 
         : (form.assigneeId ? [form.assigneeId] : []);
 
+      const selectedReporterIds = form.reporterIds && form.reporterIds.length > 0
+        ? form.reporterIds
+        : (form.reporterId ? [form.reporterId] : (currentUser?.$id ? [currentUser.$id] : []));
+
       const res = await tasksApi.createTask({
         workspaceId,
         projectId: form.projectId,
@@ -207,7 +216,8 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
         parentTaskId: form.parentTaskId || null,
         assigneeId: selectedAssigneeIds[0] || null,
         assigneeIds: selectedAssigneeIds,
-        reporterId: form.reporterId || currentUser?.$id || null,
+        reporterId: selectedReporterIds[0] || currentUser?.$id || null,
+        reporterIds: selectedReporterIds,
         sprintId: form.sprintId || null,
         storyPoints: Number(form.storyPoints) || 1,
         dueDate: form.dueDate || null,
@@ -425,8 +435,8 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
             )}
           </div>
 
-          {/* Priority, Sprint & Reporter Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-0.5">
+          {/* Priority & Sprint Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-0.5">
             <div>
               <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Priority</label>
               <select
@@ -457,115 +467,182 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                 ))}
               </select>
             </div>
-
-            <div>
-              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Reporter</label>
-              <div className="relative">
-                <select
-                  value={form.reporterId || currentUser?.$id || ''}
-                  onChange={(e) => setForm({ ...form, reporterId: e.target.value })}
-                  className="w-full rounded-md border border-neutral-200 bg-white pl-6 pr-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
-                >
-                  {members.map((m) => {
-                    const uId = m.user_id || m.userId || m.$id || m.id;
-                    const isSelf = currentUser?.$id === uId;
-                    return (
-                      <option key={m.$id || m.id} value={uId}>
-                        {m.name || m.email} {isSelf ? '(You)' : ''}
-                      </option>
-                    );
-                  })}
-                </select>
-                <div className="absolute left-2 top-2 pointer-events-none text-neutral-400">
-                  <User className="size-3" />
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Multiple Assignees Selector */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-[10px] font-semibold text-neutral-600">Assignees (Assign to Multiple Members)</label>
-              {(form.assigneeIds || []).length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, assigneeIds: [], assigneeId: '' })}
-                  className="text-[10px] font-medium text-neutral-400 hover:text-red-500 transition"
-                >
-                  Clear all ({(form.assigneeIds || []).length})
-                </button>
-              )}
-            </div>
+          {/* Multiple Assignees & Multiple Reporters Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* Multiple Assignees Selector */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[10px] font-semibold text-neutral-600">Assignees (Assign to Multiple)</label>
+                {(form.assigneeIds || []).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, assigneeIds: [], assigneeId: '' })}
+                    className="text-[10px] font-medium text-neutral-400 hover:text-red-500 transition"
+                  >
+                    Clear all ({(form.assigneeIds || []).length})
+                  </button>
+                )}
+              </div>
 
-            {/* Selected Assignee Chips */}
-            {(form.assigneeIds || []).length > 0 && (
-              <div className="flex flex-wrap gap-1 p-1.5 mb-1.5 bg-neutral-50 rounded-md border border-neutral-200">
-                {form.assigneeIds.map((id) => {
-                  const m = members.find((mem) => (mem.$id || mem.id) === id);
-                  if (!m) return null;
-                  return (
-                    <span
-                      key={id}
-                      className="inline-flex items-center gap-1 bg-white px-1.5 py-0.5 rounded-md text-[10px] font-medium text-neutral-800 border border-neutral-200 shadow-2xs"
-                    >
-                      <div className="size-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">
-                        {m.name?.substring(0, 1).toUpperCase() || 'M'}
-                      </div>
-                      <span className="truncate max-w-[120px]">{m.name || m.email}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const next = form.assigneeIds.filter((item) => item !== id);
-                          setForm({ ...form, assigneeIds: next, assigneeId: next[0] || '' });
-                        }}
-                        className="text-neutral-400 hover:text-red-500 rounded-full ml-0.5"
+              {/* Selected Assignee Chips */}
+              {(form.assigneeIds || []).length > 0 && (
+                <div className="flex flex-wrap gap-1 p-1.5 mb-1.5 bg-neutral-50 rounded-md border border-neutral-200 max-h-20 overflow-y-auto">
+                  {form.assigneeIds.map((id) => {
+                    const m = members.find((mem) => (mem.$id || mem.id) === id);
+                    if (!m) return null;
+                    return (
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1 bg-white px-1.5 py-0.5 rounded-md text-[10px] font-medium text-neutral-800 border border-neutral-200 shadow-2xs"
                       >
-                        &times;
-                      </button>
-                    </span>
+                        <div className="size-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">
+                          {m.name?.substring(0, 1).toUpperCase() || 'M'}
+                        </div>
+                        <span className="truncate max-w-[100px]">{m.name || m.email}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = form.assigneeIds.filter((item) => item !== id);
+                            setForm({ ...form, assigneeIds: next, assigneeId: next[0] || '' });
+                          }}
+                          className="text-neutral-400 hover:text-red-500 rounded-full ml-0.5"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Member Checkbox List */}
+              <div className="rounded-md border border-neutral-200 bg-white max-h-32 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
+                {members.map((m) => {
+                  const id = m.$id || m.id;
+                  const isSelected = (form.assigneeIds || []).includes(id);
+                  const toggle = () => {
+                    const current = form.assigneeIds || [];
+                    const next = isSelected ? current.filter((x) => x !== id) : [...current, id];
+                    setForm({ ...form, assigneeIds: next, assigneeId: next[0] || '' });
+                  };
+                  return (
+                    <div
+                      key={id}
+                      onClick={toggle}
+                      className={`flex items-center justify-between px-2 py-1 cursor-pointer transition select-none text-[10px] ${
+                        isSelected ? 'bg-blue-50/70 text-blue-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 truncate">
+                        <div className="size-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center shrink-0">
+                          {m.name?.substring(0, 1).toUpperCase() || 'M'}
+                        </div>
+                        <span className="truncate">{m.name || m.email}</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}}
+                        className="size-3.5 rounded text-blue-600 focus:ring-blue-500 border-neutral-300 ml-1 shrink-0"
+                      />
+                    </div>
                   );
                 })}
+                {members.length === 0 && (
+                  <div className="p-2.5 text-center text-[10px] text-neutral-400">No members found</div>
+                )}
               </div>
-            )}
+            </div>
 
-            {/* Member Checkbox List */}
-            <div className="rounded-md border border-neutral-200 bg-white max-h-32 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
-              {members.map((m) => {
-                const id = m.$id || m.id;
-                const isSelected = (form.assigneeIds || []).includes(id);
-                const toggle = () => {
-                  const current = form.assigneeIds || [];
-                  const next = isSelected ? current.filter((x) => x !== id) : [...current, id];
-                  setForm({ ...form, assigneeIds: next, assigneeId: next[0] || '' });
-                };
-                return (
-                  <div
-                    key={id}
-                    onClick={toggle}
-                    className={`flex items-center justify-between px-2.5 py-1.5 cursor-pointer transition select-none text-[10px] ${
-                      isSelected ? 'bg-blue-50/70 text-blue-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
-                    }`}
+            {/* Multiple Reporters Selector */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[10px] font-semibold text-neutral-600">Reporters (Choose Multiple)</label>
+                {(form.reporterIds || []).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, reporterIds: [], reporterId: '' })}
+                    className="text-[10px] font-medium text-neutral-400 hover:text-red-500 transition"
                   >
-                    <div className="flex items-center gap-1.5">
-                      <div className="size-4 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center">
-                        {m.name?.substring(0, 1).toUpperCase() || 'M'}
-                      </div>
-                      <span>{m.name || m.email}</span>
-                      <span className="text-[9px] text-neutral-400">({m.role || 'MEMBER'})</span>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => {}}
-                      className="size-3.5 rounded text-blue-600 focus:ring-blue-500 border-neutral-300"
-                    />
-                  </div>
-                );
-              })}
-              {members.length === 0 && (
-                <div className="p-2.5 text-center text-[10px] text-neutral-400">No members found</div>
+                    Clear all ({(form.reporterIds || []).length})
+                  </button>
+                )}
+              </div>
+
+              {/* Selected Reporter Chips */}
+              {(form.reporterIds || []).length > 0 && (
+                <div className="flex flex-wrap gap-1 p-1.5 mb-1.5 bg-neutral-50 rounded-md border border-neutral-200 max-h-20 overflow-y-auto">
+                  {form.reporterIds.map((id) => {
+                    const m = members.find((mem) => (mem.user_id || mem.userId || mem.$id || mem.id) === id || (mem.$id || mem.id) === id);
+                    const name = m?.name || (id === currentUser?.$id ? currentUser?.name : 'Reporter');
+                    const isSelf = currentUser?.$id === id || currentUser?.$id === (m?.user_id || m?.userId);
+                    return (
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1 bg-white px-1.5 py-0.5 rounded-md text-[10px] font-medium text-neutral-800 border border-neutral-200 shadow-2xs"
+                      >
+                        <div className="size-3.5 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center">
+                          {name?.substring(0, 1).toUpperCase() || 'R'}
+                        </div>
+                        <span className="truncate max-w-[100px]">{name} {isSelf ? '(You)' : ''}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = form.reporterIds.filter((item) => item !== id);
+                            setForm({ ...form, reporterIds: next, reporterId: next[0] || '' });
+                          }}
+                          className="text-neutral-400 hover:text-red-500 rounded-full ml-0.5"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
               )}
+
+              {/* Reporter Checkbox List */}
+              <div className="rounded-md border border-neutral-200 bg-white max-h-32 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
+                {members.map((m) => {
+                  const uId = m.user_id || m.userId || m.$id || m.id;
+                  const isSelected = (form.reporterIds || []).includes(uId) || (form.reporterIds || []).includes(m.$id || m.id);
+                  const isSelf = currentUser?.$id === uId;
+                  const toggle = () => {
+                    const current = form.reporterIds || [];
+                    const next = isSelected 
+                      ? current.filter((x) => x !== uId && x !== (m.$id || m.id))
+                      : [...current, uId];
+                    setForm({ ...form, reporterIds: next, reporterId: next[0] || '' });
+                  };
+                  return (
+                    <div
+                      key={m.$id || m.id}
+                      onClick={toggle}
+                      className={`flex items-center justify-between px-2 py-1 cursor-pointer transition select-none text-[10px] ${
+                        isSelected ? 'bg-indigo-50/70 text-indigo-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 truncate">
+                        <div className="size-3.5 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center shrink-0">
+                          {m.name?.substring(0, 1).toUpperCase() || 'M'}
+                        </div>
+                        <span className="truncate">{m.name || m.email} {isSelf ? '(You)' : ''}</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}}
+                        className="size-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-neutral-300 ml-1 shrink-0"
+                      />
+                    </div>
+                  );
+                })}
+                {members.length === 0 && (
+                  <div className="p-2.5 text-center text-[10px] text-neutral-400">No members found</div>
+                )}
+              </div>
             </div>
           </div>
 
