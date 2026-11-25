@@ -2,23 +2,23 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva } from 'class-variance-authority';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-const buttonVariants = cva('inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:from-neutral-100 disabled:to-neutral-100 disabled:text-neutral-300 border border-neutral-300 shadow-2xs [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0', {
+const buttonVariants = cva('inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-600 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:from-neutral-100 disabled:to-neutral-100 disabled:text-neutral-400 border border-neutral-200/90 shadow-2xs active:scale-[0.99] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0', {
     variants: {
         variant: {
-            primary: 'bg-gradient-to-b from-blue-600 to-blue-700 text-primary-foreground hover:from-blue-700 hover:to-blue-700 border-blue-600',
-            destructive: 'bg-gradient-to-b from-amber-600 to-amber-700 text-destructive-foreground hover:from-amber-700 hover:to-amber-700 border-amber-600',
-            outline: 'border border-input bg-background shadow-2xs hover:bg-accent hover:text-accent-foreground',
-            secondary: 'bg-white text-neutral-800 hover:bg-neutral-50 border-neutral-300',
-            ghost: 'border-transparent shadow-none hover:bg-accent hover:text-accent-foreground',
-            muted: 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border-neutral-200',
-            tertiary: 'bg-blue-50 text-blue-600 border-transparent hover:bg-blue-100 shadow-none',
+            primary: 'bg-blue-600 text-white hover:bg-blue-700 border-blue-600 shadow-xs',
+            destructive: 'bg-red-600 text-white hover:bg-red-700 border-red-600 shadow-xs',
+            outline: 'border border-neutral-300 bg-white text-neutral-800 shadow-2xs hover:bg-neutral-50 hover:text-neutral-900',
+            secondary: 'bg-white text-neutral-800 hover:bg-neutral-50 border-neutral-300 shadow-2xs',
+            ghost: 'border-transparent shadow-none hover:bg-neutral-100 hover:text-neutral-900',
+            muted: 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 border-neutral-200',
+            tertiary: 'bg-blue-50 text-blue-700 border-blue-200/60 hover:bg-blue-100 shadow-none',
         },
         size: {
-            default: 'h-7 px-2.5 py-1 text-[10px]',
-            xs: 'h-5 rounded px-1.5 text-[8.5px]',
-            sm: 'h-6 rounded px-2 text-[9px]',
-            lg: 'h-8 rounded-md px-3.5 text-[11px]',
-            icon: 'size-6',
+            default: 'h-9 px-3.5 py-1.5 text-sm',
+            xs: 'h-6 rounded-md px-2 text-xs',
+            sm: 'h-7.5 rounded-md px-2.5 text-xs',
+            lg: 'h-10 rounded-lg px-4 text-sm',
+            icon: 'size-9 rounded-lg',
         },
     },
     defaultVariants: {

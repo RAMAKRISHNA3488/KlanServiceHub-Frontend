@@ -265,36 +265,36 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
       <div className="flex flex-col w-full max-w-2xl max-h-[90vh] rounded-xl bg-white shadow-2xl border border-neutral-200 overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-neutral-200/80 bg-neutral-50/50">
-          <div className="flex items-center gap-2">
-            <div className="size-6 rounded-md bg-blue-600 flex items-center justify-center text-white shadow-2xs">
-              <Plus className="size-3.5 stroke-[2.5]" />
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-200/80 bg-neutral-50/50">
+          <div className="flex items-center gap-2.5">
+            <div className="size-7 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
+              <Plus className="size-4 stroke-[2.5]" />
             </div>
             <div>
-              <h2 className="text-[12px] font-semibold text-neutral-900">Create Issue</h2>
-              <p className="text-[10px] text-neutral-500">Add a new task, story, bug, or epic to your workspace</p>
+              <h2 className="text-base font-bold text-neutral-900">Create Issue</h2>
+              <p className="text-xs text-neutral-500">Add a new task, story, bug, or epic to your workspace</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1 rounded text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
           >
             <X className="size-4" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 text-[11px]">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-sm">
           {/* Project & Issue Type Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Project *</label>
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">Project *</label>
               <select
                 value={form.projectId}
                 onChange={(e) => setForm({ ...form, projectId: e.target.value })}
                 required
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
               >
                 {projects.map((p) => (
                   <option key={p.$id || p.id} value={p.$id || p.id}>
@@ -305,12 +305,12 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Issue Type *</label>
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">Issue Type *</label>
               <div className="relative">
                 <select
                   value={form.issueType}
                   onChange={(e) => setForm({ ...form, issueType: e.target.value })}
-                  className="w-full rounded-md border border-neutral-200 bg-white pl-7 pr-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                  className="w-full rounded-lg border border-neutral-300 bg-white pl-8 pr-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
                 >
                   {availableIssueTypes.map((t) => (
                     <option key={t.id || t.name} value={t.name || t.id}>
@@ -318,7 +318,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                     </option>
                   ))}
                 </select>
-                <div className="absolute left-2 top-2 pointer-events-none">
+                <div className="absolute left-2.5 top-2.5 pointer-events-none">
                   {(() => {
                     const activeTypeObj = availableIssueTypes.find((t) => t.id === form.issueType || t.name === form.issueType);
                     const iconVal = activeTypeObj?.icon;
@@ -332,7 +332,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                     );
                     return (
                       <IconComp
-                        className="size-3"
+                        className="size-4"
                         style={{ color: activeTypeObj?.color || '#0052CC' }}
                       />
                     );
@@ -344,7 +344,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
 
           {/* Summary / Title */}
           <div>
-            <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Summary / Title *</label>
+            <label className="block text-xs font-semibold text-neutral-700 mb-1">Summary / Title *</label>
             <input
               type="text"
               required
@@ -352,16 +352,16 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="e.g. Implement OAuth2 Google Login with callback verification"
-              className="w-full rounded-md border border-neutral-300 px-2.5 py-1 text-[11px] font-medium focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+              className="w-full rounded-lg border border-neutral-300 px-3 py-1.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="block text-[10px] font-semibold text-neutral-600">Description</label>
+              <label className="block text-xs font-semibold text-neutral-700">Description</label>
               {descriptionImages.length > 0 && (
-                <span className="text-[10px] text-neutral-400 font-medium">
+                <span className="text-xs text-neutral-400 font-medium">
                   {descriptionImages.length} image{descriptionImages.length > 1 ? 's' : ''} attached
                 </span>
               )}
@@ -438,11 +438,11 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
           {/* Priority & Sprint Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-0.5">
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Priority</label>
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">Priority</label>
               <select
                 value={form.priority}
                 onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
               >
                 {PRIORITIES.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -453,11 +453,11 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Sprint</label>
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">Sprint</label>
               <select
                 value={form.sprintId}
                 onChange={(e) => setForm({ ...form, sprintId: e.target.value })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
               >
                 <option value="">Backlog (No Sprint)</option>
                 {sprints.map((s) => (
@@ -474,12 +474,12 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
             {/* Multiple Assignees Selector */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-[10px] font-semibold text-neutral-600">Assignees (Assign to Multiple)</label>
+                <label className="block text-xs font-semibold text-neutral-700">Assignees (Assign to Multiple)</label>
                 {(form.assigneeIds || []).length > 0 && (
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, assigneeIds: [], assigneeId: '' })}
-                    className="text-[10px] font-medium text-neutral-400 hover:text-red-500 transition"
+                    className="text-xs font-medium text-neutral-400 hover:text-red-500 transition"
                   >
                     Clear all ({(form.assigneeIds || []).length})
                   </button>
@@ -488,19 +488,19 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
 
               {/* Selected Assignee Chips */}
               {(form.assigneeIds || []).length > 0 && (
-                <div className="flex flex-wrap gap-1 p-1.5 mb-1.5 bg-neutral-50 rounded-md border border-neutral-200 max-h-20 overflow-y-auto">
+                <div className="flex flex-wrap gap-1.5 p-2 mb-1.5 bg-neutral-50 rounded-lg border border-neutral-200 max-h-24 overflow-y-auto">
                   {form.assigneeIds.map((id) => {
                     const m = members.find((mem) => (mem.$id || mem.id) === id);
                     if (!m) return null;
                     return (
                       <span
                         key={id}
-                        className="inline-flex items-center gap-1 bg-white px-1.5 py-0.5 rounded-md text-[10px] font-medium text-neutral-800 border border-neutral-200 shadow-2xs"
+                        className="inline-flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-md text-xs font-medium text-neutral-800 border border-neutral-200 shadow-2xs"
                       >
-                        <div className="size-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">
+                        <div className="size-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center">
                           {m.name?.substring(0, 1).toUpperCase() || 'M'}
                         </div>
-                        <span className="truncate max-w-[100px]">{m.name || m.email}</span>
+                        <span className="truncate max-w-[120px]">{m.name || m.email}</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -518,7 +518,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
               )}
 
               {/* Member Checkbox List */}
-              <div className="rounded-md border border-neutral-200 bg-white max-h-32 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
+              <div className="rounded-lg border border-neutral-200 bg-white max-h-36 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
                 {members.map((m) => {
                   const id = m.$id || m.id;
                   const isSelected = (form.assigneeIds || []).includes(id);
@@ -531,27 +531,27 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                     <div
                       key={id}
                       onClick={toggle}
-                      className={`flex items-center justify-between px-2 py-1 cursor-pointer transition select-none text-[10px] ${
+                      className={`flex items-center justify-between px-3 py-1.5 cursor-pointer transition select-none text-xs ${
                         isSelected ? 'bg-blue-50/70 text-blue-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 truncate">
-                        <div className="size-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center shrink-0">
+                      <div className="flex items-center gap-2 truncate">
+                        <div className="size-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
                           {m.name?.substring(0, 1).toUpperCase() || 'M'}
                         </div>
-                        <span className="truncate">{m.name || m.email}</span>
+                        <span className="truncate font-medium">{m.name || m.email}</span>
                       </div>
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => {}}
-                        className="size-3.5 rounded text-blue-600 focus:ring-blue-500 border-neutral-300 ml-1 shrink-0"
+                        className="size-4 rounded text-blue-600 focus:ring-blue-500 border-neutral-300 ml-1 shrink-0"
                       />
                     </div>
                   );
                 })}
                 {members.length === 0 && (
-                  <div className="p-2.5 text-center text-[10px] text-neutral-400">No members found</div>
+                  <div className="p-3 text-center text-xs text-neutral-400">No members found</div>
                 )}
               </div>
             </div>
@@ -559,12 +559,12 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
             {/* Multiple Reporters Selector */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-[10px] font-semibold text-neutral-600">Reporters (Choose Multiple)</label>
+                <label className="block text-xs font-semibold text-neutral-700">Reporters (Choose Multiple)</label>
                 {(form.reporterIds || []).length > 0 && (
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, reporterIds: [], reporterId: '' })}
-                    className="text-[10px] font-medium text-neutral-400 hover:text-red-500 transition"
+                    className="text-xs font-medium text-neutral-400 hover:text-red-500 transition"
                   >
                     Clear all ({(form.reporterIds || []).length})
                   </button>
@@ -573,7 +573,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
 
               {/* Selected Reporter Chips */}
               {(form.reporterIds || []).length > 0 && (
-                <div className="flex flex-wrap gap-1 p-1.5 mb-1.5 bg-neutral-50 rounded-md border border-neutral-200 max-h-20 overflow-y-auto">
+                <div className="flex flex-wrap gap-1.5 p-2 mb-1.5 bg-neutral-50 rounded-lg border border-neutral-200 max-h-24 overflow-y-auto">
                   {form.reporterIds.map((id) => {
                     const m = members.find((mem) => (mem.user_id || mem.userId || mem.$id || mem.id) === id || (mem.$id || mem.id) === id);
                     const name = m?.name || (id === currentUser?.$id ? currentUser?.name : 'Reporter');
@@ -581,12 +581,12 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                     return (
                       <span
                         key={id}
-                        className="inline-flex items-center gap-1 bg-white px-1.5 py-0.5 rounded-md text-[10px] font-medium text-neutral-800 border border-neutral-200 shadow-2xs"
+                        className="inline-flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-md text-xs font-medium text-neutral-800 border border-neutral-200 shadow-2xs"
                       >
-                        <div className="size-3.5 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center">
+                        <div className="size-4 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center">
                           {name?.substring(0, 1).toUpperCase() || 'R'}
                         </div>
-                        <span className="truncate max-w-[100px]">{name} {isSelf ? '(You)' : ''}</span>
+                        <span className="truncate max-w-[120px]">{name} {isSelf ? '(You)' : ''}</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -604,7 +604,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
               )}
 
               {/* Reporter Checkbox List */}
-              <div className="rounded-md border border-neutral-200 bg-white max-h-32 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
+              <div className="rounded-lg border border-neutral-200 bg-white max-h-36 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
                 {members.map((m) => {
                   const uId = m.user_id || m.userId || m.$id || m.id;
                   const isSelected = (form.reporterIds || []).includes(uId) || (form.reporterIds || []).includes(m.$id || m.id);
@@ -620,104 +620,104 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                     <div
                       key={m.$id || m.id}
                       onClick={toggle}
-                      className={`flex items-center justify-between px-2 py-1 cursor-pointer transition select-none text-[10px] ${
+                      className={`flex items-center justify-between px-3 py-1.5 cursor-pointer transition select-none text-xs ${
                         isSelected ? 'bg-indigo-50/70 text-indigo-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 truncate">
-                        <div className="size-3.5 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center shrink-0">
+                      <div className="flex items-center gap-2 truncate">
+                        <div className="size-4 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
                           {m.name?.substring(0, 1).toUpperCase() || 'M'}
                         </div>
-                        <span className="truncate">{m.name || m.email} {isSelf ? '(You)' : ''}</span>
+                        <span className="truncate font-medium">{m.name || m.email} {isSelf ? '(You)' : ''}</span>
                       </div>
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => {}}
-                        className="size-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-neutral-300 ml-1 shrink-0"
+                        className="size-4 rounded text-indigo-600 focus:ring-indigo-500 border-neutral-300 ml-1 shrink-0"
                       />
                     </div>
                   );
                 })}
                 {members.length === 0 && (
-                  <div className="p-2.5 text-center text-[10px] text-neutral-400">No members found</div>
+                  <div className="p-3 text-center text-xs text-neutral-400">No members found</div>
                 )}
               </div>
             </div>
           </div>
 
           {/* Story Points & Due Date & Estimate Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-0.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-0.5">
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Story Points</label>
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">Story Points</label>
               <input
                 type="number"
                 min={1}
                 max={100}
                 value={form.storyPoints}
                 onChange={(e) => setForm({ ...form, storyPoints: e.target.value })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Due Date</label>
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">Due Date</label>
               <input
                 type="date"
                 value={form.dueDate}
                 onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Estimate (Hours)</label>
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">Estimate (Hours)</label>
               <input
                 type="number"
                 min={0}
                 value={form.originalEstimateHours}
                 onChange={(e) => setForm({ ...form, originalEstimateHours: e.target.value })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
               />
             </div>
           </div>
 
           {/* Labels */}
           <div>
-            <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Labels (comma-separated)</label>
+            <label className="block text-xs font-semibold text-neutral-700 mb-1">Labels (comma-separated)</label>
             <input
               type="text"
               value={form.labels}
               onChange={(e) => setForm({ ...form, labels: e.target.value })}
               placeholder="frontend, auth, high-priority, v2-release"
-              className="w-full rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 shadow-2xs"
             />
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-between pt-3 border-t border-neutral-200">
-            <label className="flex items-center gap-1.5 cursor-pointer text-[10px] font-medium text-neutral-700">
+          <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-neutral-700 select-none">
               <input
                 type="checkbox"
                 checked={createAnother}
                 onChange={(e) => setCreateAnother(e.target.checked)}
-                className="size-3.5 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                className="size-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
               />
               Create another issue
             </label>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded px-2.5 py-1 text-[10px] font-medium text-neutral-600 hover:bg-neutral-100 transition"
+                className="rounded-lg px-3.5 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-100 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={creating}
-                className="rounded bg-blue-600 px-3.5 py-1 text-[10px] font-semibold text-white shadow-2xs hover:bg-blue-700 transition disabled:opacity-50"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition disabled:opacity-50"
               >
                 {creating ? 'Creating...' : 'Create'}
               </button>

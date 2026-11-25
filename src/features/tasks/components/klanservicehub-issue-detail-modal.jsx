@@ -864,10 +864,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 value={task?.name || ''}
                 onChange={(e) => setTask({ ...task, name: e.target.value })}
                 onBlur={(e) => handleUpdateProperty({ name: e.target.value })}
-                className="w-full text-[13px] sm:text-[14px] font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none py-0.5 transition"
+                className="w-full text-base sm:text-lg font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none py-1 transition"
                 placeholder="Issue summary..."
               />
-              <div className="flex items-center gap-2.5 text-[10px] text-neutral-400 font-normal">
+              <div className="flex items-center gap-2.5 text-xs text-neutral-500 font-normal">
                 <span
                   className="flex items-center gap-1"
                   title={
@@ -1472,7 +1472,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                       handleUpdateProperty({ assigneeIds: nextIds });
                     }
                   }}
-                  className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                  className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
                 >
                   <option value="">+ Assign another member...</option>
                   {members
@@ -1488,21 +1488,21 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Reporters (Multiple) */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[10px] font-semibold text-neutral-500">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-neutral-500">
                   Reporters {((task?.reporters || (task?.reporter ? [task.reporter] : [])).length > 0) && `(${(task?.reporters || (task?.reporter ? [task.reporter] : [])).length})`}
                 </label>
               </div>
 
               {/* Reporter Chips List */}
-              <div className="space-y-1 mb-1.5">
+              <div className="space-y-1.5 mb-2">
                 {(() => {
                   const currentReporters = task?.reporters && task.reporters.length > 0
                     ? task.reporters
                     : (task?.reporter ? [task.reporter] : []);
                   
                   if (currentReporters.length === 0) {
-                    return <div className="text-[10px] text-neutral-400 italic py-0.5">No reporter specified</div>;
+                    return <div className="text-xs text-neutral-400 italic py-0.5">No reporter specified</div>;
                   }
 
                   return currentReporters.map((rep) => {
@@ -1511,13 +1511,13 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                     return (
                       <div
                         key={rId}
-                        className="flex items-center justify-between bg-white border border-neutral-200 rounded-md px-2 py-1 shadow-2xs"
+                        className="flex items-center justify-between bg-white border border-neutral-200 rounded-lg px-2.5 py-1.5 shadow-2xs"
                       >
-                        <div className="flex items-center gap-1.5">
-                          <div className="size-4 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center">
+                        <div className="flex items-center gap-2">
+                          <div className="size-5 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center">
                             {rep.name?.substring(0, 1).toUpperCase() || 'R'}
                           </div>
-                          <span className="text-[10px] font-medium text-neutral-800">
+                          <span className="text-xs font-medium text-neutral-800">
                             {rep.name || rep.email || 'Reporter'} {isSelf ? '(You)' : ''}
                           </span>
                         </div>
@@ -1535,7 +1535,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                             }));
                             handleUpdateProperty({ reporterIds: nextIds });
                           }}
-                          className="text-neutral-400 hover:text-red-500 text-[11px] px-1"
+                          className="text-neutral-400 hover:text-red-500 text-xs px-1 font-bold"
                           title="Remove reporter"
                         >
                           &times;
@@ -1577,7 +1577,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                       handleUpdateProperty({ reporterIds: nextIds });
                     }
                   }}
-                  className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                  className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
                 >
                   <option value="">+ Add another reporter...</option>
                   {members
@@ -1603,11 +1603,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Issue Type */}
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Issue Type</label>
+              <label className="block text-xs font-semibold text-neutral-500 mb-1">Issue Type</label>
               <select
                 value={task?.issueType || 'Task'}
                 onChange={(e) => handleUpdateProperty({ issueType: e.target.value })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
               >
                 {workspaceIssueTypes.length > 0 ? (
                   workspaceIssueTypes.map((t) => (
@@ -1630,11 +1630,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Priority */}
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Priority</label>
+              <label className="block text-xs font-semibold text-neutral-500 mb-1">Priority</label>
               <select
                 value={task?.priority || 'MEDIUM'}
                 onChange={(e) => handleUpdateProperty({ priority: e.target.value })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
               >
                 <option value="CRITICAL">P0 - Critical</option>
                 <option value="HIGH">P1 - High</option>
@@ -1646,7 +1646,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
 
             {/* Story Points */}
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Story Points Estimate</label>
+              <label className="block text-xs font-semibold text-neutral-500 mb-1">Story Points Estimate</label>
               <input
                 type="number"
                 min={0}
@@ -1667,28 +1667,28 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                     e.currentTarget.blur();
                   }
                 }}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
               />
             </div>
 
             {/* Due Date */}
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Due Date</label>
+              <label className="block text-xs font-semibold text-neutral-500 mb-1">Due Date</label>
               <input
                 type="date"
                 value={task?.dueDate ? task.dueDate.split('T')[0] : ''}
                 onChange={(e) => handleUpdateProperty({ dueDate: e.target.value })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
               />
             </div>
 
             {/* Sprint */}
             <div>
-              <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Sprint</label>
+              <label className="block text-xs font-semibold text-neutral-500 mb-1">Sprint</label>
               <select
                 value={task?.sprintId || task?.sprint_id || ''}
                 onChange={(e) => handleUpdateProperty({ sprintId: e.target.value || null })}
-                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
               >
                 <option value="">Backlog (No Sprint)</option>
                 {sprints.map((s) => (
@@ -1700,16 +1700,16 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
             </div>
 
             {/* Dates & Timestamps */}
-            <div className="pt-2.5 border-t border-neutral-200/80 space-y-1.5 text-[10px]">
-              <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider">
+            <div className="pt-3 border-t border-neutral-200/80 space-y-2 text-xs">
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
                 Dates & Timestamps
               </label>
-              <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
-                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px] shrink-0">
-                  <Calendar className="size-2.5 text-neutral-400" /> Created
+              <div className="flex items-center justify-between text-neutral-600 bg-white px-2.5 py-1.5 rounded-lg border border-neutral-200 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-neutral-400 font-normal text-xs shrink-0">
+                  <Calendar className="size-3.5 text-neutral-400" /> Created
                 </span>
                 <span
-                  className="font-medium text-neutral-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis ml-2 text-right"
+                  className="font-medium text-neutral-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis ml-2 text-right"
                   title={
                     task?.created_at || task?.$createdAt
                       ? new Date(task.created_at || task.$createdAt).toLocaleString()
@@ -1719,12 +1719,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
-                <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px] shrink-0">
-                  <Clock className="size-2.5 text-neutral-400" /> Updated
+              <div className="flex items-center justify-between text-neutral-600 bg-white px-2.5 py-1.5 rounded-lg border border-neutral-200 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-neutral-400 font-normal text-xs shrink-0">
+                  <Clock className="size-3.5 text-neutral-400" /> Updated
                 </span>
                 <span
-                  className="font-medium text-neutral-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis ml-2 text-right"
+                  className="font-medium text-neutral-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis ml-2 text-right"
                   title={
                     task?.updated_at || task?.$updatedAt
                       ? new Date(task.updated_at || task.$updatedAt).toLocaleString()
@@ -1735,11 +1735,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 </span>
               </div>
               {task?.dueDate && (
-                <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
-                  <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px] shrink-0">
-                    <Clock className="size-2.5 text-neutral-400" /> Due Date
+                <div className="flex items-center justify-between text-neutral-600 bg-white px-2.5 py-1.5 rounded-lg border border-neutral-200 shadow-2xs">
+                  <span className="flex items-center gap-1.5 text-neutral-400 font-normal text-xs shrink-0">
+                    <Clock className="size-3.5 text-neutral-400" /> Due Date
                   </span>
-                  <span className="font-medium text-neutral-700 text-[10px] whitespace-nowrap ml-2 text-right">
+                  <span className="font-medium text-neutral-700 text-xs whitespace-nowrap ml-2 text-right">
                     {new Date(task.dueDate).toLocaleDateString([], {
                       month: 'short',
                       day: 'numeric',

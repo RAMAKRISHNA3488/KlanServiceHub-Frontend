@@ -1112,7 +1112,7 @@ export const BoardsView = () => {
                           <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                             {matchedType && (
                               <span
-                                className="inline-flex items-center gap-1 px-1 sm:px-1.5 py-0.5 rounded text-[8.5px] sm:text-[9px] font-bold text-white shadow-2xs"
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold text-white shadow-2xs"
                                 style={{ backgroundColor: matchedType.color || '#4F46E5' }}
                                 title={`Issue Type: ${matchedType.name}`}
                               >
@@ -1125,7 +1125,7 @@ export const BoardsView = () => {
                                 e.stopPropagation();
                                 setSelectedDetailTaskId(taskId);
                               }}
-                              className="font-mono text-[9px] sm:text-[10px] font-bold text-blue-700 bg-blue-50 px-1 sm:px-1.5 py-0.5 rounded hover:bg-blue-100 transition cursor-pointer"
+                              className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded hover:bg-blue-100 transition cursor-pointer"
                               title="Click to view ticket details"
                             >
                               {task.key || 'TASK'}
@@ -1133,7 +1133,7 @@ export const BoardsView = () => {
                           </div>
                           <div className="flex items-center gap-1 sm:gap-1.5">
                             <span
-                              className={`px-1 sm:px-1.5 py-0.5 rounded text-[8.5px] sm:text-[9px] font-bold ${
+                              className={`px-1.5 py-0.5 rounded text-xs font-bold ${
                                 task.priority === 'CRITICAL' || task.priority === 'HIGHEST' || task.priority === 'P0'
                                   ? 'bg-red-100 text-red-700'
                                   : task.priority === 'HIGH' || task.priority === 'P1'
@@ -1165,9 +1165,9 @@ export const BoardsView = () => {
                                   e.stopPropagation();
                                   handleDeleteTask(taskId, task.key, task.name);
                                 }}
-                                className="p-0.5 sm:p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                               >
-                                <Trash2 className="size-3 sm:size-3.5" />
+                                <Trash2 className="size-3.5" />
                               </button>
                             )}
                           </div>
@@ -1179,19 +1179,19 @@ export const BoardsView = () => {
                             e.stopPropagation();
                             setSelectedDetailTaskId(taskId);
                           }}
-                          className="text-[11px] sm:text-xs font-semibold text-neutral-900 leading-snug break-words hover:text-blue-600 transition cursor-pointer"
+                          className="text-sm font-semibold text-neutral-900 leading-snug break-words hover:text-blue-600 transition cursor-pointer"
                           title="Click to view ticket details"
                         >
                           {task.name}
                         </p>
 
                         {/* Footer: Assignee, Date/Time & Action Controls */}
-                        <div className="flex items-center justify-between pt-1 border-t border-neutral-100 text-[10px] sm:text-[11px]">
-                          <div className="flex items-center gap-1 sm:gap-1.5 text-neutral-500">
-                            <div className="size-4 sm:size-5 rounded-full bg-neutral-100 flex items-center justify-center font-bold text-[8.5px] sm:text-[9px] text-neutral-600 uppercase border">
-                              {task.assignee?.name?.charAt(0) || <User className="size-2.5 sm:size-3" />}
+                        <div className="flex items-center justify-between pt-1.5 border-t border-neutral-100 text-xs">
+                          <div className="flex items-center gap-1.5 text-neutral-500">
+                            <div className="size-5 rounded-full bg-neutral-100 flex items-center justify-center font-bold text-xs text-neutral-600 uppercase border border-neutral-200">
+                              {task.assignee?.name?.charAt(0) || <User className="size-3" />}
                             </div>
-                            <span className="truncate max-w-[75px] sm:max-w-[90px] text-[9.5px] sm:text-[10px]">
+                            <span className="truncate max-w-[100px] text-xs font-medium">
                               {task.assignee?.name || 'Unassigned'}
                             </span>
                           </div>
@@ -1199,14 +1199,14 @@ export const BoardsView = () => {
                           {/* Ticket Date & Time Badge */}
                           {(task.created_at || task.$createdAt || task.dueDate) && (
                             <div
-                              className="flex items-center gap-1 text-[8.5px] sm:text-[9px] text-neutral-400 font-medium"
+                              className="flex items-center gap-1 text-xs text-neutral-400 font-medium"
                               title={
                                 task.dueDate
                                   ? `Due: ${new Date(task.dueDate).toLocaleDateString()}`
                                   : `Created: ${new Date(task.created_at || task.$createdAt).toLocaleString()}`
                               }
                             >
-                              <Clock className="size-2.5 sm:size-3 text-neutral-400 shrink-0" />
+                              <Clock className="size-3 text-neutral-400 shrink-0" />
                               <span>
                                 {task.dueDate
                                   ? new Date(task.dueDate).toLocaleDateString([], { month: 'short', day: 'numeric' })
