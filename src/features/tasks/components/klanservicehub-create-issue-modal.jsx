@@ -22,6 +22,7 @@ import {
   Clock,
   Tag,
   Info,
+  Search,
   Image as ImageIcon,
 } from 'lucide-react';
 
@@ -57,6 +58,8 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
   const [creating, setCreating] = useState(false);
   const [createAnother, setCreateAnother] = useState(false);
   const [descriptionImages, setDescriptionImages] = useState([]);
+  const [assigneeSearch, setAssigneeSearch] = useState('');
+  const [reporterSearch, setReporterSearch] = useState('');
 
   const handleDescriptionImageUpload = (e) => {
     const files = Array.from(e.target.files || []);
@@ -154,16 +157,6 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
   });
 
   useEffect(() => {
-    if (currentUser?.$id && (!form.reporterIds || form.reporterIds.length === 0)) {
-      setForm((prev) => ({
-        ...prev,
-        reporterId: currentUser.$id,
-        reporterIds: [currentUser.$id],
-      }));
-    }
-  }, [currentUser, form.reporterIds]);
-
-  useEffect(() => {
     if (projects.length > 0 && !form.projectId) {
       setForm((prev) => ({ ...prev, projectId: defaultProjectId || projects[0].$id || projects[0].id }));
     }
@@ -202,7 +195,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
 
       const selectedReporterIds = form.reporterIds && form.reporterIds.length > 0
         ? form.reporterIds
-        : (form.reporterId ? [form.reporterId] : (currentUser?.$id ? [currentUser.$id] : []));
+        : (form.reporterId ? [form.reporterId] : []);
 
       const res = await tasksApi.createTask({
         workspaceId,
@@ -216,7 +209,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
         parentTaskId: form.parentTaskId || null,
         assigneeId: selectedAssigneeIds[0] || null,
         assigneeIds: selectedAssigneeIds,
-        reporterId: selectedReporterIds[0] || currentUser?.$id || null,
+        reporterId: selectedReporterIds[0] || null,
         reporterIds: selectedReporterIds,
         sprintId: form.sprintId || null,
         storyPoints: Number(form.storyPoints) || 1,
@@ -250,8 +243,16 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
           description: '',
           dueDate: '',
           labels: '',
+          assigneeIds: [],
+          assigneeId: '',
+          reporterIds: [],
+          reporterId: '',
         }));
+        setAssigneeSearch('');
+        setReporterSearch('');
       } else {
+        setAssigneeSearch('');
+        setReporterSearch('');
         onClose();
       }
     } catch (err) {
@@ -517,42 +518,76 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                 </div>
               )}
 
+              {/* Assignee Search Input */}
+              <div className="relative mb-1.5">
+                <Search className="size-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search assignees..."
+                  value={assigneeSearch}
+                  onChange={(e) => setAssigneeSearch(e.target.value)}
+                  className="w-full h-8 rounded-lg border border-neutral-300 bg-white pl-8 pr-7 text-xs font-medium text-neutral-800 placeholder:text-neutral-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500/20 shadow-2xs transition-all duration-150"
+                />
+                {assigneeSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setAssigneeSearch('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs px-0.5"
+                    title="Clear search"
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+
               {/* Member Checkbox List */}
               <div className="rounded-lg border border-neutral-200 bg-white max-h-36 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
-                {members.map((m) => {
-                  const id = m.$id || m.id;
-                  const isSelected = (form.assigneeIds || []).includes(id);
-                  const toggle = () => {
-                    const current = form.assigneeIds || [];
-                    const next = isSelected ? current.filter((x) => x !== id) : [...current, id];
-                    setForm({ ...form, assigneeIds: next, assigneeId: next[0] || '' });
-                  };
-                  return (
-                    <div
-                      key={id}
-                      onClick={toggle}
-                      className={`flex items-center justify-between px-3 py-1.5 cursor-pointer transition select-none text-xs ${
-                        isSelected ? 'bg-blue-50/70 text-blue-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <div className="size-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
-                          {m.name?.substring(0, 1).toUpperCase() || 'M'}
-                        </div>
-                        <span className="truncate font-medium">{m.name || m.email}</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => {}}
-                        className="size-4 rounded text-blue-600 focus:ring-blue-500 border-neutral-300 ml-1 shrink-0"
-                      />
-                    </div>
+                {(() => {
+                  const filteredAssignees = members.filter((m) =>
+                    (m.name || '').toLowerCase().includes(assigneeSearch.toLowerCase()) ||
+                    (m.email || '').toLowerCase().includes(assigneeSearch.toLowerCase())
                   );
-                })}
-                {members.length === 0 && (
-                  <div className="p-3 text-center text-xs text-neutral-400">No members found</div>
-                )}
+
+                  if (filteredAssignees.length === 0) {
+                    return (
+                      <div className="p-3 text-center text-xs text-neutral-400">
+                        {assigneeSearch ? 'No matching assignees' : 'No members found'}
+                      </div>
+                    );
+                  }
+
+                  return filteredAssignees.map((m) => {
+                    const id = m.$id || m.id;
+                    const isSelected = (form.assigneeIds || []).includes(id);
+                    const toggle = () => {
+                      const current = form.assigneeIds || [];
+                      const next = isSelected ? current.filter((x) => x !== id) : [...current, id];
+                      setForm({ ...form, assigneeIds: next, assigneeId: next[0] || '' });
+                    };
+                    return (
+                      <div
+                        key={id}
+                        onClick={toggle}
+                        className={`flex items-center justify-between px-3 py-1.5 cursor-pointer transition select-none text-xs ${
+                          isSelected ? 'bg-blue-50/70 text-blue-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <div className="size-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                            {m.name?.substring(0, 1).toUpperCase() || 'M'}
+                          </div>
+                          <span className="truncate font-medium">{m.name || m.email}</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {}}
+                          className="size-4 rounded text-blue-600 focus:ring-blue-500 border-neutral-300 ml-1 shrink-0"
+                        />
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
 
@@ -603,45 +638,79 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                 </div>
               )}
 
+              {/* Reporter Search Input */}
+              <div className="relative mb-1.5">
+                <Search className="size-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search reporters..."
+                  value={reporterSearch}
+                  onChange={(e) => setReporterSearch(e.target.value)}
+                  className="w-full h-8 rounded-lg border border-neutral-300 bg-white pl-8 pr-7 text-xs font-medium text-neutral-800 placeholder:text-neutral-400 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/20 shadow-2xs transition-all duration-150"
+                />
+                {reporterSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setReporterSearch('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs px-0.5"
+                    title="Clear search"
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+
               {/* Reporter Checkbox List */}
               <div className="rounded-lg border border-neutral-200 bg-white max-h-36 overflow-y-auto divide-y divide-neutral-100 shadow-2xs">
-                {members.map((m) => {
-                  const uId = m.user_id || m.userId || m.$id || m.id;
-                  const isSelected = (form.reporterIds || []).includes(uId) || (form.reporterIds || []).includes(m.$id || m.id);
-                  const isSelf = currentUser?.$id === uId;
-                  const toggle = () => {
-                    const current = form.reporterIds || [];
-                    const next = isSelected 
-                      ? current.filter((x) => x !== uId && x !== (m.$id || m.id))
-                      : [...current, uId];
-                    setForm({ ...form, reporterIds: next, reporterId: next[0] || '' });
-                  };
-                  return (
-                    <div
-                      key={m.$id || m.id}
-                      onClick={toggle}
-                      className={`flex items-center justify-between px-3 py-1.5 cursor-pointer transition select-none text-xs ${
-                        isSelected ? 'bg-indigo-50/70 text-indigo-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <div className="size-4 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
-                          {m.name?.substring(0, 1).toUpperCase() || 'M'}
-                        </div>
-                        <span className="truncate font-medium">{m.name || m.email} {isSelf ? '(You)' : ''}</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => {}}
-                        className="size-4 rounded text-indigo-600 focus:ring-indigo-500 border-neutral-300 ml-1 shrink-0"
-                      />
-                    </div>
+                {(() => {
+                  const filteredReporters = members.filter((m) =>
+                    (m.name || '').toLowerCase().includes(reporterSearch.toLowerCase()) ||
+                    (m.email || '').toLowerCase().includes(reporterSearch.toLowerCase())
                   );
-                })}
-                {members.length === 0 && (
-                  <div className="p-3 text-center text-xs text-neutral-400">No members found</div>
-                )}
+
+                  if (filteredReporters.length === 0) {
+                    return (
+                      <div className="p-3 text-center text-xs text-neutral-400">
+                        {reporterSearch ? 'No matching reporters' : 'No members found'}
+                      </div>
+                    );
+                  }
+
+                  return filteredReporters.map((m) => {
+                    const uId = m.user_id || m.userId || m.$id || m.id;
+                    const isSelected = (form.reporterIds || []).includes(uId) || (form.reporterIds || []).includes(m.$id || m.id);
+                    const isSelf = currentUser?.$id === uId;
+                    const toggle = () => {
+                      const current = form.reporterIds || [];
+                      const next = isSelected 
+                        ? current.filter((x) => x !== uId && x !== (m.$id || m.id))
+                        : [...current, uId];
+                      setForm({ ...form, reporterIds: next, reporterId: next[0] || '' });
+                    };
+                    return (
+                      <div
+                        key={m.$id || m.id}
+                        onClick={toggle}
+                        className={`flex items-center justify-between px-3 py-1.5 cursor-pointer transition select-none text-xs ${
+                          isSelected ? 'bg-indigo-50/70 text-indigo-900 font-medium' : 'hover:bg-neutral-50 text-neutral-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <div className="size-4 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                            {m.name?.substring(0, 1).toUpperCase() || 'M'}
+                          </div>
+                          <span className="truncate font-medium">{m.name || m.email} {isSelf ? '(You)' : ''}</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {}}
+                          className="size-4 rounded text-indigo-600 focus:ring-indigo-500 border-neutral-300 ml-1 shrink-0"
+                        />
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           </div>
