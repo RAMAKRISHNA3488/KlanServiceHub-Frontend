@@ -106,7 +106,7 @@ export const Navigation = () => {
                   <Link
                     href={fullHref}
                     className={cn(
-                      'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition group text-xs',
+                      'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition-all duration-150 ease-out group text-xs active:scale-[0.99]',
                       isActive
                         ? 'bg-blue-50 text-blue-700 font-bold shadow-xs'
                         : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
@@ -114,11 +114,11 @@ export const Navigation = () => {
                   >
                     <Icon
                       className={cn(
-                        'size-4 shrink-0 transition',
+                        'size-4 shrink-0 transition-transform duration-150 group-hover:scale-105',
                         isActive ? 'text-blue-600' : 'text-neutral-400 group-hover:text-neutral-600',
                       )}
                     />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate transition-transform duration-150 group-hover:translate-x-0.5">{item.label}</span>
                   </Link>
                 </li>
               );
@@ -143,7 +143,7 @@ export const Navigation = () => {
                 <Link
                   href={fullHref}
                   className={cn(
-                    'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition group text-xs',
+                    'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition-all duration-150 ease-out group text-xs active:scale-[0.99]',
                     isActive
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-xs'
                       : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
@@ -151,11 +151,11 @@ export const Navigation = () => {
                 >
                   <Icon
                     className={cn(
-                      'size-4 shrink-0 transition',
+                      'size-4 shrink-0 transition-transform duration-150 group-hover:scale-105',
                       isActive ? 'text-blue-600' : 'text-neutral-400 group-hover:text-neutral-600',
                     )}
                   />
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate transition-transform duration-150 group-hover:translate-x-0.5">{item.label}</span>
                 </Link>
               </li>
             );
@@ -179,7 +179,7 @@ export const Navigation = () => {
                 <Link
                   href={fullHref}
                   className={cn(
-                    'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition group text-xs',
+                    'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition-all duration-150 ease-out group text-xs active:scale-[0.99]',
                     isActive
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-xs'
                       : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
@@ -187,11 +187,11 @@ export const Navigation = () => {
                 >
                   <Icon
                     className={cn(
-                      'size-4 shrink-0 transition',
+                      'size-4 shrink-0 transition-transform duration-150 group-hover:scale-105',
                       isActive ? 'text-blue-600' : 'text-neutral-400 group-hover:text-neutral-600',
                     )}
                   />
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate transition-transform duration-150 group-hover:translate-x-0.5">{item.label}</span>
                 </Link>
               </li>
             );
@@ -224,7 +224,7 @@ export const Navigation = () => {
                   <Link
                     href={fullHref}
                     className={cn(
-                      'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition group text-xs',
+                      'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-semibold transition-all duration-150 ease-out group text-xs active:scale-[0.99]',
                       isActive
                         ? 'bg-blue-50 text-blue-700 font-bold shadow-xs'
                         : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
@@ -232,11 +232,11 @@ export const Navigation = () => {
                   >
                     <Icon
                       className={cn(
-                        'size-4 shrink-0 transition',
+                        'size-4 shrink-0 transition-transform duration-150 group-hover:scale-105',
                         isActive ? 'text-blue-600' : 'text-neutral-400 group-hover:text-neutral-600',
                       )}
                     />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate transition-transform duration-150 group-hover:translate-x-0.5">{item.label}</span>
                   </Link>
                 </li>
               );

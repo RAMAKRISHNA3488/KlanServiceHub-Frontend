@@ -262,8 +262,8 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
-      <div className="flex flex-col w-full max-w-2xl max-h-[90vh] rounded-xl bg-white shadow-2xl border border-neutral-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+      <div className="flex flex-col w-full max-w-2xl max-h-[90vh] rounded-xl bg-white shadow-2xl border border-neutral-200 overflow-hidden modal-container-enter">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-200/80 bg-neutral-50/50">
           <div className="flex items-center gap-2.5">

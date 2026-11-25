@@ -1104,7 +1104,7 @@ export const BoardsView = () => {
                             toast.info(`Ticket is already at the final stage (${col.label})`);
                           }
                         }}
-                        className="shrink-0 w-full rounded-lg sm:rounded-xl border border-neutral-200 bg-white p-2.5 sm:p-3 shadow-xs hover:shadow-md hover:border-blue-400 transition-all space-y-1.5 sm:space-y-2 cursor-grab active:cursor-grabbing select-none"
+                        className="shrink-0 w-full rounded-lg sm:rounded-xl border border-neutral-200 bg-white p-2.5 sm:p-3 shadow-xs hover:shadow-md hover:-translate-y-0.5 hover:border-blue-400 active:scale-[0.99] active:shadow-2xs transition-all duration-200 ease-out space-y-1.5 sm:space-y-2 cursor-grab active:cursor-grabbing select-none"
                         title="Double-click to advance stage • Drag to move • Click to view details"
                       >
                         {/* Task Key, Issue Type Badge & Priority */}

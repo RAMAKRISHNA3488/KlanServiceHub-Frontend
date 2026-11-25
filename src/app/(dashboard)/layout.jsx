@@ -25,7 +25,7 @@ const DashboardLayout = ({ children }) => {
 
         {/* Middle / Center Work Area (Independently scrollable) */}
         <div className="flex-1 min-w-0 flex flex-col h-full overflow-y-auto overflow-x-hidden">
-          <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 pb-20 lg:pb-6 w-full min-w-0">
+          <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 pb-20 lg:pb-6 w-full min-w-0 page-view-enter">
             {children}
           </main>
         </div>

@@ -660,8 +660,8 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const matchedColor = matchedType?.color || TYPE_ICONS[currentTypeName]?.color || '#0052CC';
   if (loading && !task) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
-        <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden p-6">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden p-6 modal-container-enter">
           <TaskDetailSkeleton isModal />
         </div>
       </div>
@@ -679,8 +679,8 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
-      <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden modal-container-enter">
         {/* Top Header & Breadcrumbs */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-200 bg-neutral-50/70 select-none">
           <div className="flex items-center gap-2 flex-wrap">
