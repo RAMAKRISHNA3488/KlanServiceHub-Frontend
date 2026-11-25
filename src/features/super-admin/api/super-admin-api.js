@@ -131,11 +131,12 @@ export const useToggleSuperAdmin = () => {
 export const useUpdateTenantSubscription = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, plan, userLimit, status }) => platformAdminApi.updateTenantSubscription(id, { plan, userLimit, status }),
+    mutationFn: ({ id, ...payload }) => platformAdminApi.updateTenantSubscription(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['super-admin-billing'] });
       queryClient.invalidateQueries({ queryKey: ['super-admin-organizations'] });
       queryClient.invalidateQueries({ queryKey: ['super-admin-financials'] });
+      queryClient.invalidateQueries({ queryKey: ['super-admin-overview'] });
     },
   });
 };

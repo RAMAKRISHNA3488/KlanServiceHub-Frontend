@@ -99,9 +99,22 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
     return () => clearInterval(timer);
   }, [isOtpMode, activeTab, countdown]);
 
-  const handleRedirectAfterAuth = (workspaceId) => {
+  const handleRedirectAfterAuth = (workspaceId, userObj) => {
     queryClient.invalidateQueries({ queryKey: ['current'] });
     queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+
+    const isSuper = Boolean(
+      userObj?.isSuperAdmin ||
+      userObj?.is_super_admin ||
+      userObj?.email === 'superadmin@klanservicehub.com' ||
+      userObj?.email === 'owner@company.com' ||
+      email.toLowerCase().trim() === 'superadmin@klanservicehub.com'
+    );
+
+    if (isSuper) {
+      window.location.href = '/super-admin/dashboard';
+      return;
+    }
 
     if (inviteToken) {
       window.location.href = `/invite/${inviteToken}`;
@@ -132,7 +145,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
       });
 
       toast.success('Signed in successfully! Opening klanservicehub...');
-      handleRedirectAfterAuth(res.workspaceId);
+      handleRedirectAfterAuth(res.workspaceId, res.user);
     } catch (err) {
       toast.error(err.message || 'Invalid email or password. Please try again.');
     } finally {
@@ -165,7 +178,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
       });
 
       toast.success('Account created successfully! Launching your workspace...');
-      handleRedirectAfterAuth(res.workspaceId);
+      handleRedirectAfterAuth(res.workspaceId, res.user);
     } catch (err) {
       toast.error(err.message || 'Failed to create account.');
     } finally {
@@ -224,7 +237,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
       setLoading(true);
       const res = await authApi.loginWithOtp(email.trim(), fullOtp);
       toast.success('Signed in successfully! Launching your workspace...');
-      handleRedirectAfterAuth(res.workspaceId);
+      handleRedirectAfterAuth(res.workspaceId, res.user);
     } catch (err) {
       toast.error(err.message || 'Invalid or expired verification code.');
     } finally {
@@ -257,7 +270,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
       });
 
       toast.success('Account setup complete! Welcome to KlanserviceHub.');
-      handleRedirectAfterAuth(res.workspaceId);
+      handleRedirectAfterAuth(res.workspaceId, res.user);
     } catch (err) {
       toast.error(err.message || 'Failed to complete registration.');
     } finally {
@@ -318,7 +331,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
       });
 
       toast.success('🎉 Password reset successfully! Entering klanservicehub...');
-      handleRedirectAfterAuth(res.workspaceId);
+      handleRedirectAfterAuth(res.workspaceId, res.user);
     } catch (err) {
       toast.error(err.message || 'Failed to reset password. Please verify the code.');
     } finally {
@@ -347,7 +360,7 @@ export const EmailFirstAuth = ({ initialMode = 'SIGN_IN' }) => {
       const providerLabel = provider === 'microsoft' ? 'Microsoft 365' : provider.charAt(0).toUpperCase() + provider.slice(1);
       toast.success(`🎉 Authenticated with ${providerLabel} as ${chosenEmail.trim()}!`);
       setSocialModal(null);
-      handleRedirectAfterAuth(res.workspaceId);
+      handleRedirectAfterAuth(res.workspaceId, res.user);
     } catch (err) {
       toast.error(err.message || `Failed to authenticate with ${provider}`);
     } finally {

@@ -3,8 +3,17 @@ import { KlanserviceHubTopNavbar } from '@/components/klanservicehub-top-navbar'
 import { Sidebar } from '@/components/sidebar';
 import { MobileSidebar } from '@/components/mobile-sidebar';
 import { MobileBottomNav } from '@/components/mobile-bottom-nav';
+import { useCurrent } from '@/features/auth/api/use-current';
+import { Navigate } from 'react-router-dom';
 
 const DashboardLayout = ({ children }) => {
+  const { data: user } = useCurrent();
+  const isSuper = Boolean(user?.isSuperAdmin || user?.is_super_admin || user?.email === 'superadmin@klanservicehub.com' || user?.email === 'owner@company.com');
+
+  if (isSuper) {
+    return <Navigate to="/super-admin/dashboard" replace />;
+  }
+
   return (
     <div className="h-screen flex flex-col bg-[#F4F5F7] overflow-hidden">
       <ModalProvider />

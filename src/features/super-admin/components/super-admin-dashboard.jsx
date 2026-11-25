@@ -98,7 +98,15 @@ export const SuperAdminDashboard = () => {
   const [editingSubOrg, setEditingSubOrg] = useState(null);
   const [subFormPlan, setSubFormPlan] = useState('BUSINESS');
   const [subFormLimit, setSubFormLimit] = useState(100);
+  const [subFormBillingCycle, setSubFormBillingCycle] = useState('MONTHLY');
+  const [subFormCurrency, setSubFormCurrency] = useState('USD');
+  const [subFormRate, setSubFormRate] = useState(149);
   const [subFormStatus, setSubFormStatus] = useState('ACTIVE');
+  const [subFormNotes, setSubFormNotes] = useState('');
+
+  // Default tiers config
+  const DEFAULT_TIER_LIMITS = { STARTER: 10, PROFESSIONAL: 25, BUSINESS: 100, ENTERPRISE: 500, CUSTOM: 250 };
+  const DEFAULT_TIER_RATES = { STARTER: 29, PROFESSIONAL: 79, BUSINESS: 149, ENTERPRISE: 299, CUSTOM: 199 };
 
   // Filtered Organizations
   const filteredOrgs = organizations.filter((org) => {
@@ -185,13 +193,33 @@ export const SuperAdminDashboard = () => {
     const orgId = item.workspaceId || item.id;
     const orgName = item.workspaceName || item.name;
     const plan = (item.plan || item.subscriptionPlan || 'BUSINESS').toUpperCase();
-    const limit = Number(item.userLimit || 100);
+    const limit = Number(item.userLimit || DEFAULT_TIER_LIMITS[plan] || 100);
     const status = item.status || item.subscriptionStatus || 'ACTIVE';
+    const cycle = (item.billingCycle || 'MONTHLY').toUpperCase();
+    const curr = (item.currency || 'USD').toUpperCase();
+    const rate = Number(item.lastInvoiceAmount || DEFAULT_TIER_RATES[plan] || 149);
 
-    setEditingSubOrg({ id: orgId, name: orgName });
+    setEditingSubOrg({
+      id: orgId,
+      name: orgName,
+      ownerEmail: item.ownerEmail || item.owner?.email || '',
+      ownerName: item.ownerName || item.owner?.name || '',
+    });
     setSubFormPlan(plan);
     setSubFormLimit(limit);
+    setSubFormBillingCycle(cycle);
+    setSubFormCurrency(curr);
+    setSubFormRate(rate);
     setSubFormStatus(status);
+    setSubFormNotes('');
+  };
+
+  const handlePlanChange = (newPlan) => {
+    setSubFormPlan(newPlan);
+    if (newPlan !== 'CUSTOM') {
+      setSubFormLimit(DEFAULT_TIER_LIMITS[newPlan] || 100);
+      setSubFormRate(DEFAULT_TIER_RATES[newPlan] || 149);
+    }
   };
 
   const handleSaveSub = async (e) => {
@@ -202,12 +230,16 @@ export const SuperAdminDashboard = () => {
         id: editingSubOrg.id,
         plan: subFormPlan,
         userLimit: Number(subFormLimit),
+        billingCycle: subFormBillingCycle,
+        currency: subFormCurrency,
+        customRate: Number(subFormRate),
         status: subFormStatus,
+        notes: subFormNotes,
       });
-      toast.success(`Subscription plan for ${editingSubOrg.name} updated to ${subFormPlan}`);
+      toast.success(`Billing details customized for ${editingSubOrg.name}`);
       setEditingSubOrg(null);
     } catch (err) {
-      toast.error(err.message || 'Failed to update subscription');
+      toast.error(err.message || 'Failed to customize billing');
     }
   };
 
@@ -791,11 +823,11 @@ export const SuperAdminDashboard = () => {
                   <tr>
                     <th className="py-3 px-4">Organization Tenant</th>
                     <th className="py-3 px-4">Owner Contact</th>
-                    <th className="py-3 px-4">Current Plan</th>
+                    <th className="py-3 px-4">Plan & Customized Rate</th>
                     <th className="py-3 px-4 text-center">Seats (Active / Limit)</th>
                     <th className="py-3 px-4">Billing Cycle</th>
                     <th className="py-3 px-4">Subscription Status</th>
-                    <th className="py-3 px-4 text-right">Plan Governance</th>
+                    <th className="py-3 px-4 text-right">Customize Billing</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-sans">
@@ -823,17 +855,25 @@ export const SuperAdminDashboard = () => {
                           <div className="text-[11px] text-slate-400">{sub.ownerEmail}</div>
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider ${
-                            sub.plan === 'ENTERPRISE'
-                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                              : sub.plan === 'BUSINESS'
-                              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                              : sub.plan === 'PROFESSIONAL'
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : 'bg-slate-800 text-slate-300'
-                          }`}>
-                            {sub.plan}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider ${
+                              sub.plan === 'ENTERPRISE'
+                                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                : sub.plan === 'BUSINESS'
+                                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                : sub.plan === 'PROFESSIONAL'
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : sub.plan === 'CUSTOM'
+                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                : 'bg-slate-800 text-slate-300'
+                            }`}>
+                              {sub.plan}
+                            </span>
+                          </div>
+                          <div className="text-[11px] font-mono font-semibold text-emerald-400 mt-1">
+                            ${sub.lastInvoiceAmount || (DEFAULT_TIER_RATES[sub.plan] || 149)}
+                            <span className="text-[10px] text-slate-500 font-normal"> / {sub.billingCycle?.toLowerCase() || 'mo'}</span>
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-center font-mono">
                           <span className="font-bold text-white">{sub.activeMembers}</span>
@@ -855,10 +895,10 @@ export const SuperAdminDashboard = () => {
                         <td className="py-3.5 px-4 text-right">
                           <button
                             onClick={() => handleOpenEditSub(sub)}
-                            className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5 ml-auto"
+                            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5 ml-auto shadow-sm"
                           >
-                            <Edit3 className="w-3 h-3 text-rose-400" />
-                            <span>Edit Plan / Quota</span>
+                            <CreditCard className="w-3.5 h-3.5 text-rose-400" />
+                            <span>Customize Billing Details</span>
                           </button>
                         </td>
                       </tr>
@@ -971,9 +1011,10 @@ export const SuperAdminDashboard = () => {
                           <td className="py-3.5 px-4 text-right space-x-2">
                             <button
                               onClick={() => handleOpenEditSub(org)}
-                              className="px-2.5 py-1 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700 transition"
+                              className="px-2.5 py-1 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-750 text-rose-300 hover:text-white border border-slate-700 transition inline-flex items-center gap-1.5"
                             >
-                              Plan
+                              <CreditCard className="w-3.5 h-3.5 text-rose-400" />
+                              <span>Customize Billing</span>
                             </button>
                             <button
                               disabled={actionInProgress === org.id}
@@ -1273,82 +1314,202 @@ export const SuperAdminDashboard = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: EDIT ORGANIZATION SUBSCRIPTION & SEAT QUOTA */}
+      {/* MODAL: CUSTOMIZE ORGANIZATION BILLING DETAILS */}
       {/* ========================================================================= */}
       {editingSubOrg && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-rose-400" />
-                  Manage Tenant Subscription
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">{editingSubOrg.name}</p>
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-5 my-8">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    Customize Billing Details
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      SUPER ADMIN OVERRIDE
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {editingSubOrg.name} {editingSubOrg.ownerEmail ? `• ${editingSubOrg.ownerEmail}` : ''}
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setEditingSubOrg(null)}
-                className="text-slate-500 hover:text-white p-1 rounded-lg"
+                className="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleSaveSub} className="space-y-4">
+              {/* Plan Tier Selection */}
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1.5">Subscription Plan Tier</label>
-                <select
-                  value={subFormPlan}
-                  onChange={(e) => setSubFormPlan(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-500"
-                >
-                  <option value="STARTER">Starter ($29/mo)</option>
-                  <option value="PROFESSIONAL">Professional ($79/mo)</option>
-                  <option value="BUSINESS">Business ($149/mo)</option>
-                  <option value="ENTERPRISE">Enterprise ($299/mo)</option>
-                </select>
+                <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                  Subscription Plan Tier
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    { key: 'STARTER', label: 'Starter', price: '$29/mo' },
+                    { key: 'PROFESSIONAL', label: 'Professional', price: '$79/mo' },
+                    { key: 'BUSINESS', label: 'Business', price: '$149/mo' },
+                    { key: 'ENTERPRISE', label: 'Enterprise', price: '$299/mo' },
+                    { key: 'CUSTOM', label: 'Custom Tailored', price: 'Negotiated' },
+                  ].map((p) => (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() => handlePlanChange(p.key)}
+                      className={`p-2.5 rounded-xl border text-left transition-all ${
+                        subFormPlan === p.key
+                          ? 'bg-rose-500/15 border-rose-500 text-white shadow-sm'
+                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{p.label}</div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">{p.price}</div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1.5">User Seat Quota Limit</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5000"
-                  value={subFormLimit}
-                  onChange={(e) => setSubFormLimit(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-500"
-                />
+              {/* 2-Column: Customized Rate & Currency */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                    Custom Rate / Price ({subFormBillingCycle === 'YEARLY' ? 'Annual' : 'Monthly'})
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-500 font-bold">
+                      {subFormCurrency === 'INR' ? '₹' : subFormCurrency === 'EUR' ? '€' : subFormCurrency === 'GBP' ? '£' : '$'}
+                    </span>
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      value={subFormRate}
+                      onChange={(e) => setSubFormRate(e.target.value)}
+                      placeholder="149"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-8 pr-3 text-xs text-white font-mono font-bold focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                    Billing Currency
+                  </label>
+                  <select
+                    value={subFormCurrency}
+                    onChange={(e) => setSubFormCurrency(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-500 font-mono"
+                  >
+                    <option value="USD">USD ($) - US Dollar</option>
+                    <option value="INR">INR (₹) - Indian Rupee</option>
+                    <option value="EUR">EUR (€) - Euro</option>
+                    <option value="GBP">GBP (£) - British Pound</option>
+                  </select>
+                </div>
               </div>
 
+              {/* 2-Column: Seat Quota Limit & Billing Interval */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                    User Seat Quota Limit
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={subFormLimit}
+                    onChange={(e) => setSubFormLimit(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  />
+                  {/* Presets */}
+                  <div className="flex items-center gap-1 mt-1.5 overflow-x-auto">
+                    {[10, 25, 50, 100, 250, 500].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setSubFormLimit(preset)}
+                        className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-colors ${
+                          Number(subFormLimit) === preset
+                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                            : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                        }`}
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                    Billing Cycle
+                  </label>
+                  <select
+                    value={subFormBillingCycle}
+                    onChange={(e) => setSubFormBillingCycle(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  >
+                    <option value="MONTHLY">Monthly Billing Cycle</option>
+                    <option value="YEARLY">Yearly / Annual Cycle</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Subscription Status */}
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1.5">Subscription Status</label>
+                <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                  Subscription Status
+                </label>
                 <select
                   value={subFormStatus}
                   onChange={(e) => setSubFormStatus(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-500 font-mono"
                 >
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="PAST_DUE">PAST_DUE</option>
-                  <option value="SUSPENDED">SUSPENDED</option>
-                  <option value="CANCELED">CANCELED</option>
+                  <option value="ACTIVE">ACTIVE - Standard Tenant in Good Standing</option>
+                  <option value="TRIAL">TRIAL - Active Evaluation Period</option>
+                  <option value="COMPLIMENTARY">COMPLIMENTARY - Sponsored / Partner Account</option>
+                  <option value="PAST_DUE">PAST_DUE - Overdue Invoices</option>
+                  <option value="SUSPENDED">SUSPENDED - Temporarily Restricted</option>
+                  <option value="CANCELED">CANCELED - Deactivated Tenant</option>
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              {/* Internal Notes / Audit Reason */}
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                  Adjustment Reason / Internal Notes (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={subFormNotes}
+                  onChange={(e) => setSubFormNotes(e.target.value)}
+                  placeholder="e.g. Approved custom contract pricing; extended seat quota for enterprise renewal."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingSubOrg(null)}
-                  className="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                  className="px-3.5 py-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updateTenantSubscription.isPending}
-                  className="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-md transition disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg shadow-rose-950/50 transition disabled:opacity-50"
                 >
-                  {updateTenantSubscription.isPending ? 'Saving...' : 'Apply Subscription'}
+                  {updateTenantSubscription.isPending ? 'Saving Overrides...' : 'Apply Billing Customizations'}
                 </button>
               </div>
             </form>

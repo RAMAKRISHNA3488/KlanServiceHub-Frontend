@@ -92,12 +92,19 @@ const PublicRoute = () => {
 
 // Home Redirect / SaaS Landing Page Component
 const HomePage = () => {
-  const { data: user } = useCurrent();
+  const { data: user, isLoading: isLoadingUser } = useCurrent();
+  const isSuper = Boolean(user?.isSuperAdmin || user?.is_super_admin || user?.email === 'superadmin@klanservicehub.com' || user?.email === 'owner@company.com');
+
   const { data: workspaces, isLoading: isLoadingWorkspaces } = useGetWorkspaces({
-    enabled: !!user,
+    enabled: !!user && !isSuper,
   });
 
+  if (isLoadingUser) return <PageLoader />;
+
   if (user) {
+    if (isSuper) {
+      return <Navigate to="/super-admin/dashboard" replace />;
+    }
     if (isLoadingWorkspaces && !workspaces) return <PageLoader />;
     if (!workspaces || workspaces.total === 0) return <Navigate to="/onboarding" replace />;
     const wsId = workspaces.documents[0]?.$id || workspaces.documents[0]?.id;
