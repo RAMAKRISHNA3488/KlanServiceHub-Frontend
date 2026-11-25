@@ -36,7 +36,11 @@ export const CreateWorkspaceForm = ({ onCancel }) => {
         }, {
             onSuccess: ({ data }) => {
                 createWorkspaceForm.reset();
-                router.push(`/workspaces/${data.$id}`);
+                onCancel?.();
+                const targetId = data?.$id || data?.id;
+                if (targetId) {
+                    router.push(`/workspaces/${targetId}`);
+                }
             },
         });
     };

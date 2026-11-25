@@ -29,6 +29,29 @@ export const useSuperAdminOverview = () => {
   });
 };
 
+export const useSuperAdminFinancials = () => {
+  return useQuery({
+    queryKey: ['super-admin-financials'],
+    queryFn: async () => {
+      const res = await platformAdminApi.getFinancials();
+      return res?.data || null;
+    },
+    refetchInterval: 20 * 1000,
+    staleTime: 15 * 1000,
+  });
+};
+
+export const useSuperAdminBilling = () => {
+  return useQuery({
+    queryKey: ['super-admin-billing'],
+    queryFn: async () => {
+      const res = await platformAdminApi.getBilling();
+      return res?.data?.subscriptions || [];
+    },
+    staleTime: 15 * 1000,
+  });
+};
+
 export const useSuperAdminOrganizations = () => {
   return useQuery({
     queryKey: ['super-admin-organizations'],
@@ -101,6 +124,18 @@ export const useToggleSuperAdmin = () => {
     mutationFn: ({ id, isSuperAdmin }) => platformAdminApi.toggleSuperAdmin(id, isSuperAdmin),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['super-admin-users'] });
+    },
+  });
+};
+
+export const useUpdateTenantSubscription = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, plan, userLimit, status }) => platformAdminApi.updateTenantSubscription(id, { plan, userLimit, status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['super-admin-billing'] });
+      queryClient.invalidateQueries({ queryKey: ['super-admin-organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['super-admin-financials'] });
     },
   });
 };

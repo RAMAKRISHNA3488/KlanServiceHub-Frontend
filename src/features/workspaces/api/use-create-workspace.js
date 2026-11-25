@@ -14,11 +14,21 @@ export const useCreateWorkspace = () => {
             }
             return await response.json();
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
             toast.success('Workspace created.');
             queryClient.invalidateQueries({
                 queryKey: ['workspaces'],
             });
+            queryClient.invalidateQueries({
+                queryKey: ['workspace'],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ['company'],
+            });
+            const newId = response?.data?.$id || response?.data?.id;
+            if (newId) {
+                router.push(`/workspaces/${newId}`);
+            }
         },
         onError: (error) => {
             console.error('[CREATE_WORKSPACE]: ', error);

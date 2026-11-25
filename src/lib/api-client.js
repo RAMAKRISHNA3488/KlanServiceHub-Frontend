@@ -560,6 +560,9 @@ export const platformAdminApi = {
     }
   },
   getOverview: () => apiFetch('/api/platform-admin/overview'),
+  getFinancials: () => apiFetch('/api/platform-admin/financials'),
+  getBilling: () => apiFetch('/api/platform-admin/billing'),
+  updateTenantSubscription: (id, payload) => apiFetch(`/api/platform-admin/organizations/${id}/subscription`, { method: 'PATCH', body: JSON.stringify(payload) }),
   getSystemHealth: () => apiFetch('/api/platform-admin/system-health'),
   getOrganizations: () => apiFetch('/api/platform-admin/organizations'),
   updateOrganizationStatus: (id, status) => apiFetch(`/api/platform-admin/organizations/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),

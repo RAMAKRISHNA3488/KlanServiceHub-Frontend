@@ -10,6 +10,8 @@ import {
   FileText,
   Activity,
   Radio,
+  TrendingUp,
+  CreditCard,
 } from 'lucide-react';
 import { useSuperAdminCurrent, useSuperAdminHealth } from '../api/super-admin-api';
 import { platformAdminApi } from '@/lib/api-client';
@@ -30,7 +32,9 @@ export const SuperAdminLayout = () => {
 
   const navItems = [
     { label: 'Overview & Telemetry', path: '/super-admin/dashboard', icon: LayoutDashboard },
-    { label: 'Organizations', path: '/super-admin/organizations', icon: Building2 },
+    { label: 'Revenue & Profits', path: '/super-admin/financials', icon: TrendingUp },
+    { label: 'Billing & Subscriptions', path: '/super-admin/billing', icon: CreditCard },
+    { label: 'Organizations Directory', path: '/super-admin/organizations', icon: Building2 },
     { label: 'Users Directory', path: '/super-admin/users', icon: Users },
     { label: 'Platform Audit Trail', path: '/super-admin/audit-logs', icon: FileText },
     { label: 'System Diagnostics', path: '/super-admin/system-health', icon: Activity },

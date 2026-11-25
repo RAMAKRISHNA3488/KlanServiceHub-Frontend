@@ -165,6 +165,8 @@ export const App = () => {
         <Route element={<SuperAdminLayout />}>
           <Route path="/super-admin" element={<Navigate to="/super-admin/dashboard" replace />} />
           <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/financials" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/billing" element={<SuperAdminDashboard />} />
           <Route path="/super-admin/organizations" element={<SuperAdminDashboard />} />
           <Route path="/super-admin/users" element={<SuperAdminDashboard />} />
           <Route path="/super-admin/audit-logs" element={<SuperAdminDashboard />} />

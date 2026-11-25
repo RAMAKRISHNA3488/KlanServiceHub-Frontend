@@ -360,7 +360,13 @@ export const WorkspacesManagementView = () => {
                   </div>
 
                   <button
-                    onClick={() => navigate(`/workspaces/${wsId}`)}
+                    onClick={() => {
+                      queryClient.invalidateQueries({ queryKey: ['workspace', wsId] });
+                      queryClient.invalidateQueries({ queryKey: ['company', wsId] });
+                      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+                      queryClient.invalidateQueries({ queryKey: ['projects'] });
+                      navigate(`/workspaces/${wsId}`);
+                    }}
                     className={`flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-xs ${
                       isCurrent
                         ? 'bg-neutral-900 text-white hover:bg-black'
