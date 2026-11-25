@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
+import { useCurrent } from '@/features/auth/api/use-current';
 import { useGetProjects } from '@/features/projects/api/use-get-projects';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { tasksApi, sprintsApi, workflowsAdminApi } from '@/lib/api-client';
@@ -46,6 +47,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
   const queryClient = useQueryClient();
   const { data: projectsData } = useGetProjects({ workspaceId });
   const { data: membersData } = useGetMembers({ workspaceId });
+  const { data: currentUser } = useCurrent();
 
   const projects = projectsData?.documents || [];
   const members = membersData?.documents || [];
@@ -142,12 +144,19 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
     priority: 'MEDIUM',
     assigneeId: '',
     assigneeIds: [],
+    reporterId: '',
     sprintId: defaultSprintId || '',
     storyPoints: 1,
     dueDate: '',
     labels: '',
     originalEstimateHours: 0,
   });
+
+  useEffect(() => {
+    if (currentUser?.$id && !form.reporterId) {
+      setForm((prev) => ({ ...prev, reporterId: currentUser.$id }));
+    }
+  }, [currentUser, form.reporterId]);
 
   useEffect(() => {
     if (projects.length > 0 && !form.projectId) {
@@ -198,6 +207,7 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
         parentTaskId: form.parentTaskId || null,
         assigneeId: selectedAssigneeIds[0] || null,
         assigneeIds: selectedAssigneeIds,
+        reporterId: form.reporterId || currentUser?.$id || null,
         sprintId: form.sprintId || null,
         storyPoints: Number(form.storyPoints) || 1,
         dueDate: form.dueDate || null,
@@ -415,8 +425,8 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
             )}
           </div>
 
-          {/* Priority & Sprint Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-0.5">
+          {/* Priority, Sprint & Reporter Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-0.5">
             <div>
               <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Priority</label>
               <select
@@ -446,6 +456,30 @@ export const KlanserviceHubCreateIssueModal = ({ open, onClose, onCreated, defau
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-semibold text-neutral-600 mb-1">Reporter</label>
+              <div className="relative">
+                <select
+                  value={form.reporterId || currentUser?.$id || ''}
+                  onChange={(e) => setForm({ ...form, reporterId: e.target.value })}
+                  className="w-full rounded-md border border-neutral-200 bg-white pl-6 pr-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+                >
+                  {members.map((m) => {
+                    const uId = m.user_id || m.userId || m.$id || m.id;
+                    const isSelf = currentUser?.$id === uId;
+                    return (
+                      <option key={m.$id || m.id} value={uId}>
+                        {m.name || m.email} {isSelf ? '(You)' : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+                <div className="absolute left-2 top-2 pointer-events-none text-neutral-400">
+                  <User className="size-3" />
+                </div>
+              </div>
             </div>
           </div>
 

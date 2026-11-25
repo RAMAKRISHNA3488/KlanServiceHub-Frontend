@@ -17,10 +17,12 @@ import { useCreateTask } from '@/features/tasks/api/use-create-task';
 import { createTaskSchema } from '@/features/tasks/schema';
 import { TaskStatus } from '@/features/tasks/types';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
+import { useCurrent } from '@/features/auth/api/use-current';
 import { cn } from '@/lib/utils';
 export const CreateTaskForm = ({ initialStatus, onCancel, memberOptions, projectOptions }) => {
     const router = useRouter();
     const workspaceId = useWorkspaceId();
+    const { data: currentUser } = useCurrent();
     const { mutate: createTask, isPending } = useCreateTask();
     const createTaskForm = useForm({
         resolver: zodResolver(createTaskSchema),
@@ -28,6 +30,7 @@ export const CreateTaskForm = ({ initialStatus, onCancel, memberOptions, project
             name: '',
             dueDate: undefined,
             assigneeId: undefined,
+            reporterId: currentUser?.$id,
             description: '',
             projectId: undefined,
             status: initialStatus ?? undefined,
@@ -205,6 +208,28 @@ export const CreateTaskForm = ({ initialStatus, onCancel, memberOptions, project
                   </FormItem>
                 );
               }}/>
+
+              <FormField disabled={isPending} control={createTaskForm.control} name="reporterId" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Reporter</FormLabel>
+                  <Select disabled={isPending} defaultValue={field.value || currentUser?.$id} value={field.value || currentUser?.$id} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>{field.value ? <SelectValue placeholder="Select reporter" /> : 'Select reporter'}</SelectTrigger>
+                    </FormControl>
+                    <FormMessage />
+                    <SelectContent>
+                      {memberOptions.map((member) => (
+                        <SelectItem key={member.id} value={member.userId || member.id}>
+                          <div className="flex items-center gap-x-2">
+                            <MemberAvatar className="size-6" name={member.name} />
+                            {member.name} {member.userId === currentUser?.$id ? '(You)' : ''}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
 
               <FormField disabled={isPending} control={createTaskForm.control} name="status" render={({ field }) => (<FormItem>
                     <FormLabel>Status</FormLabel>

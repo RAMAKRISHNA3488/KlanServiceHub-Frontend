@@ -1489,12 +1489,35 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
             {/* Reporter */}
             <div>
               <label className="block text-[10px] font-semibold text-neutral-500 mb-0.5">Reporter</label>
-              <div className="flex items-center gap-1.5 font-medium text-[10px] text-neutral-800 px-1 py-0.5">
-                <div className="size-4 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center">
-                  {task?.reporter?.name?.substring(0, 1) || 'R'}
-                </div>
-                <span>{task?.reporter?.name || 'System User'}</span>
-              </div>
+              <select
+                value={task?.reporter?.id || task?.reporter_id || ''}
+                onChange={(e) => {
+                  const newReporterId = e.target.value;
+                  const newReporterMember = members.find((m) => (m.user_id || m.userId || m.$id || m.id) === newReporterId);
+                  setTask((prev) => ({
+                    ...prev,
+                    reporter_id: newReporterId,
+                    reporter: newReporterMember ? {
+                      id: newReporterId,
+                      name: newReporterMember.name,
+                      email: newReporterMember.email,
+                      avatarUrl: newReporterMember.avatar_url,
+                    } : prev.reporter,
+                  }));
+                  handleUpdateProperty({ reporterId: newReporterId });
+                }}
+                className="w-full rounded-md border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-7 shadow-2xs"
+              >
+                {members.map((m) => {
+                  const uId = m.user_id || m.userId || m.$id || m.id;
+                  const isCurrent = currentUser?.$id === uId;
+                  return (
+                    <option key={m.$id || m.id} value={uId}>
+                      {m.name || m.email} {isCurrent ? '(You)' : ''}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
 
             {/* Issue Type */}
