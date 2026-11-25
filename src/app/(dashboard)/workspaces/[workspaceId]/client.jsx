@@ -187,7 +187,7 @@ export const WorkspaceIdClient = () => {
     }
   };
 
-  const isLoading = (isLoadingAnalytics || isLoadingTasks || isLoadingProjects || isLoadingMembers) && !tasks && !projects;
+  const isLoading = (isLoadingAnalytics && !workspaceAnalytics) || (isLoadingTasks && !tasks) || (isLoadingProjects && !projects);
 
   // Compute mathematically consistent live analytics
   const safeAnalytics = useMemo(() => {

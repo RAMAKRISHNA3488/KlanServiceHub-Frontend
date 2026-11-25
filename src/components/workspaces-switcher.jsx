@@ -1,9 +1,11 @@
 'use client';
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { RiAddCircleFill } from 'react-icons/ri';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
+import { useCurrent } from '@/features/auth/api/use-current';
 import { WorkspaceAvatar } from '@/features/workspaces/components/workspace-avatar';
 import { useCreateWorkspaceModal } from '@/features/workspaces/hooks/use-create-workspace-modal';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
@@ -13,7 +15,35 @@ export const WorkspaceSwitcher = () => {
     const queryClient = useQueryClient();
     const workspaceId = useWorkspaceId();
     const { open } = useCreateWorkspaceModal();
-    const { data: workspaces } = useGetWorkspaces();
+    const { data: workspaces, isLoading: isLoadingWorkspaces } = useGetWorkspaces();
+    const { data: user } = useCurrent();
+
+    // Resilient workspace list: prefer fresh workspaces query, fallback to user.workspaces from /current
+    const workspaceList = useMemo(() => {
+        if (Array.isArray(workspaces?.documents) && workspaces.documents.length > 0) {
+            return workspaces.documents;
+        }
+        if (Array.isArray(user?.workspaces) && user.workspaces.length > 0) {
+            return user.workspaces.map((w) => ({
+                $id: w.id || w.$id,
+                id: w.id || w.$id,
+                name: w.name,
+                imageUrl: w.image_url || w.imageUrl,
+            }));
+        }
+        return [];
+    }, [workspaces, user]);
+
+    // Active workspace to display
+    const currentWorkspace = useMemo(() => {
+        if (!workspaceList.length) return null;
+        if (workspaceId) {
+            return workspaceList.find((w) => (w.$id || w.id) === workspaceId) || workspaceList[0];
+        }
+        return workspaceList[0];
+    }, [workspaceList, workspaceId]);
+
+    const activeValue = workspaceId || currentWorkspace?.$id || currentWorkspace?.id || '';
 
     const onSelect = (id) => {
         if (!id) return;
@@ -32,13 +62,20 @@ export const WorkspaceSwitcher = () => {
         </button>
       </div>
 
-      <Select onValueChange={onSelect} value={workspaceId || undefined}>
-        <SelectTrigger className="w-full bg-neutral-200/80 hover:bg-neutral-200 p-1 font-medium transition">
-          <SelectValue placeholder="No workspace selected"/>
+      <Select onValueChange={onSelect} value={activeValue || undefined}>
+        <SelectTrigger className="w-full bg-neutral-200/80 hover:bg-neutral-200 p-1 font-medium transition text-xs">
+          {currentWorkspace ? (
+            <div className="flex items-center gap-2 overflow-hidden text-left w-full pr-1">
+              <WorkspaceAvatar name={currentWorkspace.name} image={currentWorkspace.imageUrl}/>
+              <span className="truncate font-semibold text-neutral-800">{currentWorkspace.name}</span>
+            </div>
+          ) : (
+            <SelectValue placeholder={isLoadingWorkspaces ? "Loading..." : "Select organization"}/>
+          )}
         </SelectTrigger>
 
         <SelectContent>
-          {workspaces?.documents?.map((workspace) => {
+          {workspaceList.map((workspace) => {
             const wsId = workspace.$id || workspace.id;
             return (
               <SelectItem key={wsId} value={wsId}>
