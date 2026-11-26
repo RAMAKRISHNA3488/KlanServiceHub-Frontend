@@ -129,7 +129,7 @@ export const SuperAdminLayout = () => {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold text-neutral-900 truncate">{user?.name || 'Super Administrator'}</div>
-                <div className="text-[11px] text-neutral-500 truncate">{user?.email || 'superadmin@klanservicehub.com'}</div>
+                <div className="text-[11px] text-neutral-500 truncate">{user?.email || 'Administrator'}</div>
               </div>
             </div>
 

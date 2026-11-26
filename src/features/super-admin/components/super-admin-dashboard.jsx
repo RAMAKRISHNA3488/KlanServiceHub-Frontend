@@ -99,14 +99,10 @@ export const SuperAdminDashboard = () => {
   const [subFormPlan, setSubFormPlan] = useState('BUSINESS');
   const [subFormLimit, setSubFormLimit] = useState(100);
   const [subFormBillingCycle, setSubFormBillingCycle] = useState('MONTHLY');
-  const [subFormCurrency, setSubFormCurrency] = useState('USD');
-  const [subFormRate, setSubFormRate] = useState(149);
+  const [subFormCurrency, setSubFormCurrency] = useState('INR');
+  const [subFormRate, setSubFormRate] = useState(0);
   const [subFormStatus, setSubFormStatus] = useState('ACTIVE');
   const [subFormNotes, setSubFormNotes] = useState('');
-
-  // Default tiers config
-  const DEFAULT_TIER_LIMITS = { STARTER: 10, PROFESSIONAL: 25, BUSINESS: 100, ENTERPRISE: 500, CUSTOM: 250 };
-  const DEFAULT_TIER_RATES = { STARTER: 29, PROFESSIONAL: 79, BUSINESS: 149, ENTERPRISE: 299, CUSTOM: 199 };
 
   // Dynamic currency formatter
   const formatCurrency = (amount, currencyCode) => {
@@ -199,12 +195,12 @@ export const SuperAdminDashboard = () => {
   const handleOpenEditSub = (item) => {
     const orgId = item.workspaceId || item.id;
     const orgName = item.workspaceName || item.name;
-    const plan = (item.plan || item.subscriptionPlan || 'BUSINESS').toUpperCase();
-    const limit = Number(item.userLimit || DEFAULT_TIER_LIMITS[plan] || 100);
+    const plan = (item.plan || item.subscriptionPlan || 'STARTER').toUpperCase();
+    const limit = Number(item.userLimit || item.user_limit || 0);
     const status = item.status || item.subscriptionStatus || 'ACTIVE';
     const cycle = (item.billingCycle || 'MONTHLY').toUpperCase();
-    const curr = (item.currency || 'USD').toUpperCase();
-    const rate = Number(item.lastInvoiceAmount || DEFAULT_TIER_RATES[plan] || 149);
+    const curr = (item.currency || financials?.currency || 'INR').toUpperCase();
+    const rate = Number(item.lastInvoiceAmount || 0);
 
     setEditingSubOrg({
       id: orgId,
@@ -223,10 +219,6 @@ export const SuperAdminDashboard = () => {
 
   const handlePlanChange = (newPlan) => {
     setSubFormPlan(newPlan);
-    if (newPlan !== 'CUSTOM') {
-      setSubFormLimit(DEFAULT_TIER_LIMITS[newPlan] || 100);
-      setSubFormRate(DEFAULT_TIER_RATES[newPlan] || 149);
-    }
   };
 
   const handleSaveSub = async (e) => {
@@ -608,7 +600,7 @@ export const SuperAdminDashboard = () => {
                           {log.created_at ? new Date(log.created_at).toLocaleTimeString() : 'Just now'}
                         </span>
                         <span className="text-[9px] font-mono text-neutral-400 block">
-                          IP: {log.ip_address || '127.0.0.1'}
+                          IP: {log.ip_address || '—'}
                         </span>
                       </div>
                     </div>
@@ -905,8 +897,14 @@ export const SuperAdminDashboard = () => {
                             </span>
                           </div>
                           <div className="text-[11px] font-mono font-semibold text-emerald-700 mt-1">
-                            {formatCurrency(sub.lastInvoiceAmount || (DEFAULT_TIER_RATES[sub.plan] || 149), sub.currency)}
-                            <span className="text-[10px] text-neutral-500 font-normal"> / {sub.billingCycle?.toLowerCase() || 'mo'}</span>
+                            {Number(sub.lastInvoiceAmount || 0) > 0 ? (
+                              <>
+                                {formatCurrency(sub.lastInvoiceAmount, sub.currency)}
+                                <span className="text-[10px] text-neutral-500 font-normal"> / {sub.billingCycle?.toLowerCase() || 'mo'}</span>
+                              </>
+                            ) : (
+                              <span className="text-[10px] text-neutral-400 font-mono italic">Unbilled / Trial</span>
+                            )}
                           </div>
                         </td>
                         <td className="py-3.5 px-4 text-center font-mono">
@@ -1024,11 +1022,11 @@ export const SuperAdminDashboard = () => {
                           </td>
                           <td className="py-3.5 px-4">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-neutral-100 text-neutral-700 border border-neutral-200">
-                              {org.subscriptionPlan || 'BUSINESS'}
+                              {org.subscriptionPlan || 'STARTER'}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-center font-mono font-medium text-neutral-700">
-                            {org.userCount ?? 1} / {org.userLimit ?? 100}
+                            {org.userCount ?? 0} {org.userLimit ? `/ ${org.userLimit}` : ''}
                           </td>
                           <td className="py-3.5 px-4">
                             <span
@@ -1284,7 +1282,7 @@ export const SuperAdminDashboard = () => {
                           {log.target_name || log.target_id || 'System Platform'}
                         </td>
                         <td className="py-3 px-4 text-neutral-500 whitespace-nowrap">
-                          {log.ip_address || '127.0.0.1'}
+                          {log.ip_address || '—'}
                         </td>
                         <td className="py-3 px-4 text-neutral-600 max-w-xs truncate">
                           {log.details || '—'}
@@ -1322,7 +1320,7 @@ export const SuperAdminDashboard = () => {
               <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
                 <div className="text-xs font-semibold text-neutral-500 mb-1">Database Latency</div>
                 <div className="text-2xl font-bold font-mono text-emerald-600">
-                  {health?.database?.latencyMs ?? 8} ms
+                  {health?.database?.latencyMs ?? 0} ms
                 </div>
                 <div className="text-[10px] text-neutral-400 mt-1 font-mono">D1 Edge Query Execution</div>
               </div>
@@ -1338,10 +1336,10 @@ export const SuperAdminDashboard = () => {
               <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
                 <div className="text-xs font-semibold text-neutral-500 mb-1">D1 Distributed Schema</div>
                 <div className="text-sm font-bold text-neutral-900 mt-1">
-                  {health?.database?.tableCount ?? 85} Tables
+                  {health?.database?.tableCount ?? 0} Tables
                 </div>
                 <div className="text-[10px] text-neutral-400 mt-1 font-mono">
-                  {health?.database?.totalRecords ? `${health.database.totalRecords.toLocaleString()}+ DB Rows` : '85 Tables Verified'}
+                  {health?.database?.totalRecords ? `${health.database.totalRecords.toLocaleString()} DB Records` : 'Active Schema'}
                 </div>
               </div>
 
@@ -1351,7 +1349,7 @@ export const SuperAdminDashboard = () => {
                   <ShieldCheck className="w-4 h-4" /> MFA Enforced
                 </div>
                 <div className="text-[10px] text-neutral-400 mt-1 font-mono">
-                  {health?.activeSessions ?? 1} Live Active Sessions
+                  {health?.activeSessions ?? 0} Live Active Sessions
                 </div>
               </div>
             </div>
@@ -1398,11 +1396,11 @@ export const SuperAdminDashboard = () => {
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {[
-                    { key: 'STARTER', label: 'Starter', price: `${formatCurrency(DEFAULT_TIER_RATES.STARTER, subFormCurrency)}/mo` },
-                    { key: 'PROFESSIONAL', label: 'Professional', price: `${formatCurrency(DEFAULT_TIER_RATES.PROFESSIONAL, subFormCurrency)}/mo` },
-                    { key: 'BUSINESS', label: 'Business', price: `${formatCurrency(DEFAULT_TIER_RATES.BUSINESS, subFormCurrency)}/mo` },
-                    { key: 'ENTERPRISE', label: 'Enterprise', price: `${formatCurrency(DEFAULT_TIER_RATES.ENTERPRISE, subFormCurrency)}/mo` },
-                    { key: 'CUSTOM', label: 'Custom Tailored', price: 'Negotiated' },
+                    { key: 'STARTER', label: 'Starter', desc: 'Base Tier' },
+                    { key: 'PROFESSIONAL', label: 'Professional', desc: 'Standard Tier' },
+                    { key: 'BUSINESS', label: 'Business', desc: 'Commercial Tier' },
+                    { key: 'ENTERPRISE', label: 'Enterprise', desc: 'Full Capacity' },
+                    { key: 'CUSTOM', label: 'Custom Tailored', desc: 'Negotiated Terms' },
                   ].map((p) => (
                     <button
                       key={p.key}
@@ -1415,7 +1413,7 @@ export const SuperAdminDashboard = () => {
                       }`}
                     >
                       <div className="text-xs font-bold">{p.label}</div>
-                      <div className="text-[10px] text-neutral-500 font-mono mt-0.5">{p.price}</div>
+                      <div className="text-[10px] text-neutral-500 font-mono mt-0.5">{p.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -1437,7 +1435,7 @@ export const SuperAdminDashboard = () => {
                       min="0"
                       value={subFormRate}
                       onChange={(e) => setSubFormRate(e.target.value)}
-                      placeholder="149"
+                      placeholder="0"
                       className="w-full bg-neutral-50 border border-neutral-300 rounded-xl py-2 pl-8 pr-3 text-xs text-neutral-900 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
                     />
                   </div>
