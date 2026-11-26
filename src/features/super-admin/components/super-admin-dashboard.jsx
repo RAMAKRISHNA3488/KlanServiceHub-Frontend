@@ -35,6 +35,10 @@ import {
   X,
   ChevronRight,
   AlertTriangle,
+  Plus,
+  Trash2,
+  Key,
+  Palette,
 } from 'lucide-react';
 import {
   useSuperAdminOverview,
@@ -44,6 +48,10 @@ import {
   useSuperAdminHealth,
   useSuperAdminFinancials,
   useSuperAdminBilling,
+  useSuperAdminRoles,
+  useCreatePlatformRole,
+  useUpdatePlatformRole,
+  useDeletePlatformRole,
   useUpdateOrganizationStatus,
   useUpdateUserStatus,
   useToggleSuperAdmin,
@@ -62,6 +70,7 @@ export const SuperAdminDashboard = () => {
   else if (currentPath.includes('billing')) activeTab = 'billing';
   else if (currentPath.includes('organizations')) activeTab = 'organizations';
   else if (currentPath.includes('users')) activeTab = 'users';
+  else if (currentPath.includes('roles')) activeTab = 'roles';
   else if (currentPath.includes('audit-logs')) activeTab = 'audit-logs';
   else if (currentPath.includes('system-health')) activeTab = 'system-health';
 
@@ -76,6 +85,7 @@ export const SuperAdminDashboard = () => {
   const { data: billing = [], isLoading: loadingBilling, refetch: refetchBilling } = useSuperAdminBilling();
   const { data: organizations = [], isLoading: loadingOrgs, refetch: refetchOrgs } = useSuperAdminOrganizations();
   const { data: users = [], isLoading: loadingUsers, refetch: refetchUsers } = useSuperAdminUsers();
+  const { data: roles = [], isLoading: loadingRoles, refetch: refetchRoles } = useSuperAdminRoles();
   const { data: auditLogs = [], isLoading: loadingAudits, refetch: refetchAudits } = useSuperAdminAuditLogs();
   const { data: health, isLoading: loadingHealth, refetch: refetchHealth } = useSuperAdminHealth();
 
@@ -84,6 +94,9 @@ export const SuperAdminDashboard = () => {
   const updateUserStatus = useUpdateUserStatus();
   const toggleSuperAdmin = useToggleSuperAdmin();
   const updateTenantSubscription = useUpdateTenantSubscription();
+  const createPlatformRole = useCreatePlatformRole();
+  const updatePlatformRole = useUpdatePlatformRole();
+  const deletePlatformRole = useDeletePlatformRole();
 
   // Local search and filter states
   const [orgSearch, setOrgSearch] = useState('');
@@ -92,8 +105,22 @@ export const SuperAdminDashboard = () => {
   const [userStatusFilter, setUserStatusFilter] = useState('ALL');
   const [billingSearch, setBillingSearch] = useState('');
   const [billingPlanFilter, setBillingPlanFilter] = useState('ALL');
+  const [roleSearch, setRoleSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('ALL');
   const [auditSearch, setAuditSearch] = useState('');
   const [actionInProgress, setActionInProgress] = useState(null);
+
+  // Platform Roles Modals State
+  const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState(null);
+  const [deletingRole, setDeletingRole] = useState(null);
+
+  // Role Form State
+  const [roleFormName, setRoleFormName] = useState('');
+  const [roleFormDesc, setRoleFormDesc] = useState('');
+  const [roleFormColor, setRoleFormColor] = useState('#2563eb');
+  const [roleFormOrder, setRoleFormOrder] = useState(10);
+  const [roleFormPerms, setRoleFormPerms] = useState([]);
 
   // Subscription Edit Modal State
   const [editingSubOrg, setEditingSubOrg] = useState(null);
@@ -155,6 +182,92 @@ export const SuperAdminDashboard = () => {
       (a.action || '').toLowerCase().includes(search)
     );
   });
+
+  // Filtered Roles
+  const filteredRoles = roles.filter((r) => {
+    const search = roleSearch.toLowerCase();
+    const matchesSearch =
+      (r.name || '').toLowerCase().includes(search) ||
+      (r.description || '').toLowerCase().includes(search);
+    const isSys = r.isSystem || r.is_system === 1 || r.is_system === true;
+    const matchesFilter =
+      roleFilter === 'ALL' ||
+      (roleFilter === 'SYSTEM' && isSys) ||
+      (roleFilter === 'CUSTOM' && !isSys);
+    return matchesSearch && matchesFilter;
+  });
+
+  const handleOpenAddRole = () => {
+    setRoleFormName('');
+    setRoleFormDesc('');
+    setRoleFormColor('#2563eb');
+    setRoleFormOrder(roles.length + 1);
+    setRoleFormPerms(['PROJECT_VIEW', 'ISSUE_VIEW', 'ISSUE_CREATE', 'ISSUE_COMMENT']);
+    setIsAddRoleOpen(true);
+  };
+
+  const handleOpenEditRole = (role) => {
+    setEditingRole(role);
+    setRoleFormName(role.name || '');
+    setRoleFormDesc(role.description || '');
+    setRoleFormColor(role.color || '#2563eb');
+    setRoleFormOrder(role.displayOrder ?? role.display_order ?? 10);
+    setRoleFormPerms(role.permissions || []);
+  };
+
+  const handleCreateRoleSubmit = async (e) => {
+    e.preventDefault();
+    if (!roleFormName.trim()) {
+      toast.error('Role name is required');
+      return;
+    }
+    try {
+      await createPlatformRole.mutateAsync({
+        name: roleFormName.trim(),
+        description: roleFormDesc.trim(),
+        color: roleFormColor,
+        displayOrder: Number(roleFormOrder) || 10,
+        permissions: roleFormPerms,
+      });
+      toast.success(`Platform role "${roleFormName}" created! Changes reflected platform-wide.`);
+      setIsAddRoleOpen(false);
+      refetchRoles();
+    } catch (err) {
+      toast.error(err.message || 'Failed to create platform role');
+    }
+  };
+
+  const handleUpdateRoleSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingRole) return;
+    try {
+      await updatePlatformRole.mutateAsync({
+        id: editingRole.id,
+        name: roleFormName.trim(),
+        description: roleFormDesc.trim(),
+        color: roleFormColor,
+        displayOrder: Number(roleFormOrder) || 10,
+        permissions: roleFormPerms,
+      });
+      toast.success(`Platform role "${roleFormName}" customized successfully!`);
+      setEditingRole(null);
+      refetchRoles();
+    } catch (err) {
+      toast.error(err.message || 'Failed to update platform role');
+    }
+  };
+
+  const handleDeleteRoleConfirm = async () => {
+    if (!deletingRole) return;
+    try {
+      await deletePlatformRole.mutateAsync(deletingRole.id);
+      toast.success(`Role "${deletingRole.name}" deleted successfully.`);
+      setDeletingRole(null);
+      refetchRoles();
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete role');
+    }
+  };
 
   // Actions
   const handleInitiateOrgToggle = (org) => {
@@ -1250,6 +1363,259 @@ export const SuperAdminDashboard = () => {
       )}
 
       {/* ========================================================================= */}
+      {/* VIEW 5.5: GLOBAL ASSIGNED ROLES GOVERNANCE (SUPER ADMIN CONTROLLED) */}
+      {/* ========================================================================= */}
+      {activeTab === 'roles' && (
+        <div className="space-y-6">
+          {/* Header & Live Scope Callout */}
+          <div className="p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="size-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-neutral-900">Platform Assigned Roles</h2>
+                  <span className="flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 px-2.5 py-0.5 text-[10px] font-bold">
+                    <Sparkles className="w-3 h-3 text-emerald-600" /> Live Multi-Tenant Sync
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500">
+                  Global role definitions that dynamically reflect across all organizations, invite modals, and user directories.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 self-stretch md:self-auto justify-end">
+              <button
+                type="button"
+                onClick={() => refetchRoles()}
+                className="p-2.5 rounded-xl border border-neutral-200 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition"
+                title="Refresh Roles"
+              >
+                <RefreshCw className={`w-4 h-4 ${loadingRoles ? 'animate-spin text-blue-600' : ''}`} />
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenAddRole}
+                className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Platform Role</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 4 Stat Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 rounded-2xl bg-white border border-neutral-200/90 shadow-sm">
+              <div className="flex items-center justify-between text-neutral-500 text-xs font-medium mb-1">
+                <span>Total Platform Roles</span>
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="text-2xl font-black text-neutral-900 font-mono">{roles.length}</div>
+              <p className="text-[11px] text-neutral-400 mt-1">Available across entire application</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white border border-neutral-200/90 shadow-sm">
+              <div className="flex items-center justify-between text-neutral-500 text-xs font-medium mb-1">
+                <span>System Core Roles</span>
+                <Key className="w-4 h-4 text-purple-600" />
+              </div>
+              <div className="text-2xl font-black text-purple-700 font-mono">
+                {roles.filter((r) => r.isSystem || r.is_system === 1 || r.is_system === true).length}
+              </div>
+              <p className="text-[11px] text-neutral-400 mt-1">Protected default baseline roles</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white border border-neutral-200/90 shadow-sm">
+              <div className="flex items-center justify-between text-neutral-500 text-xs font-medium mb-1">
+                <span>Custom Defined Roles</span>
+                <Palette className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div className="text-2xl font-black text-emerald-700 font-mono">
+                {roles.filter((r) => !(r.isSystem || r.is_system === 1 || r.is_system === true)).length}
+              </div>
+              <p className="text-[11px] text-neutral-400 mt-1">Super Admin created custom roles</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white border border-neutral-200/90 shadow-sm">
+              <div className="flex items-center justify-between text-neutral-500 text-xs font-medium mb-1">
+                <span>Application Sync</span>
+                <Zap className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="text-2xl font-black text-neutral-900 font-mono">100%</div>
+              <p className="text-[11px] text-neutral-400 mt-1">Reflects in Invite Modals & RBAC</p>
+            </div>
+          </div>
+
+          {/* Search & Filter Bar */}
+          <div className="p-4 rounded-2xl bg-white border border-neutral-200/90 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={roleSearch}
+                onChange={(e) => setRoleSearch(e.target.value)}
+                placeholder="Search roles by title or description..."
+                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl pl-9 pr-3.5 py-2 text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+              {[
+                { id: 'ALL', label: 'All Roles' },
+                { id: 'SYSTEM', label: 'System Protected' },
+                { id: 'CUSTOM', label: 'Custom Defined' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setRoleFilter(tab.id)}
+                  className={`text-xs px-3 py-1.5 rounded-xl font-medium transition ${
+                    roleFilter === tab.id
+                      ? 'bg-neutral-900 text-white font-semibold shadow-xs'
+                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Roles Table */}
+          <div className="rounded-2xl border border-neutral-200/90 bg-white shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-neutral-600">
+                <thead className="border-b border-neutral-200 bg-neutral-50/80 font-bold uppercase tracking-wider text-neutral-500 text-[10px]">
+                  <tr>
+                    <th className="px-5 py-3.5">Assigned Role</th>
+                    <th className="px-4 py-3.5">Description</th>
+                    <th className="px-4 py-3.5">Classification</th>
+                    <th className="px-4 py-3.5">Permissions Granted</th>
+                    <th className="px-4 py-3.5">Order</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {loadingRoles ? (
+                    <tr>
+                      <td colSpan={6} className="px-5 py-12 text-center text-neutral-400">
+                        <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                        <span>Loading platform roles from database...</span>
+                      </td>
+                    </tr>
+                  ) : filteredRoles.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-5 py-12 text-center text-neutral-400">
+                        No platform roles found matching criteria.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRoles.map((r) => {
+                      const isSys = r.isSystem || r.is_system === 1 || r.is_system === true;
+                      const roleColor = r.color || '#2563eb';
+                      const permsCount = Array.isArray(r.permissions) ? r.permissions.length : 0;
+
+                      return (
+                        <tr key={r.id || r.name} className="hover:bg-neutral-50/70 transition">
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-3">
+                              <span
+                                className="size-3.5 rounded-full shrink-0 shadow-xs border border-black/10"
+                                style={{ backgroundColor: roleColor }}
+                              />
+                              <div>
+                                <div className="font-bold text-neutral-900 text-sm flex items-center gap-1.5">
+                                  <span>{r.name}</span>
+                                </div>
+                                <span className="text-[10px] text-neutral-400 font-mono">
+                                  ID: {r.id || 'system'}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-3.5 max-w-xs">
+                            <p className="text-neutral-700 text-xs line-clamp-2">
+                              {r.description || <span className="text-neutral-400 italic">No description</span>}
+                            </p>
+                          </td>
+
+                          <td className="px-4 py-3.5">
+                            {isSys ? (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 border border-purple-200">
+                                <Key className="w-3 h-3 text-purple-600" /> System Core
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200">
+                                <Sparkles className="w-3 h-3 text-blue-600" /> Custom Platform
+                              </span>
+                            )}
+                          </td>
+
+                          <td className="px-4 py-3.5">
+                            <div className="flex items-center gap-2">
+                              <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-xs font-mono font-bold text-neutral-700">
+                                {permsCount}
+                              </span>
+                              <span className="text-[11px] text-neutral-400">
+                                {permsCount === 0
+                                  ? 'Standard permissions'
+                                  : permsCount > 4
+                                  ? 'Full access scope'
+                                  : 'Targeted permissions'}
+                              </span>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-3.5 font-mono text-neutral-600 text-xs">
+                            #{r.displayOrder ?? r.display_order ?? 10}
+                          </td>
+
+                          <td className="px-5 py-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditRole(r)}
+                                className="px-2.5 py-1 rounded-lg text-xs font-semibold text-neutral-700 hover:text-blue-700 hover:bg-blue-50 border border-neutral-200 transition flex items-center gap-1"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Customize</span>
+                              </button>
+
+                              {!isSys ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setDeletingRole(r)}
+                                  className="p-1 rounded-lg text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                                  title="Delete Custom Role"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              ) : (
+                                <span
+                                  className="p-1 text-neutral-300 cursor-not-allowed"
+                                  title="System default roles cannot be deleted"
+                                >
+                                  <Trash2 className="w-4 h-4 opacity-30" />
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
       {/* VIEW 6: PLATFORM AUDIT TRAIL STREAM */}
       {/* ========================================================================= */}
       {activeTab === 'audit-logs' && (
@@ -1662,6 +2028,424 @@ export const SuperAdminDashboard = () => {
                 className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-500/20 transition disabled:opacity-50"
               >
                 {actionInProgress === suspendModalOrg.id ? 'Suspending...' : 'Suspend & Start 6-Day Expiration'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* ADD PLATFORM ROLE MODAL */}
+      {/* ========================================================================= */}
+      {isAddRoleOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-neutral-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-600">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-900">Create Platform Assigned Role</h3>
+                  <p className="text-[11px] text-neutral-500">Reflects across all tenant organizations</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsAddRoleOpen(false)}
+                className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateRoleSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="text-xs font-bold text-neutral-700 block mb-1">
+                  Role Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={roleFormName}
+                  onChange={(e) => setRoleFormName(e.target.value)}
+                  placeholder="e.g. Solutions Architect, Security Analyst, Technical Writer"
+                  className="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-neutral-700 block mb-1">
+                  Description / Role Scope
+                </label>
+                <input
+                  type="text"
+                  value={roleFormDesc}
+                  onChange={(e) => setRoleFormDesc(e.target.value)}
+                  placeholder="e.g. Responsible for architectural design, technical specs, and reviews"
+                  className="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-neutral-700 block mb-1">
+                    Theme Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={roleFormColor}
+                      onChange={(e) => setRoleFormColor(e.target.value)}
+                      className="size-8 rounded-lg cursor-pointer border border-neutral-200 p-0.5"
+                    />
+                    <div className="flex items-center gap-1">
+                      {['#2563eb', '#059669', '#7c3aed', '#d97706', '#dc2626', '#0891b2'].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setRoleFormColor(preset)}
+                          className="size-5 rounded-full border border-black/10 transition-transform hover:scale-110"
+                          style={{ backgroundColor: preset }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-neutral-700 block mb-1">
+                    Display Priority Order
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={roleFormOrder}
+                    onChange={(e) => setRoleFormOrder(e.target.value)}
+                    className="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-xs text-neutral-900 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-neutral-700">
+                    Baseline Permissions Scope ({roleFormPerms.length} selected)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (roleFormPerms.length >= 10) {
+                        setRoleFormPerms([]);
+                      } else {
+                        setRoleFormPerms([
+                          'PROJECT_VIEW', 'PROJECT_CREATE', 'PROJECT_UPDATE',
+                          'ISSUE_VIEW', 'ISSUE_CREATE', 'ISSUE_UPDATE', 'ISSUE_ASSIGN', 'ISSUE_COMMENT',
+                          'BOARD_VIEW', 'SPRINT_VIEW', 'DEPLOYMENT_TRIGGER', 'DORA_METRICS_VIEW',
+                          'CMDB_TOPOLOGY_VIEW', 'ITSM_TICKET_MANAGE'
+                        ]);
+                      }
+                    }}
+                    className="text-[11px] font-bold text-blue-600 hover:underline"
+                  >
+                    {roleFormPerms.length >= 10 ? 'Deselect All' : 'Select Recommended'}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-neutral-50 p-3 rounded-xl border border-neutral-200 max-h-48 overflow-y-auto">
+                  {[
+                    { code: 'PROJECT_VIEW', label: 'View Projects & Roadmaps' },
+                    { code: 'PROJECT_CREATE', label: 'Create Projects' },
+                    { code: 'PROJECT_UPDATE', label: 'Edit Project Settings' },
+                    { code: 'ISSUE_VIEW', label: 'View Tasks & Tickets' },
+                    { code: 'ISSUE_CREATE', label: 'Create New Tasks' },
+                    { code: 'ISSUE_UPDATE', label: 'Update Task Details' },
+                    { code: 'ISSUE_ASSIGN', label: 'Assign & Reassign Tasks' },
+                    { code: 'ISSUE_COMMENT', label: 'Comment on Tasks' },
+                    { code: 'BOARD_VIEW', label: 'View Agile Boards' },
+                    { code: 'BOARD_MANAGE', label: 'Manage Board Columns' },
+                    { code: 'SPRINT_VIEW', label: 'View Sprints' },
+                    { code: 'SPRINT_START', label: 'Start & Close Sprints' },
+                    { code: 'DEPLOYMENT_TRIGGER', label: 'Trigger Deployments' },
+                    { code: 'DEPLOYMENT_ROLLBACK', label: 'Rollback Deployments' },
+                    { code: 'DORA_METRICS_VIEW', label: 'View DORA Benchmarks' },
+                    { code: 'CMDB_TOPOLOGY_VIEW', label: 'View CMDB Infrastructure' },
+                    { code: 'ITSM_TICKET_MANAGE', label: 'Manage ITSM Service Tickets' },
+                    { code: 'AUDIT_LOG_VIEW', label: 'View Workspace Audit Logs' },
+                  ].map((p) => {
+                    const checked = roleFormPerms.includes(p.code);
+                    return (
+                      <label
+                        key={p.code}
+                        className={`flex items-center gap-2 p-2 rounded-lg border text-[11px] cursor-pointer transition ${
+                          checked
+                            ? 'bg-blue-50 border-blue-300 text-blue-900 font-medium'
+                            : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setRoleFormPerms([...roleFormPerms, p.code]);
+                            } else {
+                              setRoleFormPerms(roleFormPerms.filter((c) => c !== p.code));
+                            }
+                          }}
+                          className="rounded text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="truncate">{p.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-neutral-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddRoleOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={createPlatformRole.isPending}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition disabled:opacity-50"
+                >
+                  {createPlatformRole.isPending ? 'Publishing Role...' : 'Create & Publish Platform Role'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* CUSTOMIZE PLATFORM ROLE MODAL */}
+      {/* ========================================================================= */}
+      {editingRole && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-neutral-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="size-8 rounded-xl flex items-center justify-center text-white font-bold"
+                  style={{ backgroundColor: roleFormColor }}
+                >
+                  <Edit3 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-900">Customize Platform Role</h3>
+                  <p className="text-[11px] text-neutral-500">
+                    Modifying {editingRole.name} {editingRole.isSystem ? '(System Core)' : '(Custom)'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingRole(null)}
+                className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateRoleSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="text-xs font-bold text-neutral-700 block mb-1">
+                  Role Title {editingRole.isSystem && <span className="text-neutral-400 font-normal">(System Core)</span>}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={roleFormName}
+                  onChange={(e) => setRoleFormName(e.target.value)}
+                  className="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-neutral-700 block mb-1">
+                  Description / Subtitle
+                </label>
+                <input
+                  type="text"
+                  value={roleFormDesc}
+                  onChange={(e) => setRoleFormDesc(e.target.value)}
+                  className="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-neutral-700 block mb-1">
+                    Theme Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={roleFormColor}
+                      onChange={(e) => setRoleFormColor(e.target.value)}
+                      className="size-8 rounded-lg cursor-pointer border border-neutral-200 p-0.5"
+                    />
+                    <div className="flex items-center gap-1">
+                      {['#2563eb', '#059669', '#7c3aed', '#d97706', '#dc2626', '#0891b2'].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setRoleFormColor(preset)}
+                          className="size-5 rounded-full border border-black/10 transition-transform hover:scale-110"
+                          style={{ backgroundColor: preset }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-neutral-700 block mb-1">
+                    Display Priority Order
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={roleFormOrder}
+                    onChange={(e) => setRoleFormOrder(e.target.value)}
+                    className="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-xs text-neutral-900 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-neutral-700 block mb-1.5">
+                  Default Permissions ({roleFormPerms.length} assigned)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-neutral-50 p-3 rounded-xl border border-neutral-200 max-h-48 overflow-y-auto">
+                  {[
+                    { code: 'PROJECT_VIEW', label: 'View Projects & Roadmaps' },
+                    { code: 'PROJECT_CREATE', label: 'Create Projects' },
+                    { code: 'PROJECT_UPDATE', label: 'Edit Project Settings' },
+                    { code: 'ISSUE_VIEW', label: 'View Tasks & Tickets' },
+                    { code: 'ISSUE_CREATE', label: 'Create New Tasks' },
+                    { code: 'ISSUE_UPDATE', label: 'Update Task Details' },
+                    { code: 'ISSUE_ASSIGN', label: 'Assign & Reassign Tasks' },
+                    { code: 'ISSUE_COMMENT', label: 'Comment on Tasks' },
+                    { code: 'BOARD_VIEW', label: 'View Agile Boards' },
+                    { code: 'BOARD_MANAGE', label: 'Manage Board Columns' },
+                    { code: 'SPRINT_VIEW', label: 'View Sprints' },
+                    { code: 'SPRINT_START', label: 'Start & Close Sprints' },
+                    { code: 'DEPLOYMENT_TRIGGER', label: 'Trigger Deployments' },
+                    { code: 'DEPLOYMENT_ROLLBACK', label: 'Rollback Deployments' },
+                    { code: 'DORA_METRICS_VIEW', label: 'View DORA Benchmarks' },
+                    { code: 'CMDB_TOPOLOGY_VIEW', label: 'View CMDB Infrastructure' },
+                    { code: 'ITSM_TICKET_MANAGE', label: 'Manage ITSM Service Tickets' },
+                    { code: 'AUDIT_LOG_VIEW', label: 'View Workspace Audit Logs' },
+                  ].map((p) => {
+                    const checked = roleFormPerms.includes(p.code);
+                    return (
+                      <label
+                        key={p.code}
+                        className={`flex items-center gap-2 p-2 rounded-lg border text-[11px] cursor-pointer transition ${
+                          checked
+                            ? 'bg-blue-50 border-blue-300 text-blue-900 font-medium'
+                            : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setRoleFormPerms([...roleFormPerms, p.code]);
+                            } else {
+                              setRoleFormPerms(roleFormPerms.filter((c) => c !== p.code));
+                            }
+                          }}
+                          className="rounded text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="truncate">{p.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-neutral-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingRole(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatePlatformRole.isPending}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition disabled:opacity-50"
+                >
+                  {updatePlatformRole.isPending ? 'Saving...' : 'Save Role Customizations'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* DELETE PLATFORM ROLE CONFIRMATION MODAL */}
+      {/* ========================================================================= */}
+      {deletingRole && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-neutral-200 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+              <div className="flex items-center gap-2.5 text-rose-600">
+                <div className="p-2 rounded-xl bg-rose-50 border border-rose-200">
+                  <Trash2 className="w-5 h-5 text-rose-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-900">Delete Platform Role</h3>
+                  <p className="text-[11px] text-neutral-500">Global role removal</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDeletingRole(null)}
+                className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-neutral-600">
+              <p>
+                Are you sure you want to remove the platform role{' '}
+                <strong className="text-neutral-900 font-semibold">{deletingRole.name}</strong>?
+              </p>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-900 text-[11px] space-y-1">
+                <strong>Platform Impact:</strong>
+                <p>
+                  This role will immediately cease to be available in "Invite Member" dropdowns and role assignment menus across all tenant workspaces. Existing members assigned to this role in their workspace will retain historical permissions.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-neutral-100">
+              <button
+                type="button"
+                onClick={() => setDeletingRole(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deletePlatformRole.isPending}
+                onClick={handleDeleteRoleConfirm}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-500/20 transition disabled:opacity-50"
+              >
+                {deletePlatformRole.isPending ? 'Deleting...' : 'Delete Role'}
               </button>
             </div>
           </div>

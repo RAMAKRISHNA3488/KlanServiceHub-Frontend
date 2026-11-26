@@ -15,7 +15,8 @@ import { MemberAvatar } from '@/features/members/components/member-avatar';
 import { MemberRole } from '@/features/members/types';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
-import { usersAdminApi } from '@/lib/api-client';
+import { useQuery } from '@tanstack/react-query';
+import { usersAdminApi, rolesAdminApi } from '@/lib/api-client';
 import { toast } from 'sonner';
 
 export const MembersList = () => {
@@ -24,6 +25,22 @@ export const MembersList = () => {
   const { data: members, refetch: refetchMembers } = useGetMembers({ workspaceId });
   const { mutate: deleteMember, isPending: isDeletingMember } = useDeleteMember();
   const { mutate: updateMember, isPending: isUpdatingMember } = useUpdateMember();
+
+  // 100% Dynamic Roles from Cloudflare D1
+  const { data: rolesData } = useQuery({
+    queryKey: ['roles', workspaceId],
+    queryFn: async () => {
+      const res = await rolesAdminApi.getRoles(workspaceId).catch(() => ({ data: [] }));
+      return res?.data || [];
+    },
+    enabled: !!workspaceId,
+  });
+
+  const activeRoles = React.useMemo(() => {
+    if (Array.isArray(rolesData)) return rolesData;
+    if (Array.isArray(rolesData?.roles)) return rolesData.roles;
+    return [];
+  }, [rolesData]);
 
   // Invite Modal State
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -328,10 +345,20 @@ export const MembersList = () => {
                     onChange={(e) => setInviteRole(e.target.value)}
                     className="w-full rounded-xl border border-neutral-300 px-3.5 py-2.5 text-sm bg-white focus:border-blue-600 focus:outline-none font-medium"
                   >
-                    <option value="Developer">Developer (Standard Member)</option>
-                    <option value="Product Manager">Product Manager</option>
-                    <option value="Company Admin">Company Admin (Full Access)</option>
-                    <option value="QA Engineer">QA Engineer</option>
+                    {activeRoles && activeRoles.length > 0 ? (
+                      activeRoles.map((r) => (
+                        <option key={r.id || r.name} value={r.name}>
+                          {r.name} {r.description ? `(${r.description})` : ''}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Developer">Developer (Standard Member)</option>
+                        <option value="Product Manager">Product Manager</option>
+                        <option value="Company Admin">Company Admin (Full Access)</option>
+                        <option value="QA Engineer">QA Engineer</option>
+                      </>
+                    )}
                   </select>
                 </div>
 

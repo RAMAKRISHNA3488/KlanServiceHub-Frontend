@@ -571,6 +571,10 @@ export const platformAdminApi = {
   getUsers: () => apiFetch('/api/platform-admin/users'),
   updateUserStatus: (id, status) => apiFetch(`/api/platform-admin/users/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   toggleSuperAdmin: (id, isSuperAdmin) => apiFetch(`/api/platform-admin/users/${id}/super-admin`, { method: 'PATCH', body: JSON.stringify({ isSuperAdmin }) }),
+  getRoles: () => apiFetch('/api/platform-admin/roles'),
+  createRole: (payload) => apiFetch('/api/platform-admin/roles', { method: 'POST', body: JSON.stringify(payload) }),
+  updateRole: (id, payload) => apiFetch(`/api/platform-admin/roles/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteRole: (id) => apiFetch(`/api/platform-admin/roles/${id}`, { method: 'DELETE' }),
   getAuditLogs: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return apiFetch(`/api/platform-admin/audit-logs${query ? `?${query}` : ''}`);

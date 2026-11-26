@@ -48,6 +48,7 @@ export const SuperAdminLayout = () => {
       items: [
         { label: 'All Organizations', path: '/super-admin/organizations', icon: Building2 },
         { label: 'Users Directory', path: '/super-admin/users', icon: Users },
+        { label: 'Assigned Roles', path: '/super-admin/roles', icon: ShieldCheck },
       ],
     },
     {

@@ -176,6 +176,7 @@ export const App = () => {
           <Route path="/super-admin/billing" element={<SuperAdminDashboard />} />
           <Route path="/super-admin/organizations" element={<SuperAdminDashboard />} />
           <Route path="/super-admin/users" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/roles" element={<SuperAdminDashboard />} />
           <Route path="/super-admin/audit-logs" element={<SuperAdminDashboard />} />
           <Route path="/super-admin/system-health" element={<SuperAdminDashboard />} />
         </Route>

@@ -96,6 +96,50 @@ export const useSuperAdminHealth = () => {
   });
 };
 
+export const useSuperAdminRoles = () => {
+  return useQuery({
+    queryKey: ['super-admin-roles'],
+    queryFn: async () => {
+      const res = await platformAdminApi.getRoles();
+      return res?.data?.roles || [];
+    },
+    staleTime: 15 * 1000,
+  });
+};
+
+export const useCreatePlatformRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => platformAdminApi.createRole(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['super-admin-roles'] });
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+    },
+  });
+};
+
+export const useUpdatePlatformRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...payload }) => platformAdminApi.updateRole(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['super-admin-roles'] });
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+    },
+  });
+};
+
+export const useDeletePlatformRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => platformAdminApi.deleteRole(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['super-admin-roles'] });
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+    },
+  });
+};
+
 export const useUpdateOrganizationStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({

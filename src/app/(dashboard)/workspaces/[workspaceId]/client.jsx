@@ -137,6 +137,12 @@ export const WorkspaceIdClient = () => {
     enabled: !!workspaceId,
   });
 
+  const activeRoles = useMemo(() => {
+    if (Array.isArray(rolesData)) return rolesData;
+    if (Array.isArray(rolesData?.roles)) return rolesData.roles;
+    return [];
+  }, [rolesData]);
+
   const workflowStatuses = useMemo(() => {
     return workflowsData?.[0]?.statuses || [];
   }, [workflowsData]);
@@ -479,8 +485,8 @@ export const WorkspaceIdClient = () => {
                     onChange={(e) => setInviteRole(e.target.value)}
                     className="w-full rounded-xl border border-neutral-300 px-3.5 py-2.5 text-sm bg-white focus:border-blue-600 focus:outline-none font-medium"
                   >
-                    {rolesData && rolesData.length > 0 ? (
-                      rolesData.map((r) => (
+                    {activeRoles && activeRoles.length > 0 ? (
+                      activeRoles.map((r) => (
                         <option key={r.id || r.name} value={r.name}>
                           {r.name} {r.description ? `(${r.description})` : ''}
                         </option>
