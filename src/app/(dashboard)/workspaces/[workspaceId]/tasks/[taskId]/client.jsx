@@ -743,65 +743,6 @@ export const TaskIdClient = () => {
                 </>
               )}
             </div>
-
-            {/* Visual Stage Movement Journey Stepper */}
-            {stageHistory && stageHistory.length > 0 && (
-              <div className="rounded-xl border border-neutral-200/80 bg-neutral-50/70 p-3 space-y-2 shadow-2xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5">
-                    <History className="size-3 text-neutral-400" />
-                    Workflow Stage Journey ({stageHistory.length} event{stageHistory.length > 1 ? 's' : ''})
-                  </span>
-                  {lastStageMove && (
-                    <span className="text-[10px] text-neutral-500 font-medium">
-                      Latest move: <strong className="text-neutral-800">{formatCommentDate(lastStageMove.timestamp)}</strong>
-                    </span>
-                  )}
-                </div>
-
-                {/* Horizontal flow line */}
-                <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none">
-                  {[...stageHistory].reverse().map((step, idx) => {
-                    const isLast = idx === stageHistory.length - 1;
-                    const actorName = step.actor?.name || 'Team Member';
-                    const actorInitial = actorName.substring(0, 1).toUpperCase();
-                    const statusLabel = step.newStatus || step.new_status || 'STATUS';
-
-                    return (
-                      <React.Fragment key={step.id || idx}>
-                        <div
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs shrink-0 transition ${
-                            isLast
-                              ? 'bg-blue-50 border-blue-300 text-blue-900 font-bold ring-2 ring-blue-100 shadow-2xs'
-                              : 'bg-white border-neutral-200 text-neutral-700 shadow-2xs'
-                          }`}
-                          title={`${step.description || `Moved to ${statusLabel}`} by ${actorName} at ${step.timestamp}`}
-                        >
-                          <div className="size-4.5 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
-                            {actorInitial}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[10px] leading-tight font-bold">{statusLabel}</span>
-                            <span className="text-[9px] leading-tight text-neutral-400 font-normal truncate max-w-[100px]">
-                              {actorName}
-                            </span>
-                          </div>
-                          {isLast && (
-                            <span className="size-1.5 rounded-full bg-blue-600 animate-pulse ml-0.5" />
-                          )}
-                        </div>
-
-                        {!isLast && (
-                          <div className="text-neutral-300 shrink-0">
-                            <ArrowRight className="size-3.5" />
-                          </div>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Description */}
@@ -1299,6 +1240,22 @@ export const TaskIdClient = () => {
             {/* Tab: History & Audit Timeline */}
             {activeTab === 'HISTORY' && (
               <div className="space-y-3">
+                {task?.historyExpired && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-xs text-amber-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">6-Month History Expiration:</span>
+                      <span>Intermediate stage transitions for this completed ticket were pruned per retention policy. Creation author is preserved.</span>
+                    </div>
+                    <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Retention Applied</span>
+                  </div>
+                )}
+                {task?.status === 'DONE' && !task?.historyExpired && task?.historyRetentionMessage && (
+                  <div className="bg-blue-50/60 border border-blue-200/60 rounded-lg p-2 text-[11px] text-blue-800 flex items-center justify-between">
+                    <span><strong>Retention Lifecycle:</strong> {task.historyRetentionMessage}</span>
+                    <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold">Active</span>
+                  </div>
+                )}
+
                 {/* Filter pills */}
                 <div className="flex items-center justify-between pb-2 border-b border-neutral-100 flex-wrap gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
@@ -1475,6 +1432,19 @@ export const TaskIdClient = () => {
               <div className="pt-1.5 border-t border-neutral-100 text-[10px] text-neutral-500 flex items-center justify-between">
                 <span>Initial Stage</span>
                 <span className="font-medium text-neutral-700">Created as {task?.status || 'TODO'}</span>
+              </div>
+            )}
+
+            {task?.status === 'DONE' && (
+              <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[10px]">
+                <span className="text-neutral-400 font-medium">History Retention</span>
+                <span className={`font-semibold text-[9px] px-1.5 py-0.5 rounded ${
+                  task.historyExpired
+                    ? 'text-rose-700 bg-rose-50 border border-rose-200/60'
+                    : 'text-amber-700 bg-amber-50 border border-amber-200/60'
+                }`}>
+                  {task.historyRetentionMessage || 'Expires 6 mo after Done'}
+                </span>
               </div>
             )}
           </div>
@@ -1678,6 +1648,13 @@ export const TaskIdClient = () => {
                   </h4>
                   <span className="text-[9px] text-neutral-400 font-medium">Transitions</span>
                 </div>
+
+                {task?.historyExpired && (
+                  <div className="bg-amber-50/80 border border-amber-200/60 rounded-md p-2 text-[10px] text-amber-800 space-y-0.5">
+                    <span className="font-semibold block">6-Month Retention Policy Applied</span>
+                    <span>Intermediate stage movements were pruned after 6 months from completion. Ticket creator attribution is permanently preserved.</span>
+                  </div>
+                )}
 
                 <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                   {stageHistory.map((sh, idx) => {
