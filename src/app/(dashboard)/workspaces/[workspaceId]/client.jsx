@@ -156,6 +156,12 @@ export const WorkspaceIdClient = () => {
   const [sendingInvite, setSendingInvite] = useState(false);
   const [sentInviteData, setSentInviteData] = useState(null);
 
+  useEffect(() => {
+    if (activeRoles && activeRoles.length > 0 && !activeRoles.some((r) => r.name === inviteRole)) {
+      setInviteRole(activeRoles[0].name);
+    }
+  }, [activeRoles, inviteRole]);
+
   const handleSendInvite = async (e) => {
     e.preventDefault();
     if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
@@ -493,10 +499,12 @@ export const WorkspaceIdClient = () => {
                       ))
                     ) : (
                       <>
-                        <option value="Developer">Developer (Standard Member)</option>
-                        <option value="Product Manager">Product Manager</option>
-                        <option value="Company Admin">Company Admin (Full Access)</option>
-                        <option value="QA Engineer">QA Engineer</option>
+                        <option value="Developer">Developer (Standard Member / Software Engineer)</option>
+                        <option value="Product Manager">Product Manager (Product Lead & Roadmaps)</option>
+                        <option value="Company Admin">Company Admin (Full Administrative Access)</option>
+                        <option value="QA Engineer">QA Engineer (Quality Assurance & Testing)</option>
+                        <option value="DevOps & SRE">DevOps & SRE (Infrastructure & Deployments)</option>
+                        <option value="Viewer">Viewer (Read-Only Viewer)</option>
                       </>
                     )}
                   </select>

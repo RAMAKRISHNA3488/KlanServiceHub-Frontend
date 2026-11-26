@@ -51,6 +51,12 @@ export const MembersList = () => {
   const [sendingInvite, setSendingInvite] = useState(false);
   const [sentInviteData, setSentInviteData] = useState(null);
 
+  React.useEffect(() => {
+    if (activeRoles && activeRoles.length > 0 && !activeRoles.some((r) => r.name === inviteRole)) {
+      setInviteRole(activeRoles[0].name);
+    }
+  }, [activeRoles, inviteRole]);
+
   const handleDeleteMember = async (memberId, memberName = 'this member') => {
     const ok = await confirm({
       title: 'Remove Workspace Member',
@@ -353,10 +359,12 @@ export const MembersList = () => {
                       ))
                     ) : (
                       <>
-                        <option value="Developer">Developer (Standard Member)</option>
-                        <option value="Product Manager">Product Manager</option>
-                        <option value="Company Admin">Company Admin (Full Access)</option>
-                        <option value="QA Engineer">QA Engineer</option>
+                        <option value="Developer">Developer (Standard Member / Software Engineer)</option>
+                        <option value="Product Manager">Product Manager (Product Lead & Roadmaps)</option>
+                        <option value="Company Admin">Company Admin (Full Administrative Access)</option>
+                        <option value="QA Engineer">QA Engineer (Quality Assurance & Testing)</option>
+                        <option value="DevOps & SRE">DevOps & SRE (Infrastructure & Deployments)</option>
+                        <option value="Viewer">Viewer (Read-Only Viewer)</option>
                       </>
                     )}
                   </select>

@@ -202,6 +202,7 @@ export const tasksApi = {
     return apiFetch(`/api/tasks?${query}`);
   },
   getTask: (taskId) => apiFetch(`/api/tasks/${taskId}`),
+  getTaskHistory: (taskId) => apiFetch(`/api/tasks/${taskId}/history`),
   createTask: (data) => apiFetch('/api/tasks', { method: 'POST', body: JSON.stringify(data) }),
   updateTask: (taskId, data) => apiFetch(`/api/tasks/${taskId}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteTask: (taskId) => apiFetch(`/api/tasks/${taskId}`, { method: 'DELETE' }),

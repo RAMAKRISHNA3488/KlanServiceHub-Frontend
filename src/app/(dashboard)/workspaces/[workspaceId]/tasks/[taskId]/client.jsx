@@ -20,13 +20,17 @@ import {
   List,
   TrendingUp,
   MessageSquare,
+  History,
   Clock,
   ChevronRight,
   Send,
   Calendar,
   User,
+  UserCheck,
   Tag,
   ArrowLeft,
+  ArrowRight,
+  Plus,
   Pencil,
   Trash2,
   Check,
@@ -142,7 +146,15 @@ export const TaskIdClient = () => {
   const [editingContent, setEditingContent] = useState('');
   const [subtaskTitle, setSubtaskTitle] = useState('');
   const [logHours, setLogHours] = useState(1);
-  const [activeTab, setActiveTab] = useState('COMMENTS');
+  const [activeTab, setActiveTab] = useState('COMMENTS'); // COMMENTS, SUBTASKS, WORKLOG, LINKED_TICKETS, HISTORY
+  const [taskHistory, setTaskHistory] = useState([]);
+  const [historyFilter, setHistoryFilter] = useState('ALL');
+
+  const filteredHistory = taskHistory.filter((item) => {
+    if (historyFilter === 'STATUS') return item.type === 'STATUS_TRANSITION' || item.type === 'CREATION';
+    if (historyFilter === 'FIELDS') return item.type === 'FIELD_UPDATE';
+    return true;
+  });
   const [storyPointsInput, setStoryPointsInput] = useState('1');
   const [showShareModal, setShowShareModal] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -241,6 +253,7 @@ export const TaskIdClient = () => {
         setTask(res.data);
         setDescriptionImages(res.data.descriptionImages || res.data.description_images || []);
         setComments(Array.isArray(res.data.comments) ? res.data.comments : []);
+        setTaskHistory(Array.isArray(res.data.history) ? res.data.history : []);
         setStoryPointsInput(String(res.data.storyPoints ?? res.data.story_points ?? 1));
       }
     } catch (e) {
@@ -254,6 +267,7 @@ export const TaskIdClient = () => {
     if (taskId) {
       setTask(null);
       setComments([]);
+      setTaskHistory([]);
       setNewComment('');
       setEditingCommentId(null);
       setEditingContent('');
@@ -856,6 +870,17 @@ export const TaskIdClient = () => {
                 <Link2 className="size-3" />
                 Linked Tickets & Dependencies
               </button>
+              <button
+                onClick={() => setActiveTab('HISTORY')}
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
+                  activeTab === 'HISTORY'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                }`}
+              >
+                <History className="size-3" />
+                History ({taskHistory.length})
+              </button>
             </div>
 
             {/* Tab: Comments */}
@@ -1199,6 +1224,140 @@ export const TaskIdClient = () => {
                 />
               </div>
             )}
+
+            {/* Tab: History & Audit Timeline */}
+            {activeTab === 'HISTORY' && (
+              <div className="space-y-3">
+                {/* Filter pills */}
+                <div className="flex items-center justify-between pb-2 border-b border-neutral-100 flex-wrap gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                    Audit Trail & Transitions ({filteredHistory.length})
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter('ALL')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
+                        historyFilter === 'ALL'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      }`}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter('STATUS')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
+                        historyFilter === 'STATUS'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      }`}
+                    >
+                      Status Moves
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter('FIELDS')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
+                        historyFilter === 'FIELDS'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      }`}
+                    >
+                      Field Updates
+                    </button>
+                  </div>
+                </div>
+
+                {filteredHistory.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-neutral-400 border border-dashed border-neutral-200 rounded-xl">
+                    <History className="size-8 mx-auto mb-2 text-neutral-300" />
+                    No history recorded for this ticket yet.
+                  </div>
+                ) : (
+                  <div className="relative pl-6 space-y-3 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-neutral-200">
+                    {filteredHistory.map((item) => {
+                      const actorName = item.actor?.name || 'Team Member';
+                      const actorInitial = actorName.substring(0, 1).toUpperCase();
+                      const timeStr = formatCommentDate(item.timestamp);
+                      const isCreation = item.type === 'CREATION';
+                      const isStatusMove = item.type === 'STATUS_TRANSITION';
+
+                      return (
+                        <div key={item.id} className="relative group">
+                          {/* Node icon */}
+                          <div className={`absolute -left-6 top-1 size-5 rounded-full flex items-center justify-center text-[10px] border ring-4 ring-white ${
+                            isCreation
+                              ? 'bg-emerald-500 text-white border-emerald-600'
+                              : isStatusMove
+                              ? 'bg-blue-500 text-white border-blue-600'
+                              : 'bg-neutral-500 text-white border-neutral-600'
+                          }`}>
+                            {isCreation ? (
+                              <Plus className="size-2.5 stroke-[3]" />
+                            ) : isStatusMove ? (
+                              <ArrowRight className="size-2.5 stroke-[3]" />
+                            ) : (
+                              <Pencil className="size-2.5 stroke-[3]" />
+                            )}
+                          </div>
+
+                          <div className="bg-white rounded-lg border border-neutral-200/90 p-2.5 shadow-2xs space-y-1.5 transition hover:border-neutral-300">
+                            <div className="flex items-center justify-between text-[11px]">
+                              <div className="flex items-center gap-1.5">
+                                <div className="size-4.5 rounded-full bg-blue-100 text-blue-700 font-bold text-[9px] flex items-center justify-center">
+                                  {actorInitial}
+                                </div>
+                                <span className="font-semibold text-neutral-900">{actorName}</span>
+                              </div>
+                              <span className="text-[10px] text-neutral-400 font-medium" title={item.timestamp}>
+                                {timeStr}
+                              </span>
+                            </div>
+
+                            {isCreation && (
+                              <div className="text-[11px] text-neutral-700 flex items-center gap-1.5 flex-wrap">
+                                <span>Created ticket with status</span>
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/60">
+                                  {item.newStatus}
+                                </span>
+                              </div>
+                            )}
+
+                            {isStatusMove && (
+                              <div className="text-[11px] text-neutral-700 flex items-center gap-1.5 flex-wrap">
+                                <span>Moved status from</span>
+                                <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-200">
+                                  {item.previousStatus}
+                                </span>
+                                <ArrowRight className="size-3 text-neutral-400" />
+                                <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60">
+                                  {item.newStatus}
+                                </span>
+                              </div>
+                            )}
+
+                            {!isCreation && !isStatusMove && (
+                              <div className="text-[11px] text-neutral-700">
+                                <span>Updated <strong className="text-neutral-900">{item.fieldName}</strong> from </span>
+                                <code className="text-[10px] bg-neutral-100 px-1 py-0.5 rounded text-neutral-600">
+                                  {item.oldValue || 'None'}
+                                </code>
+                                <span> to </span>
+                                <code className="text-[10px] bg-blue-50 text-blue-700 px-1 py-0.5 rounded font-semibold border border-blue-100">
+                                  {item.newValue}
+                                </code>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -1336,6 +1495,23 @@ export const TaskIdClient = () => {
             <h4 className="font-bold text-[9px] uppercase tracking-wider text-neutral-400">
               Dates & Timestamps
             </h4>
+            {/* Created By Card */}
+            <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
+              <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px] shrink-0">
+                <UserCheck className="size-2.5 text-neutral-400" /> Created By
+              </span>
+              <div className="flex items-center gap-1 ml-2 overflow-hidden text-right">
+                <div className="size-3.5 rounded-full bg-blue-600 text-white text-[7px] font-bold flex items-center justify-center shrink-0">
+                  {(task?.creator?.name || 'T').substring(0, 1).toUpperCase()}
+                </div>
+                <span
+                  className="font-medium text-neutral-700 text-[10px] truncate"
+                  title={task?.creator?.email || ''}
+                >
+                  {task?.creator?.name || 'Team Member'}
+                </span>
+              </div>
+            </div>
             <div className="flex items-center justify-between text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200 shadow-2xs">
               <span className="flex items-center gap-1 text-neutral-400 font-normal text-[9px]">
                 <Calendar className="size-2.5 text-neutral-400" /> Created
