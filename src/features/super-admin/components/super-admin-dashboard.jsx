@@ -34,6 +34,7 @@ import {
   Edit3,
   X,
   ChevronRight,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   useSuperAdminOverview,
@@ -104,6 +105,9 @@ export const SuperAdminDashboard = () => {
   const [subFormStatus, setSubFormStatus] = useState('ACTIVE');
   const [subFormNotes, setSubFormNotes] = useState('');
 
+  // 6-Day Suspension Expiration Warning Modal State
+  const [suspendModalOrg, setSuspendModalOrg] = useState(null);
+
   // Dynamic currency formatter
   const formatCurrency = (amount, currencyCode) => {
     const curr = (currencyCode || financials?.currency || 'INR').toUpperCase();
@@ -153,12 +157,26 @@ export const SuperAdminDashboard = () => {
   });
 
   // Actions
-  const handleToggleOrgStatus = async (org) => {
-    const nextStatus = org.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
+  const handleInitiateOrgToggle = (org) => {
+    if (org.status !== 'SUSPENDED') {
+      // Prompt modal with 6-day data expiration warning
+      setSuspendModalOrg(org);
+    } else {
+      // Reactivate directly and cancel the 6-day countdown
+      handleToggleOrgStatus(org, 'ACTIVE');
+    }
+  };
+
+  const handleToggleOrgStatus = async (org, forceStatus = null) => {
+    const nextStatus = forceStatus || (org.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED');
     setActionInProgress(org.id);
     try {
       await updateOrgStatus.mutateAsync({ id: org.id, status: nextStatus });
-      toast.success(`Organization ${org.name} is now ${nextStatus}`);
+      if (nextStatus === 'SUSPENDED') {
+        toast.warning(`⚠️ Organization ${org.name} suspended. All data will expire and be purged in 6 days.`);
+      } else {
+        toast.success(`✅ Organization ${org.name} reactivated! 6-day deletion countdown canceled.`);
+      }
     } catch (err) {
       toast.error(err.message || 'Failed to update organization status');
     } finally {
@@ -1029,16 +1047,34 @@ export const SuperAdminDashboard = () => {
                             {org.userCount ?? 0} {org.userLimit ? `/ ${org.userLimit}` : ''}
                           </td>
                           <td className="py-3.5 px-4">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold ${
-                                isSuspended
-                                  ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                  : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              }`}
-                            >
-                              {isSuspended ? <Ban className="w-3 h-3" /> : <Check className="w-3 h-3" />}
-                              {org.status || 'ACTIVE'}
-                            </span>
+                            {isSuspended ? (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 w-fit">
+                                  <Ban className="w-3 h-3 text-rose-600" />
+                                  SUSPENDED
+                                </span>
+                                {org.daysRemaining !== null && org.daysRemaining !== undefined && (
+                                  <div className="flex items-center gap-1 text-[10px] font-mono font-medium text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 mt-0.5 w-fit">
+                                    <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                                    <span>
+                                      {org.daysRemaining > 0 
+                                        ? `Data wipes in ${org.daysRemaining}d` 
+                                        : 'Data expiration due'}
+                                    </span>
+                                  </div>
+                                )}
+                                {org.expiresAt && (
+                                  <span className="text-[9px] text-neutral-400 font-mono mt-0.5">
+                                    Purge: {new Date(org.expiresAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <Check className="w-3 h-3" />
+                                ACTIVE
+                              </span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-right space-x-2">
                             <button
@@ -1050,7 +1086,7 @@ export const SuperAdminDashboard = () => {
                             </button>
                             <button
                               disabled={actionInProgress === org.id}
-                              onClick={() => handleToggleOrgStatus(org)}
+                              onClick={() => handleInitiateOrgToggle(org)}
                               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${
                                 isSuspended
                                   ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
@@ -1557,6 +1593,77 @@ export const SuperAdminDashboard = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 6-DAY SUSPENDED ORGANIZATION DATA EXPIRATION MODAL */}
+      {/* ========================================================================= */}
+      {suspendModalOrg && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-neutral-200 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+              <div className="flex items-center gap-2.5 text-rose-600">
+                <div className="p-2 rounded-xl bg-rose-50 border border-rose-200">
+                  <AlertTriangle className="w-5 h-5 text-rose-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-900">Suspend Organization Account</h3>
+                  <p className="text-[11px] text-neutral-500 font-mono">6-Day Retention & Data Expiration</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSuspendModalOrg(null)}
+                className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-neutral-600">
+              <p>
+                Are you sure you want to suspend <strong className="text-neutral-900 font-semibold">{suspendModalOrg.name}</strong>?
+              </p>
+              <div className="bg-rose-50/80 border border-rose-200 rounded-xl p-3.5 text-rose-900 text-xs space-y-2">
+                <div className="font-bold flex items-center gap-1.5 text-rose-700">
+                  <Clock className="w-4 h-4" />
+                  <span>Automated 6-Day Data Expiration Schedule</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-rose-800">
+                  Upon suspension, all member access and active sessions will be terminated immediately. In accordance with platform lifecycle policy, <strong>all workspace data (tasks, projects, workflows, members, and documents) will permanently expire and be purged after 6 days</strong>.
+                </p>
+                <div className="pt-1.5 border-t border-rose-200/80 text-[11px] font-mono text-rose-900 flex items-center justify-between">
+                  <span>Scheduled Purge:</span>
+                  <strong>{new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</strong>
+                </div>
+              </div>
+              <p className="text-[11px] text-neutral-500 italic">
+                Note: You can cancel the deletion countdown at any time within the 6-day window by clicking "Reactivate".
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-neutral-100">
+              <button
+                type="button"
+                onClick={() => setSuspendModalOrg(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={actionInProgress === suspendModalOrg.id}
+                onClick={async () => {
+                  const targetOrg = suspendModalOrg;
+                  setSuspendModalOrg(null);
+                  await handleToggleOrgStatus(targetOrg, 'SUSPENDED');
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-500/20 transition disabled:opacity-50"
+              >
+                {actionInProgress === suspendModalOrg.id ? 'Suspending...' : 'Suspend & Start 6-Day Expiration'}
+              </button>
+            </div>
           </div>
         </div>
       )}
