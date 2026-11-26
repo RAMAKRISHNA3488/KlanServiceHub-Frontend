@@ -155,6 +155,18 @@ export const TaskIdClient = () => {
     if (historyFilter === 'FIELDS') return item.type === 'FIELD_UPDATE';
     return true;
   });
+
+  const stageHistory = React.useMemo(() => {
+    if (task?.stageHistory && Array.isArray(task.stageHistory) && task.stageHistory.length > 0) {
+      return task.stageHistory;
+    }
+    return (taskHistory || []).filter((h) => h.type === 'STATUS_TRANSITION' || h.type === 'CREATION');
+  }, [task?.stageHistory, taskHistory]);
+
+  const lastStageMove = React.useMemo(() => {
+    if (task?.lastStageMove) return task.lastStageMove;
+    return stageHistory.find((h) => h.type === 'STATUS_TRANSITION') || null;
+  }, [task?.lastStageMove, stageHistory]);
   const [storyPointsInput, setStoryPointsInput] = useState('1');
   const [showShareModal, setShowShareModal] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -731,6 +743,65 @@ export const TaskIdClient = () => {
                 </>
               )}
             </div>
+
+            {/* Visual Stage Movement Journey Stepper */}
+            {stageHistory && stageHistory.length > 0 && (
+              <div className="rounded-xl border border-neutral-200/80 bg-neutral-50/70 p-3 space-y-2 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5">
+                    <History className="size-3 text-neutral-400" />
+                    Workflow Stage Journey ({stageHistory.length} event{stageHistory.length > 1 ? 's' : ''})
+                  </span>
+                  {lastStageMove && (
+                    <span className="text-[10px] text-neutral-500 font-medium">
+                      Latest move: <strong className="text-neutral-800">{formatCommentDate(lastStageMove.timestamp)}</strong>
+                    </span>
+                  )}
+                </div>
+
+                {/* Horizontal flow line */}
+                <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none">
+                  {[...stageHistory].reverse().map((step, idx) => {
+                    const isLast = idx === stageHistory.length - 1;
+                    const actorName = step.actor?.name || 'Team Member';
+                    const actorInitial = actorName.substring(0, 1).toUpperCase();
+                    const statusLabel = step.newStatus || step.new_status || 'STATUS';
+
+                    return (
+                      <React.Fragment key={step.id || idx}>
+                        <div
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs shrink-0 transition ${
+                            isLast
+                              ? 'bg-blue-50 border-blue-300 text-blue-900 font-bold ring-2 ring-blue-100 shadow-2xs'
+                              : 'bg-white border-neutral-200 text-neutral-700 shadow-2xs'
+                          }`}
+                          title={`${step.description || `Moved to ${statusLabel}`} by ${actorName} at ${step.timestamp}`}
+                        >
+                          <div className="size-4.5 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                            {actorInitial}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] leading-tight font-bold">{statusLabel}</span>
+                            <span className="text-[9px] leading-tight text-neutral-400 font-normal truncate max-w-[100px]">
+                              {actorName}
+                            </span>
+                          </div>
+                          {isLast && (
+                            <span className="size-1.5 rounded-full bg-blue-600 animate-pulse ml-0.5" />
+                          )}
+                        </div>
+
+                        {!isLast && (
+                          <div className="text-neutral-300 shrink-0">
+                            <ArrowRight className="size-3.5" />
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Description */}
@@ -1367,6 +1438,47 @@ export const TaskIdClient = () => {
             Issue Details
           </h3>
 
+          {/* Current Stage & Last Moved Attribution Card */}
+          <div className="rounded-lg border border-neutral-200/90 bg-white p-2.5 shadow-2xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Current Stage</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60">
+                {task?.status ? task.status.replace(/_/g, ' ') : 'TODO'}
+              </span>
+            </div>
+
+            {lastStageMove ? (
+              <div className="pt-2 border-t border-neutral-100 space-y-1">
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className="text-neutral-400 font-medium">Stage Moved By</span>
+                  <span className="text-neutral-500 font-medium" title={lastStageMove.timestamp}>
+                    {formatCommentDate(lastStageMove.timestamp)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] bg-neutral-50 rounded p-1.5 border border-neutral-200/60">
+                  <div className="flex items-center gap-1.5 overflow-hidden">
+                    <div className="size-4 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center shrink-0">
+                      {(lastStageMove.actor?.name || 'M').substring(0, 1).toUpperCase()}
+                    </div>
+                    <span className="font-semibold text-neutral-800 text-[10px] truncate" title={lastStageMove.actor?.email || ''}>
+                      {lastStageMove.actor?.name || 'Team Member'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[9px] font-bold text-neutral-600 shrink-0">
+                    <span className="bg-white px-1 py-0.2 rounded border border-neutral-200">{lastStageMove.previousStatus}</span>
+                    <ArrowRight className="size-2.5 text-neutral-400" />
+                    <span className="bg-blue-100/70 text-blue-700 px-1 py-0.2 rounded border border-blue-200/60">{lastStageMove.newStatus}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="pt-1.5 border-t border-neutral-100 text-[10px] text-neutral-500 flex items-center justify-between">
+                <span>Initial Stage</span>
+                <span className="font-medium text-neutral-700">Created as {task?.status || 'TODO'}</span>
+              </div>
+            )}
+          </div>
+
           {/* Parent Ticket card if this is a subtask */}
           {(task.parentTask || task.parentTaskId) && (
             <div className="rounded-lg border border-blue-200/80 bg-blue-50/60 p-2.5 space-y-1 shadow-2xs">
@@ -1554,6 +1666,56 @@ export const TaskIdClient = () => {
                     year: 'numeric',
                   })}
                 </span>
+              </div>
+            )}
+
+            {/* Stage Movement History in Details */}
+            {stageHistory && stageHistory.length > 0 && (
+              <div className="pt-2.5 border-t border-neutral-200/80 space-y-1.5 text-[10px]">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-[9px] uppercase tracking-wider text-neutral-400">
+                    Stage Movement History ({stageHistory.length})
+                  </h4>
+                  <span className="text-[9px] text-neutral-400 font-medium">Transitions</span>
+                </div>
+
+                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                  {stageHistory.map((sh, idx) => {
+                    const isMove = sh.type === 'STATUS_TRANSITION';
+                    const actorName = sh.actor?.name || 'Team Member';
+                    const initial = actorName.substring(0, 1).toUpperCase();
+
+                    return (
+                      <div
+                        key={sh.id || idx}
+                        className="bg-white rounded-lg border border-neutral-200 p-2 shadow-2xs space-y-1 text-[10px]"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <div className="size-3.5 rounded-full bg-blue-100 text-blue-700 font-bold text-[8px] flex items-center justify-center">
+                              {initial}
+                            </div>
+                            <span className="font-semibold text-neutral-800">{actorName}</span>
+                          </div>
+                          <span className="text-neutral-400 text-[9px]" title={sh.timestamp}>
+                            {formatCommentDate(sh.timestamp)}
+                          </span>
+                        </div>
+                        {isMove ? (
+                          <div className="flex items-center gap-1 text-[9px] font-semibold text-neutral-600">
+                            <span className="bg-neutral-100 px-1 py-0.2 rounded border border-neutral-200">{sh.previousStatus}</span>
+                            <ArrowRight className="size-2.5 text-neutral-400" />
+                            <span className="bg-blue-50 text-blue-700 px-1 py-0.2 rounded border border-blue-200/60">{sh.newStatus}</span>
+                          </div>
+                        ) : (
+                          <div className="text-[9px] text-neutral-600">
+                            Created with stage <span className="bg-amber-50 text-amber-700 px-1 py-0.2 rounded border border-amber-200/60 font-semibold">{sh.newStatus}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
