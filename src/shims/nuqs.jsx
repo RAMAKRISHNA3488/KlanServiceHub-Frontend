@@ -50,12 +50,18 @@ export function useQueryState(key, parser) {
         if (parser && typeof parser.parse === 'function') {
             return parser.parse(rawValue);
         }
+        if (rawValue === null && parser && parser.defaultValue !== undefined) {
+            return parser.defaultValue;
+        }
         return rawValue;
     }, [rawValue, parser]);
     const setValue = useCallback((updater) => {
         setSearchParams((prev) => {
             const nextParams = new URLSearchParams(prev);
-            const currentVal = parser && typeof parser.parse === 'function' ? parser.parse(nextParams.get(key)) : nextParams.get(key);
+            const currentRaw = nextParams.get(key);
+            const currentVal = parser && typeof parser.parse === 'function' 
+                ? parser.parse(currentRaw) 
+                : (currentRaw === null && parser?.defaultValue !== undefined ? parser.defaultValue : currentRaw);
             const resolvedVal = typeof updater === 'function' ? updater(currentVal) : updater;
             if (resolvedVal === null ||
                 resolvedVal === undefined ||
@@ -76,7 +82,13 @@ export function useQueryStates(parsers) {
         const res = {};
         for (const [key, parser] of Object.entries(parsers)) {
             const raw = searchParams.get(key);
-            res[key] = parser && typeof parser.parse === 'function' ? parser.parse(raw) : raw;
+            if (parser && typeof parser.parse === 'function') {
+                res[key] = parser.parse(raw);
+            } else if (raw === null && parser && parser.defaultValue !== undefined) {
+                res[key] = parser.defaultValue;
+            } else {
+                res[key] = raw;
+            }
         }
         return res;
     }, [searchParams, parsers]);

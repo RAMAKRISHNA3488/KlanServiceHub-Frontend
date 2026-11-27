@@ -294,7 +294,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
     try {
       const res = await tasksApi.getAttachments(targetId);
       if (res?.data) setAttachments(Array.isArray(res.data) ? res.data : []);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   useEffect(() => {
@@ -317,7 +317,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
       if (workspaceId) {
         sprintsApi.getSprints(workspaceId).then((res) => {
           if (res?.data?.sprints) setSprints(res.data.sprints);
-        }).catch(() => {});
+        }).catch(() => { });
 
         Promise.all([
           workflowsAdminApi.getIssueTypes(workspaceId).catch(() => ({ data: [] })),
@@ -695,11 +695,11 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const rawIcon = matchedType?.icon || TYPE_ICONS[currentTypeName]?.icon;
   const TypeIcon = typeof rawIcon === 'function' ? rawIcon : (
     rawIcon === 'bookmark' ? Bookmark :
-    rawIcon === 'zap' ? Zap :
-    rawIcon === 'alert-circle' ? AlertCircle :
-    rawIcon === 'list' ? List :
-    rawIcon === 'trending-up' ? TrendingUp :
-    CheckSquare
+      rawIcon === 'zap' ? Zap :
+        rawIcon === 'alert-circle' ? AlertCircle :
+          rawIcon === 'list' ? List :
+            rawIcon === 'trending-up' ? TrendingUp :
+              CheckSquare
   );
 
   return (
@@ -773,11 +773,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 type="button"
                 onClick={handleToggleLike}
                 disabled={isLiking}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${
-                  task?.hasLiked
-                    ? 'bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs font-bold'
-                    : 'text-neutral-600 hover:text-rose-600 hover:bg-white'
-                }`}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${task?.hasLiked
+                  ? 'bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs font-bold'
+                  : 'text-neutral-600 hover:text-rose-600 hover:bg-white'
+                  }`}
                 title={task?.hasLiked ? 'Unlike this issue' : 'Like this issue'}
               >
                 <Heart className={`size-3 ${task?.hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -788,11 +787,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 type="button"
                 onClick={handleToggleFavorite}
                 disabled={isFavoriting}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${
-                  task?.isFavorite
-                    ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs font-bold'
-                    : 'text-neutral-600 hover:text-amber-600 hover:bg-white'
-                }`}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${task?.isFavorite
+                  ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs font-bold'
+                  : 'text-neutral-600 hover:text-amber-600 hover:bg-white'
+                  }`}
                 title={task?.isFavorite ? 'Remove from favorites' : 'Save to favorites'}
               >
                 <Star className={`size-3 ${task?.isFavorite ? 'fill-amber-400 text-amber-500' : ''}`} />
@@ -1011,55 +1009,50 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               <div className="flex items-center gap-3.5 border-b border-neutral-200 pb-1.5 flex-wrap">
                 <button
                   onClick={() => setActiveTab('COMMENTS')}
-                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                    activeTab === 'COMMENTS'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                  }`}
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'COMMENTS'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                    }`}
                 >
                   <MessageSquare className="size-3" />
                   Comments ({comments.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('SUBTASKS')}
-                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                    activeTab === 'SUBTASKS'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                  }`}
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'SUBTASKS'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                    }`}
                 >
                   <List className="size-3" />
                   Sub-tasks ({task?.subtasks?.length || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('WORKLOG')}
-                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                    activeTab === 'WORKLOG'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                  }`}
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'WORKLOG'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                    }`}
                 >
                   <Clock className="size-3" />
                   Time Tracking ({task?.logged_hours || 0}h logged)
                 </button>
                 <button
                   onClick={() => setActiveTab('LINKED_TICKETS')}
-                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                    activeTab === 'LINKED_TICKETS'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                  }`}
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'LINKED_TICKETS'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                    }`}
                 >
                   <Link2 className="size-3" />
                   Linked Tickets & Dependencies
                 </button>
                 <button
                   onClick={() => setActiveTab('HISTORY')}
-                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                    activeTab === 'HISTORY'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                  }`}
+                  className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'HISTORY'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                    }`}
                 >
                   <History className="size-3" />
                   History ({taskHistory.length})
@@ -1171,8 +1164,8 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                                     title={
                                       c.created_at || c.createdAt || c.$createdAt
                                         ? new Date(
-                                            c.created_at || c.createdAt || c.$createdAt
-                                          ).toLocaleString()
+                                          c.created_at || c.createdAt || c.$createdAt
+                                        ).toLocaleString()
                                         : ''
                                     }
                                   >
@@ -1332,16 +1325,14 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                           >
                             <div className="flex items-center gap-2.5 min-w-0 pr-3">
                               <CheckSquare
-                                className={`size-4 shrink-0 transition ${
-                                  isDone ? 'text-emerald-600' : 'text-blue-600 group-hover:scale-110'
-                                }`}
+                                className={`size-4 shrink-0 transition ${isDone ? 'text-emerald-600' : 'text-blue-600 group-hover:scale-110'
+                                  }`}
                               />
                               <span
-                                className={`font-semibold transition truncate ${
-                                  isDone
-                                    ? 'text-neutral-500 line-through decoration-neutral-400'
-                                    : 'text-neutral-800 group-hover:text-blue-600'
-                                }`}
+                                className={`font-semibold transition truncate ${isDone
+                                  ? 'text-neutral-500 line-through decoration-neutral-400'
+                                  : 'text-neutral-800 group-hover:text-blue-600'
+                                  }`}
                               >
                                 {sub.name}
                               </span>
@@ -1353,9 +1344,8 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <span
-                                className={`rounded px-2 py-0.5 text-[10px] font-bold border transition ${
-                                  STATUS_COLORS[sub.status] || 'bg-neutral-100 text-neutral-600 border-neutral-200'
-                                }`}
+                                className={`rounded px-2 py-0.5 text-[10px] font-bold border transition ${STATUS_COLORS[sub.status] || 'bg-neutral-100 text-neutral-600 border-neutral-200'
+                                  }`}
                               >
                                 {sub.status}
                               </span>
@@ -1433,33 +1423,30 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                       <button
                         type="button"
                         onClick={() => setHistoryFilter('ALL')}
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                          historyFilter === 'ALL'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                        }`}
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${historyFilter === 'ALL'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                          }`}
                       >
                         All
                       </button>
                       <button
                         type="button"
                         onClick={() => setHistoryFilter('STATUS')}
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                          historyFilter === 'STATUS'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                        }`}
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${historyFilter === 'STATUS'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                          }`}
                       >
                         Status Moves
                       </button>
                       <button
                         type="button"
                         onClick={() => setHistoryFilter('FIELDS')}
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                          historyFilter === 'FIELDS'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                        }`}
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${historyFilter === 'FIELDS'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                          }`}
                       >
                         Field Updates
                       </button>
@@ -1483,13 +1470,12 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                         return (
                           <div key={item.id} className="relative group">
                             {/* Node icon */}
-                            <div className={`absolute -left-6 top-1 size-5 rounded-full flex items-center justify-center text-[10px] border ring-4 ring-white ${
-                              isCreation
-                                ? 'bg-emerald-500 text-white border-emerald-600'
-                                : isStatusMove
+                            <div className={`absolute -left-6 top-1 size-5 rounded-full flex items-center justify-center text-[10px] border ring-4 ring-white ${isCreation
+                              ? 'bg-emerald-500 text-white border-emerald-600'
+                              : isStatusMove
                                 ? 'bg-blue-500 text-white border-blue-600'
                                 : 'bg-neutral-500 text-white border-neutral-600'
-                            }`}>
+                              }`}>
                               {isCreation ? (
                                 <Plus className="size-2.5 stroke-[3]" />
                               ) : isStatusMove ? (
@@ -1625,11 +1611,10 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               {task?.status === 'DONE' && (
                 <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[10px]">
                   <span className="text-neutral-400 font-medium">History Retention</span>
-                  <span className={`font-semibold text-[9px] px-1.5 py-0.5 rounded ${
-                    task.historyExpired
-                      ? 'text-rose-700 bg-rose-50 border border-rose-200/60'
-                      : 'text-amber-700 bg-amber-50 border border-amber-200/60'
-                  }`}>
+                  <span className={`font-semibold text-[9px] px-1.5 py-0.5 rounded ${task.historyExpired
+                    ? 'text-rose-700 bg-rose-50 border border-rose-200/60'
+                    : 'text-amber-700 bg-amber-50 border border-amber-200/60'
+                    }`}>
                     {task.historyRetentionMessage || 'Expires 6 mo after Done'}
                   </span>
                 </div>
@@ -1739,7 +1724,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   const currentReporters = task?.reporters && task.reporters.length > 0
                     ? task.reporters
                     : (task?.reporter ? [task.reporter] : []);
-                  
+
                   if (currentReporters.length === 0) {
                     return <div className="text-xs text-neutral-400 italic py-0.5">No reporter specified</div>;
                   }

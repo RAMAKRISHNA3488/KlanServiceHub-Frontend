@@ -293,7 +293,7 @@ export const TaskIdClient = () => {
           .then((res) => {
             if (res?.data?.sprints) setSprints(res.data.sprints);
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     }
   }, [taskId, workspaceId]);
@@ -593,8 +593,8 @@ export const TaskIdClient = () => {
   const dueDateFormatted = task.dueDate
     ? task.dueDate.split('T')[0]
     : task.due_date
-    ? task.due_date.split('T')[0]
-    : '';
+      ? task.due_date.split('T')[0]
+      : '';
 
   return (
     <div className="space-y-6 w-full pb-16">
@@ -633,11 +633,10 @@ export const TaskIdClient = () => {
               type="button"
               onClick={handleToggleLike}
               disabled={isLiking}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${
-                task?.hasLiked
-                  ? 'bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs font-bold'
-                  : 'text-neutral-600 hover:text-rose-600 hover:bg-white'
-              }`}
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${task?.hasLiked
+                ? 'bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs font-bold'
+                : 'text-neutral-600 hover:text-rose-600 hover:bg-white'
+                }`}
               title={task?.hasLiked ? 'Unlike this issue' : 'Like this issue'}
             >
               <Heart className={`size-3 ${task?.hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -648,11 +647,10 @@ export const TaskIdClient = () => {
               type="button"
               onClick={handleToggleFavorite}
               disabled={isFavoriting}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${
-                task?.isFavorite
-                  ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs font-bold'
-                  : 'text-neutral-600 hover:text-amber-600 hover:bg-white'
-              }`}
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition ${task?.isFavorite
+                ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs font-bold'
+                : 'text-neutral-600 hover:text-amber-600 hover:bg-white'
+                }`}
               title={task?.isFavorite ? 'Remove from favorites' : 'Save to favorites'}
             >
               <Star className={`size-3 ${task?.isFavorite ? 'fill-amber-400 text-amber-500' : ''}`} />
@@ -688,10 +686,9 @@ export const TaskIdClient = () => {
                 : task.status || 'TODO'
             }
             onChange={(e) => handleUpdate({ status: e.target.value })}
-            className={`rounded px-2 py-0.5 text-[10px] font-semibold border cursor-pointer focus:outline-none h-6 shadow-2xs ${
-              STATUS_COLORS[task.status] ||
+            className={`rounded px-2 py-0.5 text-[10px] font-semibold border cursor-pointer focus:outline-none h-6 shadow-2xs ${STATUS_COLORS[task.status] ||
               (task.status === 'CODE_REVIEW' || task.status === 'REVIEW' ? STATUS_COLORS.IN_REVIEW : STATUS_COLORS.TODO)
-            }`}
+              }`}
           >
             <option value="BACKLOG">BACKLOG</option>
             <option value="TODO">TO DO</option>
@@ -840,55 +837,50 @@ export const TaskIdClient = () => {
             <div className="flex items-center gap-5 border-b border-neutral-200 pb-2">
               <button
                 onClick={() => setActiveTab('COMMENTS')}
-                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                  activeTab === 'COMMENTS'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'COMMENTS'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <MessageSquare className="size-3" />
                 Comments ({comments.length})
               </button>
               <button
                 onClick={() => setActiveTab('SUBTASKS')}
-                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                  activeTab === 'SUBTASKS'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'SUBTASKS'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <List className="size-3" />
                 Sub-tasks ({task.subtasks?.length || 0})
               </button>
               <button
                 onClick={() => setActiveTab('WORKLOG')}
-                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                  activeTab === 'WORKLOG'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'WORKLOG'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <Clock className="size-3" />
                 Time Tracking ({task.logged_hours || 0}h logged)
               </button>
               <button
                 onClick={() => setActiveTab('LINKED_TICKETS')}
-                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                  activeTab === 'LINKED_TICKETS'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'LINKED_TICKETS'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <Link2 className="size-3" />
                 Linked Tickets & Dependencies
               </button>
               <button
                 onClick={() => setActiveTab('HISTORY')}
-                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${
-                  activeTab === 'HISTORY'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-neutral-500 hover:text-neutral-900'
-                }`}
+                className={`text-[11px] font-semibold flex items-center gap-1 pb-1.5 -mb-2 transition border-b-2 ${activeTab === 'HISTORY'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                  }`}
               >
                 <History className="size-3" />
                 History ({taskHistory.length})
@@ -1000,8 +992,8 @@ export const TaskIdClient = () => {
                                   title={
                                     c.created_at || c.createdAt || c.$createdAt
                                       ? new Date(
-                                          c.created_at || c.createdAt || c.$createdAt
-                                        ).toLocaleString()
+                                        c.created_at || c.createdAt || c.$createdAt
+                                      ).toLocaleString()
                                       : ''
                                   }
                                 >
@@ -1164,16 +1156,14 @@ export const TaskIdClient = () => {
                         >
                           <div className="flex items-center gap-2.5 min-w-0 pr-3">
                             <CheckSquare
-                              className={`size-4 shrink-0 transition ${
-                                isDone ? 'text-emerald-600' : 'text-blue-600 group-hover:scale-110'
-                              }`}
+                              className={`size-4 shrink-0 transition ${isDone ? 'text-emerald-600' : 'text-blue-600 group-hover:scale-110'
+                                }`}
                             />
                             <span
-                              className={`font-semibold transition truncate ${
-                                isDone
-                                  ? 'text-neutral-500 line-through decoration-neutral-400'
-                                  : 'text-neutral-800 group-hover:text-blue-600'
-                              }`}
+                              className={`font-semibold transition truncate ${isDone
+                                ? 'text-neutral-500 line-through decoration-neutral-400'
+                                : 'text-neutral-800 group-hover:text-blue-600'
+                                }`}
                             >
                               {sub.name}
                             </span>
@@ -1185,9 +1175,8 @@ export const TaskIdClient = () => {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <span
-                              className={`rounded px-2 py-0.5 text-[10px] font-bold border transition ${
-                                STATUS_COLORS[sub.status] || 'bg-neutral-100 text-neutral-600 border-neutral-200'
-                              }`}
+                              className={`rounded px-2 py-0.5 text-[10px] font-bold border transition ${STATUS_COLORS[sub.status] || 'bg-neutral-100 text-neutral-600 border-neutral-200'
+                                }`}
                             >
                               {sub.status}
                             </span>
@@ -1240,22 +1229,6 @@ export const TaskIdClient = () => {
             {/* Tab: History & Audit Timeline */}
             {activeTab === 'HISTORY' && (
               <div className="space-y-3">
-                {task?.historyExpired && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-xs text-amber-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">6-Month History Expiration:</span>
-                      <span>Intermediate stage transitions for this completed ticket were pruned per retention policy. Creation author is preserved.</span>
-                    </div>
-                    <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Retention Applied</span>
-                  </div>
-                )}
-                {task?.status === 'DONE' && !task?.historyExpired && task?.historyRetentionMessage && (
-                  <div className="bg-blue-50/60 border border-blue-200/60 rounded-lg p-2 text-[11px] text-blue-800 flex items-center justify-between">
-                    <span><strong>Retention Lifecycle:</strong> {task.historyRetentionMessage}</span>
-                    <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold">Active</span>
-                  </div>
-                )}
-
                 {/* Filter pills */}
                 <div className="flex items-center justify-between pb-2 border-b border-neutral-100 flex-wrap gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
@@ -1265,33 +1238,30 @@ export const TaskIdClient = () => {
                     <button
                       type="button"
                       onClick={() => setHistoryFilter('ALL')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                        historyFilter === 'ALL'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                      }`}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${historyFilter === 'ALL'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                        }`}
                     >
                       All
                     </button>
                     <button
                       type="button"
                       onClick={() => setHistoryFilter('STATUS')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                        historyFilter === 'STATUS'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                      }`}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${historyFilter === 'STATUS'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                        }`}
                     >
                       Status Moves
                     </button>
                     <button
                       type="button"
                       onClick={() => setHistoryFilter('FIELDS')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                        historyFilter === 'FIELDS'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                      }`}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition ${historyFilter === 'FIELDS'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                        }`}
                     >
                       Field Updates
                     </button>
@@ -1315,13 +1285,12 @@ export const TaskIdClient = () => {
                       return (
                         <div key={item.id} className="relative group">
                           {/* Node icon */}
-                          <div className={`absolute -left-6 top-1 size-5 rounded-full flex items-center justify-center text-[10px] border ring-4 ring-white ${
-                            isCreation
-                              ? 'bg-emerald-500 text-white border-emerald-600'
-                              : isStatusMove
+                          <div className={`absolute -left-6 top-1 size-5 rounded-full flex items-center justify-center text-[10px] border ring-4 ring-white ${isCreation
+                            ? 'bg-emerald-500 text-white border-emerald-600'
+                            : isStatusMove
                               ? 'bg-blue-500 text-white border-blue-600'
                               : 'bg-neutral-500 text-white border-neutral-600'
-                          }`}>
+                            }`}>
                             {isCreation ? (
                               <Plus className="size-2.5 stroke-[3]" />
                             ) : isStatusMove ? (
@@ -1432,19 +1401,6 @@ export const TaskIdClient = () => {
               <div className="pt-1.5 border-t border-neutral-100 text-[10px] text-neutral-500 flex items-center justify-between">
                 <span>Initial Stage</span>
                 <span className="font-medium text-neutral-700">Created as {task?.status || 'TODO'}</span>
-              </div>
-            )}
-
-            {task?.status === 'DONE' && (
-              <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[10px]">
-                <span className="text-neutral-400 font-medium">History Retention</span>
-                <span className={`font-semibold text-[9px] px-1.5 py-0.5 rounded ${
-                  task.historyExpired
-                    ? 'text-rose-700 bg-rose-50 border border-rose-200/60'
-                    : 'text-amber-700 bg-amber-50 border border-amber-200/60'
-                }`}>
-                  {task.historyRetentionMessage || 'Expires 6 mo after Done'}
-                </span>
               </div>
             )}
           </div>
@@ -1648,13 +1604,6 @@ export const TaskIdClient = () => {
                   </h4>
                   <span className="text-[9px] text-neutral-400 font-medium">Transitions</span>
                 </div>
-
-                {task?.historyExpired && (
-                  <div className="bg-amber-50/80 border border-amber-200/60 rounded-md p-2 text-[10px] text-amber-800 space-y-0.5">
-                    <span className="font-semibold block">6-Month Retention Policy Applied</span>
-                    <span>Intermediate stage movements were pruned after 6 months from completion. Ticket creator attribution is permanently preserved.</span>
-                  </div>
-                )}
 
                 <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                   {stageHistory.map((sh, idx) => {

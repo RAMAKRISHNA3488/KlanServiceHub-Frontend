@@ -17,17 +17,42 @@ export const columns = columnHelper.columns([
           <ArrowUpDown className="ml-2 h-4 w-4"/>
         </Button>);
         },
-        cell: ({ row }) => {
-            const name = row.original.name;
-            const key = row.original.key;
+        cell: ({ row, table }) => {
+            const task = row.original;
+            const name = task.name;
+            const key = task.key;
+            const taskId = task.$id || task.id;
+            const workspaceId = task.workspaceId || task.workspace_id;
+            const targetUrl = workspaceId && taskId ? `/workspaces/${workspaceId}/tasks/${taskId}` : '#';
+
+            const handleOpen = (e) => {
+              if (e.metaKey || e.ctrlKey || e.button === 1) return;
+              e.preventDefault();
+              if (table.options.meta?.onOpenTask) {
+                table.options.meta.onOpenTask(task);
+              }
+            };
+
             return (
               <div className="flex items-center gap-x-2">
                 {key && (
-                  <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200/80 px-1.5 py-0.2 rounded shrink-0">
+                  <a
+                    href={targetUrl}
+                    onClick={handleOpen}
+                    className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 border border-blue-200/80 px-1.5 py-0.5 rounded shrink-0 transition-colors cursor-pointer select-none"
+                    title={`Open ${key} details`}
+                  >
                     {key}
-                  </span>
+                  </a>
                 )}
-                <p className="line-clamp-1 text-[11px] font-medium text-neutral-800">{name}</p>
+                <a
+                  href={targetUrl}
+                  onClick={handleOpen}
+                  className="text-left line-clamp-1 text-[11px] font-semibold text-neutral-800 hover:text-blue-600 hover:underline transition-colors cursor-pointer"
+                  title={name}
+                >
+                  {name}
+                </a>
               </div>
             );
         },

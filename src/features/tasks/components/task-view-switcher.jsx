@@ -2,7 +2,7 @@
 import { Loader2, PlusIcon } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DottedSeparator } from '@/components/dotted-separator';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,6 +22,7 @@ import { DataFilters } from './data-filters';
 import { DataKanban } from './data-kanban';
 import { DataSearch } from './data-search';
 import { DataTable } from './data-table';
+import { KlanserviceHubIssueDetailModal } from './klanservicehub-issue-detail-modal';
 import { KanbanBoardSkeleton } from './skeletons/kanban-board-skeleton';
 import { TaskTableSkeleton } from './skeletons/task-table-skeleton';
 
@@ -70,8 +71,11 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
     const [view, setView] = useQueryState('task-view', {
         defaultValue: 'table',
     });
+    const activeView = (view === 'kanban' || view === 'calendar') ? view : 'table';
     const [{ status, assigneeId, projectId: filteredProjectId, dueDate, search }] = useTaskFilters();
     const workspaceId = useWorkspaceId();
+    const queryClient = useQueryClient();
+    const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
     const { open } = useCreateTaskModal();
     const { data: currentUser } = useCurrent();
     const { data: membersData } = useGetMembers({ workspaceId });
@@ -280,7 +284,7 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
       });
     }, [tasks?.documents, kanbanSearch, kanbanFilters, teams]);
 
-    return (<Tabs defaultValue={view} onValueChange={setView} className="w-full flex-1 rounded-lg border">
+    return (<Tabs value={activeView} defaultValue="table" onValueChange={setView} className="w-full flex-1 rounded-lg border">
       <div className="flex h-full flex-col overflow-auto p-4">
         <div className="flex flex-col items-center justify-between gap-y-2 lg:flex-row">
           <TabsList className="w-full lg:w-auto">
@@ -305,7 +309,7 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
         <DottedSeparator className="my-4"/>
 
         {/* Filter Section: Rich BoardFilters for Kanban view, standard DataFilters for Table & Calendar */}
-        {view === 'kanban' ? (
+        {activeView === 'kanban' ? (
           <div className="mb-4">
             <BoardFilters
               filters={kanbanFilters}
@@ -332,14 +336,18 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
         )}
 
         {isLoadingTasks ? (
-          view === 'table' ? (
+          activeView === 'table' ? (
             <TaskTableSkeleton />
           ) : (
             <KanbanBoardSkeleton />
           )
         ) : (<>
             <TabsContent value="table" className="mt-0 w-full min-w-0">
-              <DataTable columns={columns} data={tasks?.documents ?? []}/>
+              <DataTable
+                columns={columns}
+                data={tasks?.documents ?? []}
+                onOpenTask={(task) => setSelectedDetailTaskId(task.$id || task.id)}
+              />
             </TabsContent>
 
             <TabsContent value="kanban" className="mt-0 w-full min-w-0">
@@ -356,5 +364,18 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
             </TabsContent>
           </>)}
       </div>
+
+      {selectedDetailTaskId && (
+        <KlanserviceHubIssueDetailModal
+          key={selectedDetailTaskId}
+          taskId={selectedDetailTaskId}
+          open={!!selectedDetailTaskId}
+          onClose={() => setSelectedDetailTaskId(null)}
+          onUpdated={() => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            queryClient.invalidateQueries({ queryKey: ['task', selectedDetailTaskId] });
+          }}
+        />
+      )}
     </Tabs>);
 };
