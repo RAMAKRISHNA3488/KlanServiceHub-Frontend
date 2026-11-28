@@ -17,7 +17,7 @@ const DEFAULT_BOARDS = [
   { id: TaskStatus.DONE, label: 'Done', color: '#10B981', category: 'DONE', maxTasks: 0, overloadColor: '#EF4444' },
 ];
 
-export const DataKanban = ({ data, onChange, isAdmin, projectId }) => {
+export const DataKanban = ({ data, onChange, isAdmin, projectId, onOpenTask }) => {
     const workspaceId = useWorkspaceId();
     const [workflows, setWorkflows] = useState([]);
     const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
@@ -366,7 +366,7 @@ export const DataKanban = ({ data, onChange, isAdmin, projectId }) => {
                             >
                               <KanbanCard
                                 task={task}
-                                onDoubleClick={() => setSelectedDetailTaskId(task?.$id || task?.id)}
+                                onDoubleClick={() => onOpenTask ? onOpenTask(task) : setSelectedDetailTaskId(task?.$id || task?.id)}
                               />
                             </div>
                           )}
@@ -384,7 +384,7 @@ export const DataKanban = ({ data, onChange, isAdmin, projectId }) => {
         </div>
       </DragDropContext>
 
-      {selectedDetailTaskId && (
+      {!onOpenTask && selectedDetailTaskId && (
         <KlanserviceHubIssueDetailModal
           key={selectedDetailTaskId}
           taskId={selectedDetailTaskId}

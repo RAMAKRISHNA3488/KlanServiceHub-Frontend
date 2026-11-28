@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryState } from 'nuqs';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useCurrent } from '@/features/auth/api/use-current';
@@ -68,7 +69,11 @@ export const BoardsView = () => {
   const [sprints, setSprints] = useState([]);
   const [issueTypes, setIssueTypes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
+  const [urlTaskId, setUrlTaskId] = useQueryState('taskId');
+  const selectedDetailTaskId = urlTaskId || null;
+  const setSelectedDetailTaskId = useCallback((id) => {
+    setUrlTaskId(id || null);
+  }, [setUrlTaskId]);
   const [draggedOverCol, setDraggedOverCol] = useState(null);
 
   const boardRef = useRef(null);

@@ -91,6 +91,7 @@ export const authApi = {
     } finally {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(AUTH_TOKEN_KEY);
+        sessionStorage.removeItem('klan_last_active_route');
       }
     }
   },

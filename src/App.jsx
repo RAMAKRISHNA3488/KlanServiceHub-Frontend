@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import AuthLayout from '@/app/(auth)/layout';
 import DashboardLayout from '@/app/(dashboard)/layout';
 import StandaloneLayout from '@/app/(standalone)/layout';
 import NotFoundPage from '@/app/not-found';
 import { useCurrent } from '@/features/auth/api/use-current';
+import { AUTH_TOKEN_KEY } from '@/lib/api-client';
 import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
 import { WorkspaceIdClient } from '@/app/(dashboard)/workspaces/[workspaceId]/client';
 import { ProjectIdClient } from '@/app/(dashboard)/workspaces/[workspaceId]/projects/[projectId]/client';
@@ -76,17 +77,48 @@ import {
 
 // Protected Route Component
 const ProtectedRoute = () => {
-  const { data: user, isLoading } = useCurrent();
-  if (isLoading && !user) return <PageLoader />;
-  if (!user && !isLoading) return <Navigate to="/sign-in" replace />;
+  const { data: user, isLoading, isFetching } = useCurrent();
+  const location = useLocation();
+  const hasToken = typeof window !== 'undefined' ? Boolean(localStorage.getItem(AUTH_TOKEN_KEY)) : false;
+
+  // Persist current active workspace route whenever navigated
+  useEffect(() => {
+    if (typeof window !== 'undefined' && location.pathname && location.pathname.startsWith('/workspaces/')) {
+      sessionStorage.setItem('klan_last_active_route', `${location.pathname}${location.search || ''}`);
+    }
+  }, [location]);
+
+  // While loading or if user has an auth token and query is still in-flight, show page loader
+  if ((isLoading || (hasToken && isFetching)) && !user) {
+    return <PageLoader />;
+  }
+
+  // If definitely not authenticated
+  if (!user && !isLoading && !isFetching) {
+    return <Navigate to="/sign-in" state={{ from: location }} replace />;
+  }
+
   return <Outlet />;
 };
 
 // Public/Guest Route Component
 const PublicRoute = () => {
   const { data: user, isLoading } = useCurrent();
+  const location = useLocation();
+
   if (isLoading && !user) return <PageLoader />;
-  if (user) return <Navigate to="/" replace />;
+
+  if (user) {
+    // Check if user was trying to reach a specific route before sign-in
+    const fromPath = location.state?.from?.pathname
+      ? `${location.state.from.pathname}${location.state.from.search || ''}`
+      : null;
+    const lastActiveRoute = typeof window !== 'undefined' ? sessionStorage.getItem('klan_last_active_route') : null;
+    const targetRoute = fromPath || (lastActiveRoute && lastActiveRoute.startsWith('/workspaces/') ? lastActiveRoute : '/');
+
+    return <Navigate to={targetRoute} replace />;
+  }
+
   return <Outlet />;
 };
 
@@ -107,6 +139,13 @@ const HomePage = () => {
     }
     if (isLoadingWorkspaces && !workspaces) return <PageLoader />;
     if (!workspaces || workspaces.total === 0) return <Navigate to="/onboarding" replace />;
+
+    // Check if user has a previously active workspace sub-route saved in sessionStorage
+    const lastActiveRoute = typeof window !== 'undefined' ? sessionStorage.getItem('klan_last_active_route') : null;
+    if (lastActiveRoute && lastActiveRoute.startsWith('/workspaces/')) {
+      return <Navigate to={lastActiveRoute} replace />;
+    }
+
     const wsId = workspaces.documents[0]?.$id || workspaces.documents[0]?.id;
     if (wsId) return <Navigate to={`/workspaces/${wsId}`} replace />;
     return <Navigate to="/onboarding" replace />;

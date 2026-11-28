@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { authApi } from '@/lib/api-client';
+import { authApi, AUTH_TOKEN_KEY } from '@/lib/api-client';
 
 export const useCurrent = () => {
+    const hasToken = typeof window !== 'undefined' ? Boolean(localStorage.getItem(AUTH_TOKEN_KEY)) : false;
+
     const query = useQuery({
         queryKey: ['current'],
         queryFn: async () => {
@@ -12,7 +14,7 @@ export const useCurrent = () => {
                 return null;
             }
         },
-        retry: false,
+        retry: hasToken ? 1 : false,
         staleTime: 60 * 1000,
         refetchOnWindowFocus: true,
     });

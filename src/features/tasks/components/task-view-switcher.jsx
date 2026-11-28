@@ -75,7 +75,11 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
     const [{ status, assigneeId, projectId: filteredProjectId, dueDate, search }] = useTaskFilters();
     const workspaceId = useWorkspaceId();
     const queryClient = useQueryClient();
-    const [selectedDetailTaskId, setSelectedDetailTaskId] = useState(null);
+    const [urlTaskId, setUrlTaskId] = useQueryState('taskId');
+    const selectedDetailTaskId = urlTaskId || null;
+    const setSelectedDetailTaskId = useCallback((id) => {
+        setUrlTaskId(id || null);
+    }, [setUrlTaskId]);
     const { open } = useCreateTaskModal();
     const { data: currentUser } = useCurrent();
     const { data: membersData } = useGetMembers({ workspaceId });
@@ -356,6 +360,7 @@ export const TaskViewSwitcher = ({ projectId, hideProjectFilter }) => {
                 onChange={onKanbanChange}
                 isAdmin={isAdmin}
                 projectId={projectId || (filteredProjectId !== 'ALL' ? filteredProjectId : null)}
+                onOpenTask={(task) => setSelectedDetailTaskId(task.$id || task.id)}
               />
             </TabsContent>
 
