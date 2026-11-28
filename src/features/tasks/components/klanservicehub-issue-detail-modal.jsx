@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { useGetMembers } from '@/features/members/api/use-get-members';
@@ -128,6 +129,7 @@ const renderCommentContent = (content) => {
 };
 
 export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdated }) => {
+  const router = useRouter();
   const workspaceId = useWorkspaceId();
   const queryClient = useQueryClient();
   const { data: currentUser } = useCurrent();
@@ -786,14 +788,31 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               </button>
             )}
 
-            {/* Parent breadcrumb trail if in history */}
+            {/* 1. Project Name first in sequence with redirection */}
+            <button
+              type="button"
+              onClick={() => {
+                const pId = task?.project?.id || task?.project?.$id || task?.projectId || task?.project_id;
+                if (workspaceId && pId) {
+                  onClose?.();
+                  router.push(`/workspaces/${workspaceId}/projects/${pId}`);
+                }
+              }}
+              className="text-[11px] font-semibold text-neutral-700 hover:text-blue-600 hover:underline transition truncate max-w-[220px] cursor-pointer"
+              title={`Go to project: ${task?.project?.name || 'Project'}`}
+            >
+              {task?.project?.name || 'Project'}
+            </button>
+            <span className="text-neutral-300">/</span>
+
+            {/* 2. Parent / History sequence if opened from another ticket */}
             {historyStack.map((hist) => (
               <React.Fragment key={hist.id}>
                 <button
                   type="button"
                   onClick={() => handleBackToParent(hist)}
                   className="font-mono text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
-                  title={`Back to ${hist.name}`}
+                  title={`Back to ${hist.name || hist.key}`}
                 >
                   {hist.key}
                 </button>
@@ -807,7 +826,7 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                   type="button"
                   onClick={() => setActiveTaskId(task.parentTask.id || task.parentTask.$id)}
                   className="font-mono text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
-                  title={`Parent: ${task.parentTask.name}`}
+                  title={`Parent: ${task.parentTask.name || task.parentTask.key}`}
                 >
                   {task.parentTask.key || 'PARENT'}
                 </button>
@@ -815,12 +834,23 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               </>
             )}
 
-            <TypeIcon className="size-3.5 shrink-0" style={{ color: matchedColor }} />
-            <span className="font-mono text-[11px] font-semibold text-neutral-500 hover:underline cursor-pointer">
+            {/* 3. Current Ticket Key (No icon, clickable redirect to full page) */}
+            <button
+              type="button"
+              onClick={() => {
+                const tId = task?.id || task?.$id || currentId;
+                if (workspaceId && tId) {
+                  onClose?.();
+                  router.push(`/workspaces/${workspaceId}/tasks/${tId}`);
+                }
+              }}
+              className="font-mono text-[11px] font-bold text-neutral-800 hover:text-blue-600 hover:underline cursor-pointer"
+              title={`Open standalone task page: ${task?.key || 'TASK'}`}
+            >
               {task?.key || (task?.project?.key ? `${task.project.key}-1` : 'TASK-1')}
-            </span>
-            <span className="text-neutral-300">/</span>
-            <span className="text-[11px] font-semibold text-neutral-700 truncate max-w-[200px]">{task?.project?.name || 'Project'}</span>
+            </button>
+
+            {/* 4. Issue Type Badge */}
             {matchedType && (
               <span
                 className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-medium text-white shadow-2xs ml-1"
