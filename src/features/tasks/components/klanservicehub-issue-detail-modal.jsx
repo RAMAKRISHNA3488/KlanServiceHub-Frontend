@@ -758,18 +758,20 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   }
 
   const overlayClasses = isMaximized
-    ? "fixed inset-0 z-50 bg-black/60 p-0 overflow-hidden"
+    ? "fixed inset-0 z-50 bg-white flex flex-col overflow-hidden animate-in fade-in duration-150"
     : "fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-200";
 
   const modalContainerClasses = isMaximized
-    ? "w-screen h-screen max-w-none rounded-none bg-white flex flex-col overflow-hidden shadow-none border-0"
+    ? "w-full h-full max-w-none rounded-none bg-white flex flex-col overflow-hidden shadow-none border-0"
     : "w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden modal-container-enter";
 
   return (
     <div className={overlayClasses}>
       <div className={modalContainerClasses}>
         {/* Top Header & Breadcrumbs */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-200 bg-neutral-50/70 select-none">
+        <div className={`flex items-center justify-between border-b border-neutral-200 bg-neutral-50/80 select-none transition-all ${
+          isMaximized ? "px-5 sm:px-8 py-2.5 shadow-2xs" : "px-4 py-2"
+        }`}>
           <div className="flex items-center gap-2 flex-wrap">
             {/* If we have navigated into a subtask, show Back button */}
             {(historyStack.length > 0 || task?.parentTask || task?.parent_task_id) && (
@@ -965,74 +967,87 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
           </div>
         </div>
 
-        {/* Modal Main Content: 2 Columns */}
-        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-y-auto lg:overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-neutral-200">
+        {/* Modal Main Content */}
+        <div className={`flex-1 min-h-0 overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-neutral-200 ${
+          isMaximized
+            ? "flex flex-col lg:flex-row"
+            : "grid grid-cols-1 lg:grid-cols-12 overflow-y-auto lg:overflow-hidden"
+        }`}>
           {/* Left Main Details Column */}
-          <div className="lg:col-span-8 p-4 sm:p-5 space-y-4 min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full">
-            {/* Issue Title Input & Timestamp Metadata */}
-            <div className="space-y-1">
-              <input
-                type="text"
-                value={task?.name || ''}
-                onChange={(e) => setTask({ ...task, name: e.target.value })}
-                onBlur={(e) => handleUpdateProperty({ name: e.target.value })}
-                className="w-full text-base sm:text-lg font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none py-1 transition"
-                placeholder="Issue summary..."
-              />
-              <div className="flex items-center gap-2.5 text-xs text-neutral-500 font-normal">
-                <span
-                  className="flex items-center gap-1"
-                  title={
-                    task?.created_at || task?.$createdAt
-                      ? new Date(task.created_at || task.$createdAt).toLocaleString()
-                      : ''
-                  }
-                >
-                  <Calendar className="size-2.5 text-neutral-400" />
-                  Created: {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
-                </span>
-                {(task?.updated_at || task?.$updatedAt) && (
-                  <>
-                    <span>•</span>
-                    <span
-                      className="flex items-center gap-1"
-                      title={new Date(task.updated_at || task.$updatedAt).toLocaleString()}
-                    >
-                      <Clock className="size-2.5 text-neutral-400" />
-                      Updated: {formatCommentDate(task.updated_at || task.$updatedAt)}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 block">Description</span>
-                {descriptionImages.length > 0 && (
-                  <span className="text-[10px] text-neutral-400 font-medium">
-                    {descriptionImages.length} image{descriptionImages.length > 1 ? 's' : ''} attached
-                  </span>
-                )}
-              </div>
-
-              <div className="relative rounded-lg border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs overflow-hidden">
-                <textarea
-                  rows={4}
-                  value={task?.description || ''}
-                  onChange={(e) => setTask({ ...task, description: e.target.value })}
-                  onBlur={(e) => handleUpdateProperty({ description: e.target.value })}
-                  onPaste={handleDescriptionPaste}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const files = Array.from(e.dataTransfer?.files || []);
-                    if (files.length) handleDescriptionImageUpload({ target: { files, value: '' } });
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  placeholder="Add a detailed description, acceptance criteria, or technical design notes... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
-                  className="w-full bg-transparent p-2.5 text-[11px] text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none leading-relaxed"
+          <div className={
+            isMaximized
+              ? "flex-1 min-w-0 overflow-y-auto h-full p-6 sm:p-8 lg:p-10 bg-white"
+              : "lg:col-span-8 p-4 sm:p-5 min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full"
+          }>
+            <div className={isMaximized ? "max-w-4xl xl:max-w-5xl mx-auto w-full space-y-6" : "space-y-4"}>
+              {/* Issue Title Input & Timestamp Metadata */}
+              <div className="space-y-1">
+                <input
+                  type="text"
+                  value={task?.name || ''}
+                  onChange={(e) => setTask({ ...task, name: e.target.value })}
+                  onBlur={(e) => handleUpdateProperty({ name: e.target.value })}
+                  className={`w-full font-bold text-neutral-900 border-b border-transparent hover:border-neutral-300 focus:border-blue-600 focus:outline-none transition ${
+                    isMaximized ? "text-xl sm:text-2xl py-1.5" : "text-base sm:text-lg py-1"
+                  }`}
+                  placeholder="Issue summary..."
                 />
+                <div className="flex items-center gap-2.5 text-xs text-neutral-500 font-normal">
+                  <span
+                    className="flex items-center gap-1"
+                    title={
+                      task?.created_at || task?.$createdAt
+                        ? new Date(task.created_at || task.$createdAt).toLocaleString()
+                        : ''
+                    }
+                  >
+                    <Calendar className="size-2.5 text-neutral-400" />
+                    Created: {formatCommentDate(task?.created_at || task?.$createdAt) || 'Recently'}
+                  </span>
+                  {(task?.updated_at || task?.$updatedAt) && (
+                    <>
+                      <span>•</span>
+                      <span
+                        className="flex items-center gap-1"
+                        title={new Date(task.updated_at || task.$updatedAt).toLocaleString()}
+                      >
+                        <Clock className="size-2.5 text-neutral-400" />
+                        Updated: {formatCommentDate(task.updated_at || task.$updatedAt)}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 block">Description</span>
+                  {descriptionImages.length > 0 && (
+                    <span className="text-[10px] text-neutral-400 font-medium">
+                      {descriptionImages.length} image{descriptionImages.length > 1 ? 's' : ''} attached
+                    </span>
+                  )}
+                </div>
+
+                <div className="relative rounded-lg border border-neutral-300 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-500 bg-white transition shadow-2xs overflow-hidden">
+                  <textarea
+                    rows={isMaximized ? 6 : 4}
+                    value={task?.description || ''}
+                    onChange={(e) => setTask({ ...task, description: e.target.value })}
+                    onBlur={(e) => handleUpdateProperty({ description: e.target.value })}
+                    onPaste={handleDescriptionPaste}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const files = Array.from(e.dataTransfer?.files || []);
+                      if (files.length) handleDescriptionImageUpload({ target: { files, value: '' } });
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    placeholder="Add a detailed description, acceptance criteria, or technical design notes... (Type here, paste screenshot with Ctrl+V, or click Attach Image)"
+                    className={`w-full bg-transparent p-2.5 text-[11px] text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none leading-relaxed ${
+                      isMaximized ? "min-h-[140px] sm:min-h-[160px] text-xs sm:text-sm" : ""
+                    }`}
+                  />
 
                 <div className="flex items-center justify-between border-t border-neutral-100 px-2.5 py-1.5 bg-neutral-50/70">
                   <label
@@ -1652,10 +1667,15 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 </div>
               )}
             </div>
+            </div>
           </div>
 
           {/* Right Properties Column (KlanserviceHub Style Box) */}
-          <div className="lg:col-span-4 p-4 sm:p-5 bg-neutral-50/50 space-y-3.5 text-[11px] min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full">
+          <div className={
+            isMaximized
+              ? "w-full lg:w-80 xl:w-96 shrink-0 p-5 sm:p-6 bg-neutral-50/50 space-y-4 text-[11px] min-w-0 overflow-y-auto h-full border-l border-neutral-200"
+              : "lg:col-span-4 p-4 sm:p-5 bg-neutral-50/50 space-y-3.5 text-[11px] min-w-0 lg:overflow-y-auto lg:overflow-x-hidden lg:h-full"
+          }>
             <h3 className="font-bold text-[9px] uppercase tracking-wider text-neutral-400">Details</h3>
 
             {/* Current Stage & Last Moved Attribution Card */}
