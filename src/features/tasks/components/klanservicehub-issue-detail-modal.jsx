@@ -38,6 +38,11 @@ import {
   Star,
   Share2,
   Link2,
+  Search,
+  Minus,
+  Maximize2,
+  Minimize2,
+  ChevronDown,
 } from 'lucide-react';
 import { TaskShareModal } from './task-share-modal';
 import { LinkedTicketsSection } from './linked-tickets-section';
@@ -132,6 +137,13 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
   const [activeTaskId, setActiveTaskId] = useState(taskId);
   const [historyStack, setHistoryStack] = useState([]); // [{ id, key, name }]
   const currentId = activeTaskId || taskId;
+
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isAssigneePickerOpen, setIsAssigneePickerOpen] = useState(false);
+  const [assigneeSearch, setAssigneeSearch] = useState('');
+  const [isReporterPickerOpen, setIsReporterPickerOpen] = useState(false);
+  const [reporterSearch, setReporterSearch] = useState('');
 
   const [task, setTask] = useState(null);
   const [sprints, setSprints] = useState([]);
@@ -702,9 +714,60 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               CheckSquare
   );
 
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 right-6 z-50 flex items-center gap-2.5 bg-white border border-neutral-300 rounded-xl px-3 py-2 shadow-2xl hover:shadow-3xl transition-all duration-200 select-none animate-in slide-in-from-bottom-3">
+        <div
+          onClick={() => setIsMinimized(false)}
+          className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition"
+          title="Click to restore ticket popup"
+        >
+          <TypeIcon className="size-3.5 shrink-0" style={{ color: matchedColor }} />
+          <span className="font-mono text-xs font-bold text-neutral-800">
+            {task?.key || 'TASK'}
+          </span>
+          <span className="text-neutral-300">•</span>
+          <span className="text-xs font-medium text-neutral-700 truncate max-w-[220px]">
+            {task?.name || 'Untitled Issue'}
+          </span>
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60 shrink-0">
+            {task?.status ? task.status.replace(/_/g, ' ') : 'TODO'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-0.5 pl-2 border-l border-neutral-200">
+          <button
+            type="button"
+            onClick={() => setIsMinimized(false)}
+            className="p-1 rounded text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
+            title="Restore ticket popup"
+          >
+            <Maximize2 className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 rounded text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+            title="Close ticket"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const overlayClasses = isMaximized
+    ? "fixed inset-0 z-50 bg-black/60 p-0 overflow-hidden"
+    : "fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-200";
+
+  const modalContainerClasses = isMaximized
+    ? "w-screen h-screen max-w-none rounded-none bg-white flex flex-col overflow-hidden shadow-none border-0"
+    : "w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden modal-container-enter";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden modal-container-enter">
+    <div className={overlayClasses}>
+      <div className={modalContainerClasses}>
         {/* Top Header & Breadcrumbs */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-200 bg-neutral-50/70 select-none">
           <div className="flex items-center gap-2 flex-wrap">
@@ -866,12 +929,39 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
               );
             })()}
 
-            <button
-              onClick={onClose}
-              className="rounded p-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
-            >
-              <X className="size-4" />
-            </button>
+            {/* Window Controls: Minimize, Maximize / Restore, Close */}
+            <div className="flex items-center gap-0.5 pl-1.5 border-l border-neutral-200">
+              <button
+                type="button"
+                onClick={() => setIsMinimized(true)}
+                className="rounded p-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
+                title="Minimize ticket to tray"
+              >
+                <Minus className="size-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsMaximized((prev) => !prev)}
+                className="rounded p-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
+                title={isMaximized ? "Restore standard size" : "Maximize to full screen"}
+              >
+                {isMaximized ? (
+                  <Minimize2 className="size-3.5" />
+                ) : (
+                  <Maximize2 className="size-3.5" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded p-1 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                title="Close ticket"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1683,30 +1773,97 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 )}
               </div>
 
-              {/* Add / Toggle Assignee Dropdown */}
+              {/* Add / Toggle Assignee Dropdown with Search */}
               <div className="relative">
-                <select
-                  value=""
-                  onChange={(e) => {
-                    const memberId = e.target.value;
-                    if (!memberId) return;
-                    const currentIds = (task?.assignees || []).map((x) => x.$id || x.id);
-                    if (!currentIds.includes(memberId)) {
-                      const nextIds = [...currentIds, memberId];
-                      handleUpdateProperty({ assigneeIds: nextIds });
-                    }
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAssigneePickerOpen((prev) => !prev);
+                    setIsReporterPickerOpen(false);
+                    setAssigneeSearch('');
                   }}
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
+                  className="w-full flex items-center justify-between rounded-lg border border-dashed border-neutral-300 hover:border-blue-500 bg-white hover:bg-blue-50/40 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:text-blue-700 transition shadow-2xs cursor-pointer select-none"
                 >
-                  <option value="">+ Assign another member...</option>
-                  {members
-                    .filter((m) => !(task?.assignees || []).some((a) => (a.$id || a.id) === (m.$id || m.id)))
-                    .map((m) => (
-                      <option key={m.$id || m.id} value={m.$id || m.id}>
-                        {m.name || m.email} ({m.role || 'MEMBER'})
-                      </option>
-                    ))}
-                </select>
+                  <span className="flex items-center gap-1.5">
+                    <Plus className="size-3 text-neutral-400" />
+                    <span>Assign another member...</span>
+                  </span>
+                  <ChevronDown className={`size-3 text-neutral-400 transition-transform ${isAssigneePickerOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isAssigneePickerOpen && (
+                  <div className="mt-1.5 rounded-lg border border-neutral-200 bg-white shadow-lg p-2 space-y-1.5 z-20">
+                    <div className="relative">
+                      <Search className="size-3 text-neutral-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        autoFocus
+                        placeholder="Search assignees..."
+                        value={assigneeSearch}
+                        onChange={(e) => setAssigneeSearch(e.target.value)}
+                        className="w-full h-7 rounded-md border border-neutral-200 bg-neutral-50 pl-7 pr-6 text-xs text-neutral-800 placeholder:text-neutral-400 focus:bg-white focus:border-blue-500 focus:outline-none"
+                      />
+                      {assigneeSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setAssigneeSearch('')}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs px-1 cursor-pointer"
+                        >
+                          &times;
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="max-h-40 overflow-y-auto divide-y divide-neutral-100 rounded border border-neutral-100">
+                      {(() => {
+                        const available = members
+                          .filter((m) => !(task?.assignees || []).some((a) => (a.$id || a.id) === (m.$id || m.id)))
+                          .filter((m) =>
+                            (m.name || '').toLowerCase().includes(assigneeSearch.toLowerCase()) ||
+                            (m.email || '').toLowerCase().includes(assigneeSearch.toLowerCase()) ||
+                            (m.role || '').toLowerCase().includes(assigneeSearch.toLowerCase())
+                          );
+
+                        if (available.length === 0) {
+                          return (
+                            <div className="p-2.5 text-center text-xs text-neutral-400">
+                              {assigneeSearch ? 'No matching members found' : 'All workspace members assigned'}
+                            </div>
+                          );
+                        }
+
+                        return available.map((m) => {
+                          const mId = m.$id || m.id;
+                          return (
+                            <div
+                              key={mId}
+                              onClick={() => {
+                                const currentIds = (task?.assignees || []).map((x) => x.$id || x.id);
+                                if (!currentIds.includes(mId)) {
+                                  const nextIds = [...currentIds, mId];
+                                  handleUpdateProperty({ assigneeIds: nextIds });
+                                  setIsAssigneePickerOpen(false);
+                                  setAssigneeSearch('');
+                                }
+                              }}
+                              className="flex items-center justify-between p-1.5 hover:bg-blue-50/70 hover:text-blue-900 cursor-pointer transition select-none text-xs"
+                            >
+                              <div className="flex items-center gap-1.5 truncate">
+                                <div className="size-4 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center shrink-0">
+                                  {m.name?.substring(0, 1).toUpperCase() || 'M'}
+                                </div>
+                                <span className="font-medium truncate">{m.name || m.email}</span>
+                              </div>
+                              <span className="text-[9px] text-neutral-400 font-mono shrink-0 ml-1">
+                                {m.role || 'MEMBER'}
+                              </span>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1770,58 +1927,120 @@ export const KlanserviceHubIssueDetailModal = ({ taskId, open, onClose, onUpdate
                 })()}
               </div>
 
-              {/* Add / Toggle Reporter Dropdown */}
+              {/* Add / Toggle Reporter Dropdown with Search */}
               <div className="relative">
-                <select
-                  value=""
-                  onChange={(e) => {
-                    const memberUserId = e.target.value;
-                    if (!memberUserId) return;
-                    const currentReporters = task?.reporters && task.reporters.length > 0
-                      ? task.reporters
-                      : (task?.reporter ? [task.reporter] : []);
-                    const currentIds = currentReporters.map((x) => x.id || x.$id);
-                    if (!currentIds.includes(memberUserId)) {
-                      const nextIds = [...currentIds, memberUserId];
-                      const addedMember = members.find((m) => (m.user_id || m.userId || m.$id || m.id) === memberUserId);
-                      const newReporterObj = addedMember ? {
-                        id: memberUserId,
-                        name: addedMember.name,
-                        email: addedMember.email,
-                        avatarUrl: addedMember.avatar_url,
-                      } : { id: memberUserId, name: 'Team Member' };
-                      const nextReporters = [...currentReporters, newReporterObj];
-                      setTask((prev) => ({
-                        ...prev,
-                        reporters: nextReporters,
-                        reporterIds: nextIds,
-                        reporter: nextReporters[0] || null,
-                        reporter_id: nextIds[0] || null,
-                      }));
-                      handleUpdateProperty({ reporterIds: nextIds });
-                    }
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsReporterPickerOpen((prev) => !prev);
+                    setIsAssigneePickerOpen(false);
+                    setReporterSearch('');
                   }}
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-800 focus:border-blue-600 focus:outline-none h-8.5 shadow-2xs"
+                  className="w-full flex items-center justify-between rounded-lg border border-dashed border-neutral-300 hover:border-indigo-500 bg-white hover:bg-indigo-50/40 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:text-indigo-700 transition shadow-2xs cursor-pointer select-none"
                 >
-                  <option value="">+ Add another reporter...</option>
-                  {members
-                    .filter((m) => {
-                      const uId = m.user_id || m.userId || m.$id || m.id;
-                      const currentReporters = task?.reporters && task.reporters.length > 0
-                        ? task.reporters
-                        : (task?.reporter ? [task.reporter] : []);
-                      return !currentReporters.some((r) => (r.id || r.$id) === uId || (r.id || r.$id) === (m.$id || m.id));
-                    })
-                    .map((m) => {
-                      const uId = m.user_id || m.userId || m.$id || m.id;
-                      const isCurrent = currentUser?.$id === uId;
-                      return (
-                        <option key={m.$id || m.id} value={uId}>
-                          {m.name || m.email} {isCurrent ? '(You)' : ''}
-                        </option>
-                      );
-                    })}
-                </select>
+                  <span className="flex items-center gap-1.5">
+                    <Plus className="size-3 text-neutral-400" />
+                    <span>Add another reporter...</span>
+                  </span>
+                  <ChevronDown className={`size-3 text-neutral-400 transition-transform ${isReporterPickerOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isReporterPickerOpen && (
+                  <div className="mt-1.5 rounded-lg border border-neutral-200 bg-white shadow-lg p-2 space-y-1.5 z-20">
+                    <div className="relative">
+                      <Search className="size-3 text-neutral-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        autoFocus
+                        placeholder="Search reporters..."
+                        value={reporterSearch}
+                        onChange={(e) => setReporterSearch(e.target.value)}
+                        className="w-full h-7 rounded-md border border-neutral-200 bg-neutral-50 pl-7 pr-6 text-xs text-neutral-800 placeholder:text-neutral-400 focus:bg-white focus:border-indigo-500 focus:outline-none"
+                      />
+                      {reporterSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setReporterSearch('')}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs px-1 cursor-pointer"
+                        >
+                          &times;
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="max-h-40 overflow-y-auto divide-y divide-neutral-100 rounded border border-neutral-100">
+                      {(() => {
+                        const currentReporters = task?.reporters && task.reporters.length > 0
+                          ? task.reporters
+                          : (task?.reporter ? [task.reporter] : []);
+                        const available = members
+                          .filter((m) => {
+                            const uId = m.user_id || m.userId || m.$id || m.id;
+                            return !currentReporters.some((r) => (r.id || r.$id) === uId || (r.id || r.$id) === (m.$id || m.id));
+                          })
+                          .filter((m) =>
+                            (m.name || '').toLowerCase().includes(reporterSearch.toLowerCase()) ||
+                            (m.email || '').toLowerCase().includes(reporterSearch.toLowerCase())
+                          );
+
+                        if (available.length === 0) {
+                          return (
+                            <div className="p-2.5 text-center text-xs text-neutral-400">
+                              {reporterSearch ? 'No matching members found' : 'All workspace members added as reporters'}
+                            </div>
+                          );
+                        }
+
+                        return available.map((m) => {
+                          const uId = m.user_id || m.userId || m.$id || m.id;
+                          const isCurrent = currentUser?.$id === uId;
+                          return (
+                            <div
+                              key={m.$id || m.id}
+                              onClick={() => {
+                                const currentIds = currentReporters.map((x) => x.id || x.$id);
+                                if (!currentIds.includes(uId)) {
+                                  const nextIds = [...currentIds, uId];
+                                  const addedMember = members.find((x) => (x.user_id || x.userId || x.$id || x.id) === uId);
+                                  const newReporterObj = addedMember ? {
+                                    id: uId,
+                                    name: addedMember.name,
+                                    email: addedMember.email,
+                                    avatarUrl: addedMember.avatar_url,
+                                  } : { id: uId, name: 'Team Member' };
+                                  const nextReporters = [...currentReporters, newReporterObj];
+                                  setTask((prev) => ({
+                                    ...prev,
+                                    reporters: nextReporters,
+                                    reporterIds: nextIds,
+                                    reporter: nextReporters[0] || null,
+                                    reporter_id: nextIds[0] || null,
+                                  }));
+                                  handleUpdateProperty({ reporterIds: nextIds });
+                                  setIsReporterPickerOpen(false);
+                                  setReporterSearch('');
+                                }
+                              }}
+                              className="flex items-center justify-between p-1.5 hover:bg-indigo-50/70 hover:text-indigo-900 cursor-pointer transition select-none text-xs"
+                            >
+                              <div className="flex items-center gap-1.5 truncate">
+                                <div className="size-4 rounded-full bg-indigo-600 text-white text-[8px] font-bold flex items-center justify-center shrink-0">
+                                  {m.name?.substring(0, 1).toUpperCase() || 'R'}
+                                </div>
+                                <span className="font-medium truncate">{m.name || m.email}</span>
+                              </div>
+                              {isCurrent && (
+                                <span className="text-[9px] text-indigo-600 bg-indigo-100 font-semibold px-1 rounded shrink-0 ml-1">
+                                  You
+                                </span>
+                              )}
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

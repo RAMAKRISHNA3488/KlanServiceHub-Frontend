@@ -48,7 +48,7 @@ export const columns = columnHelper.columns([
                 <a
                   href={targetUrl}
                   onClick={handleOpen}
-                  className="text-left line-clamp-1 text-[11px] font-semibold text-neutral-800 hover:text-blue-600 hover:underline transition-colors cursor-pointer"
+                  className="text-left line-clamp-1 text-[11px] font-semibold text-neutral-800 hover:text-blue-600 no-underline hover:no-underline transition-colors cursor-pointer"
                   title={name}
                 >
                   {name}
